@@ -179,6 +179,10 @@ make_symlink "$DOTFILES_DIR/nuxt/.nuxtrc"    "$HOME/.nuxtrc"
 make_symlink "$DOTFILES_DIR/env/99-nvidia-vulkan.conf" \
              "$HOME/.config/environment.d/99-nvidia-vulkan.conf"
 
+make_symlink "$DOTFILES_DIR/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
+make_symlink "$DOTFILES_DIR/opencode/agents"         "$HOME/.config/opencode/agents"
+make_symlink "$DOTFILES_DIR/opencode/commands"        "$HOME/.config/opencode/commands"
+
 # =============================================================================
 # 4. VS CODE SETUP (optional — skipped if `code` is not installed)
 # =============================================================================
@@ -243,6 +247,11 @@ echo -e "
   3. ${YELLOW}Claude Code${RESET}
      Authenticate after installing:
        claude auth login
+
+  6. ${YELLOW}opencode provider${RESET}
+     opencode.json is symlinked from dotfiles (plugin only — no provider).
+     Add your local provider config. See ~/dotfiles/opencode/README.md for examples.
+     Quick start for Anthropic: run /connect inside opencode.
 
   4. ${YELLOW}Powerlevel10k${RESET}
      If the prompt looks wrong, re-run the config wizard:
