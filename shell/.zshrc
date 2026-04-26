@@ -89,11 +89,7 @@ source $ZSH/oh-my-zsh.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='nvim'
-# fi
+export EDITOR='nvim'
 
 # Compilation flags
 # export ARCHFLAGS="-arch $(uname -m)"
@@ -115,7 +111,6 @@ alias codium='flatpak run com.vscodium.codium'
 [[ -o interactive ]] || return
 clear
 #cat ~/.config/ascii/welcome-pango.txt
-fastfetch
 
 export PATH=~/.npm-global/bin:$PATH
 export PATH="$HOME/.local/bin:$PATH"
@@ -134,4 +129,6 @@ alias nvim-react='NVIM_PROFILE=react nvim'
 alias nvim-react-dotnet='NVIM_PROFILE=react,dotnet nvim'
 alias nvim-python='NVIM_PROFILE=python nvim'
 alias nvim-node='NVIM_PROFILE=node nvim'
+alias nvim-nuxt-dotnet-py='NVIM_PROFILE=vue,dotnet,python,rest nvim'
 
+fastfetch
