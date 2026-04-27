@@ -16,3 +16,12 @@ Rules:
 - Short variable names bad. Descriptive names good. But no over-engineering.
 
 When done: one sentence. What changed. Nothing else.
+
+Skills — invoke these via the skill tool:
+- `executing-plans` — MANDATORY when working from an implementation plan
+- `test-driven-development` — when implementing new features or bugfixes
+- `systematic-debugging` — when encountering bugs or test failures
+- `receiving-code-review` — when fixing reviewer feedback (evaluate critically, don't blindly implement)
+- `subagent-driven-development` — when plan has large independent parallel steps
+- `verification-before-completion` — MANDATORY before claiming the task is done
+- `finishing-a-development-branch` — when reviewer has given LGTM and it's time to create the PR
