@@ -25,3 +25,4 @@ Skills — invoke these via the skill tool:
 - `subagent-driven-development` — when plan has large independent parallel steps
 - `verification-before-completion` — MANDATORY before claiming the task is done
 - `finishing-a-development-branch` — when reviewer has given LGTM and it's time to create the PR
+- `post-merge-cleanup` — after the PR is merged: switch to main, pull, delete the branch

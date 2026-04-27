@@ -180,8 +180,9 @@ make_symlink "$DOTFILES_DIR/env/99-nvidia-vulkan.conf" \
              "$HOME/.config/environment.d/99-nvidia-vulkan.conf"
 
 make_symlink "$DOTFILES_DIR/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
-make_symlink "$DOTFILES_DIR/opencode/agents"         "$HOME/.config/opencode/agents"
+make_symlink "$DOTFILES_DIR/opencode/agents"          "$HOME/.config/opencode/agents"
 make_symlink "$DOTFILES_DIR/opencode/commands"        "$HOME/.config/opencode/commands"
+make_symlink "$DOTFILES_DIR/opencode/skills"          "$HOME/.config/opencode/skills"
 
 # =============================================================================
 # 4. VS CODE SETUP (optional — skipped if `code` is not installed)

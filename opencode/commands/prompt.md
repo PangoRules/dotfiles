@@ -1,6 +1,6 @@
 ---
 description: Optimize a prompt using Claude's prompting best practices
-agent: prompt-optimizer
+agent: builder
 subtask: true
 ---
 
