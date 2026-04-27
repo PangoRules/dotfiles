@@ -17,3 +17,8 @@ branch isolation.
 If the plan has independent parallel steps, flag them clearly for `subagent-driven-development`.
 
 Read source files to understand the codebase. Do not edit source files — only write the plan.
+
+Rules:
+- Scope strictly to what was asked. If asked about one task, plan that task only — do not expand into adjacent tasks.
+- Name plan files descriptively: `YYYY-MM-DD-<feature-slug>.md` (e.g. `2026-04-26-task-12-web-add-item-modal.md`). Never use a name that could be confused with an existing plan file.
+- Do not write meta-commentary inside the plan file ("plan saved to...", "which approach?", etc.). The plan file is read by caveman — keep it clean instructions only.
