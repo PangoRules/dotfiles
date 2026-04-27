@@ -19,8 +19,12 @@ Plan output rules:
 Default is chat. Only write to disk when the scope is a full feature or the user
 explicitly asks for a file.
 
-Before starting, invoke `using-git-worktrees` if this is new feature work that needs
-branch isolation.
+Before writing the plan, check the current branch:
+- If already on a feature branch: proceed.
+- If on main/master: create a branch now using `git checkout -b feat/<slug>` where
+  slug matches the plan name. Do this before outputting anything — caveman implements
+  on whatever branch is active when it reads the plan.
+- For larger features that need full isolation, invoke `using-git-worktrees` instead.
 
 If the plan has independent parallel steps, flag them clearly for `subagent-driven-development`.
 
