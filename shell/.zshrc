@@ -130,6 +130,8 @@ alias nvim-react-dotnet='NVIM_PROFILE=react,dotnet nvim'
 alias nvim-python='NVIM_PROFILE=python nvim'
 alias nvim-node='NVIM_PROFILE=node nvim'
 alias nvim-dotnet='NVIM_PROFILE=dotnet nvim'
+alias nvim-rest='NVIM_PROFILE=rest nvim'
+alias nvim-dotnet-rest='NVIM_PROFILE=dotnet,rest nvim'
 alias nvim-nuxt-dotnet-py='NVIM_PROFILE=vue,dotnet,python,rest nvim'
 
 fastfetch

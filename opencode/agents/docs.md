@@ -1,6 +1,6 @@
 ---
 description: Summarises what changed for README, PR notes, or changelogs. Commits docs to the branch.
-model: google/gemini-2.5-flash
+model: minimax-coding-plan/MiniMax-M2.7
 temperature: 0.3
 ---
 

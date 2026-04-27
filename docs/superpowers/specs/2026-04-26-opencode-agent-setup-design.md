@@ -5,8 +5,8 @@
 
 ## Context
 
-Rafael has opencode configured with Ollama as the local provider (qwen3-coder, qwen3:30b,
-qwen3:14b, gemma4) plus OpenAI (GPT-5.x) and Google (Gemini 2.5) as cloud providers.
+Rafael has opencode configured with Ollama as the local provider (qwen3-coder, qwen3:30b)
+plus OpenAI (GPT-5.x) and MiniMax (M2.7, M2.7-highspeed) as cloud providers.
 The superpowers plugin is installed and injects skill awareness into every agent automatically.
 
 The goal was to build a full development pipeline that:
@@ -18,11 +18,11 @@ The goal was to build a full development pipeline that:
 
 ```
 1. brainstorm   → GPT-5.3 Codex   → explore approaches      (brainstorming skill)
-2. architect    → qwen3:30b        → write implementation plan (writing-plans skill)
+2. architect    → MiniMax-M2.7     → write implementation plan (writing-plans skill)
 3. caveman      → qwen3-coder      → execute plan
-4. reviewer     → qwen3:14b        → review diff              (requesting-code-review skill)
+4. reviewer     → MiniMax-M2.7-hs  → review diff              (requesting-code-review skill)
 5. caveman      → qwen3-coder      → fix findings + verify
-6. docs         → Gemini 2.5 Flash → update docs, commit      (documentation-writer skill)
+6. docs         → MiniMax-M2.7     → update docs, commit      (documentation-writer skill)
 7. caveman      → qwen3-coder      → create PR                (finishing-a-development-branch skill)
 ```
 
@@ -36,7 +36,7 @@ The goal was to build a full development pipeline that:
 - **Output:** design spec written to `docs/superpowers/specs/`
 
 ### architect
-- **Model:** `ollama/qwen3:30b`
+- **Model:** `minimax-coding-plan/MiniMax-M2.7`
 - **Mode:** primary (needs file write for plan output)
 - **Mandatory skills:** `writing-plans`
 - **Conditional skills:** `using-git-worktrees` (new features), `dispatching-parallel-agents` (parallel steps)
@@ -51,13 +51,13 @@ The goal was to build a full development pipeline that:
   `finishing-a-development-branch` (after LGTM)
 
 ### reviewer
-- **Model:** `ollama/qwen3:14b`
+- **Model:** `minimax-coding-plan/MiniMax-M2.7-highspeed`
 - **Temperature:** 0.1 (analytical, focused)
 - **Mandatory skills:** `requesting-code-review`
 - **Output:** numbered list of findings or "LGTM"
 
 ### docs
-- **Model:** `google/gemini-2.5-flash`
+- **Model:** `minimax-coding-plan/MiniMax-M2.7`
 - **Mandatory skills:** `documentation-writer`
 - **Output:** updated docs committed to current branch
 
@@ -71,14 +71,15 @@ The goal was to build a full development pipeline that:
 | Step | Model | Cost |
 |---|---|---|
 | brainstorm | GPT-5.3 Codex | Paid (cloud) |
-| architect | qwen3:30b | Free (local) |
+| architect | MiniMax-M2.7 | Paid (MiniMax Starter) |
 | caveman | qwen3-coder | Free (local) |
-| reviewer | qwen3:14b | Free (local) |
-| docs | Gemini 2.5 Flash | Free (free tier) |
+| reviewer | MiniMax-M2.7-highspeed | Paid (MiniMax Starter) |
+| docs | MiniMax-M2.7 | Paid (MiniMax Starter) |
 | builder | active model | Depends |
 
-Cloud tokens are spent only on brainstorm — the one step where GPT-5 has a clear
-quality advantage for creative ideation and product thinking.
+GPT-5 is spent only on brainstorm — the one step where it has a clear quality advantage.
+MiniMax Starter ($88/year) covers reviewer and docs; local 14b models hallucinated on
+agentic tool use in both roles.
 
 ## Alternatives Considered
 

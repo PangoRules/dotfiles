@@ -8,12 +8,11 @@ Global opencode configuration, agents, and commands — tracked in dotfiles so a
 |------|---------|
 | `opencode.json` | Base config: schema + superpowers plugin |
 | `agents/brainstorm.md` | GPT-5.3 Codex — explores approaches, writes design spec |
-| `agents/architect.md` | qwen3:30b — writes implementation plan for caveman |
+| `agents/architect.md` | MiniMax-M2.7 — writes implementation plan for caveman |
 | `agents/caveman.md` | qwen3-coder — executes plans, fixes reviews, creates PRs |
-| `agents/reviewer.md` | qwen3:14b — reviews diffs, finds bugs, no edits |
-| `agents/docs.md` | Gemini 2.5 Flash — updates docs, commits to branch |
+| `agents/reviewer.md` | MiniMax-M2.7-highspeed — reviews diffs, finds bugs, no edits |
+| `agents/docs.md` | MiniMax-M2.7 — updates docs, commits to branch |
 | `agents/builder.md` | Active model — general-purpose, no restrictions |
-| `agents/prompt-optimizer.md` | Prompt optimizer agent — invoked via `/prompt` command |
 | `commands/prompt.md` | `/prompt <text>` — optimizes a prompt using Claude's best practices |
 
 ## Development flow
@@ -23,11 +22,11 @@ Global opencode configuration, agents, and commands — tracked in dotfiles so a
 │ Agent       │ Model            │ Skill(s)                                   │
 ├─────────────┼──────────────────┼────────────────────────────────────────────┤
 │ brainstorm  │ GPT-5.3 Codex    │ brainstorming (+frontend-design if UI)     │
-│ architect   │ qwen3:30b        │ writing-plans (+using-git-worktrees)       │
+│ architect   │ MiniMax-M2.7     │ writing-plans (+using-git-worktrees)       │
 │ caveman     │ qwen3-coder      │ executing-plans, verification-before-done  │
-│ reviewer    │ qwen3:14b        │ requesting-code-review                     │
+│ reviewer    │ MiniMax-M2.7-hs  │ requesting-code-review                     │
 │ caveman     │ qwen3-coder      │ receiving-code-review, verification        │
-│ docs        │ Gemini 2.5 Flash │ documentation-writer                       │
+│ docs        │ MiniMax-M2.7     │ documentation-writer                       │
 │ caveman     │ qwen3-coder      │ finishing-a-development-branch → PR        │
 └─────────────┴──────────────────┴────────────────────────────────────────────┘
 ```
@@ -87,13 +86,10 @@ whatever model you have active and has no restrictions.
 
 ## Local model requirements
 
-Agents `architect`, `caveman`, and `reviewer` require local Ollama models:
+Agent `caveman` requires a local Ollama model:
 
 ```
-ollama pull qwen3:30b
-ollama pull qwen3:14b
 ollama pull qwen3-coder:latest
-ollama pull gemma4:latest
 ```
 
 On a machine without Ollama, these agents will show a model-not-found error when selected.
@@ -128,7 +124,6 @@ Actually the easiest flow on a new machine:
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "ollama/qwen3-coder:latest",
-  "small_model": "ollama/gemma4:latest",
   "plugin": ["superpowers@git+https://github.com/obra/superpowers.git"],
   "provider": {
     "ollama": {
@@ -136,7 +131,7 @@ Actually the easiest flow on a new machine:
       "npm": "@ai-sdk/openai-compatible",
       "options": { "baseURL": "http://127.0.0.1:11434/v1" },
       "models": {
-        "gemma4:latest":       { "name": "gemma4:latest" },
+        "qwen3:30b":           { "name": "qwen3:30b" },
         "qwen3-coder:latest":  { "name": "qwen3-coder:latest" }
       }
     }
