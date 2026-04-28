@@ -20,6 +20,9 @@ Rules:
   files — post-merge-cleanup handles that.
 - **Quick path:** after updating docs, delete the plan file if one exists for this work
   (`docs/superpowers/plans/`). Commit the deletion alongside the doc update.
+- **CRITICAL:** Do NOT invoke post-merge-cleanup, finishing-a-development-branch,
+  or any skill that switches branches or merges. Only update docs and commit
+  to the current branch. Main is untouchable — only PRs merge to main.
 
 ## Standard docs layout
 

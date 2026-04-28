@@ -30,6 +30,9 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 │ reviewer    │ glm-4.7-flash      │ requesting-code-review                             │
 │ developer   │ qwen3-coder        │ receiving-code-review, verification-before-done    │
 │ docs        │ glm-4.7-flash      │ documentation-writer                               │
+│ docs        │ glm-4.7-flash      │ **CRITICAL: Do NOT invoke post-merge-cleanup or**
+│ docs        │ glm-4.7-flash      │ **any skill that switches branches or merges.** 
+│ docs        │ glm-4.7-flash      │ **Main is untouchable—only PRs merge to main.**    │
 │ developer   │ qwen3-coder        │ finishing-a-development-branch → creates PR        │
 │ developer   │ qwen3-coder        │ post-merge-cleanup → after PR is merged            │
 └─────────────┴────────────────────┴────────────────────────────────────────────────────┘
@@ -221,6 +224,12 @@ to fall back to the opencode default, or replace with a cloud model ID.
 3. Pull the required Ollama models (see above)
 4. Set API keys for cloud agents (`OPENAI_API_KEY`, MiniMax credentials) via `/connect`
    inside opencode or in your environment
+
+### Global Safety Rules
+
+- **Main branch is read-only** for all agents unless via PR
+- **No auto-merging to main**—only PRs merge to main
+- **No automatic branch switching** by documentation or any other agents outside of PR flow
 
 ### Current provider config (opencode.json)
 
