@@ -1,0 +1,22 @@
+personality = "pragmatic"
+model = "gpt-5.4"
+[projects."/home/pango/Projects/cannit-we-do-it"]
+trust_level = "trusted"
+
+[projects."/home/pango/Projects/Docker/commerce-vue-dotnet"]
+trust_level = "trusted"
+
+[projects."/home/pango/Projects/playground/bash/src"]
+trust_level = "trusted"
+
+[projects."/home/pango/Projects/playground/bash/read_project"]
+trust_level = "trusted"
+
+[projects."/home/pango/Downloads/linux_commandline_downloader"]
+trust_level = "trusted"
+
+[projects."/home/pango/Projects/Python/mini-search-engine"]
+trust_level = "trusted"
+
+[notice.model_migrations]
+"gpt-5.3-codex" = "gpt-5.4"

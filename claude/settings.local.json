@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//tmp/**)",
+      "Bash(nvim --headless +qa)",
+      "Bash(nvim *)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(NVIM_PROFILE=python nvim *)",
+      "Bash(NVIM_PROFILE=rest nvim *)",
+      "Bash(git check-ignore *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "WebFetch(domain:opencode.ai)",
+      "Bash(ollama list *)",
+      "Bash(ollama ps *)",
+      "Bash(env)",
+      "Bash(systemctl --user list-unit-files)",
+      "Bash(systemctl list-unit-files *)"
+    ]
+  }
+}

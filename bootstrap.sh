@@ -184,6 +184,12 @@ make_symlink "$DOTFILES_DIR/opencode/agents"          "$HOME/.config/opencode/ag
 make_symlink "$DOTFILES_DIR/opencode/commands"        "$HOME/.config/opencode/commands"
 make_symlink "$DOTFILES_DIR/opencode/skills"          "$HOME/.config/opencode/skills"
 
+make_symlink "$DOTFILES_DIR/claude/settings.json"       "$HOME/.claude/settings.json"
+make_symlink "$DOTFILES_DIR/claude/settings.local.json" "$HOME/.claude/settings.local.json"
+make_symlink "$DOTFILES_DIR/agents/skills"              "$HOME/.agents/skills"
+make_symlink "$DOTFILES_DIR/gemini/settings.json"       "$HOME/.gemini/settings.json"
+make_symlink "$DOTFILES_DIR/codex/config.toml"          "$HOME/.codex/config.toml"
+
 # =============================================================================
 # 4. VS CODE SETUP (optional — skipped if `code` is not installed)
 # =============================================================================
@@ -249,20 +255,23 @@ echo -e "
      Authenticate after installing:
        claude auth login
 
-  6. ${YELLOW}opencode provider${RESET}
-     opencode.json is symlinked from dotfiles (plugin only — no provider).
-     Add your local provider config. See ~/dotfiles/opencode/README.md for examples.
-     Quick start for Anthropic: run /connect inside opencode.
+  4. ${YELLOW}Gemini CLI${RESET}
+     Authenticate after installing:
+       gemini auth login
 
-  4. ${YELLOW}Powerlevel10k${RESET}
+  5. ${YELLOW}Codex${RESET}
+     Authenticate after installing (API key or OAuth):
+       codex
+
+  7. ${YELLOW}Powerlevel10k${RESET}
      If the prompt looks wrong, re-run the config wizard:
        p10k configure
 
-  5. ${YELLOW}NVIDIA Vulkan env var${RESET}
+  8. ${YELLOW}NVIDIA Vulkan env var${RESET}
      99-nvidia-vulkan.conf was symlinked. Only applies if you have an NVIDIA GPU.
      Reboot (or re-login) for environment.d changes to take effect.
 
-  6. ${YELLOW}Neovim plugins${RESET}
+  9. ${YELLOW}Neovim plugins${RESET}
      Open nvim and run: :Lazy sync
 "
 
