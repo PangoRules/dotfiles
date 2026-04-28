@@ -22,11 +22,17 @@ Use when: user hands you a spec from docs/superpowers/specs/ with a `## Tasks` c
 - Each task plan file MUST start with:
   ```
   # Task N: <name>
-  **Branch:** `feat/<milestone-slug>/task-N-<slug>`
+  **Branch:** `task/<slug>`
+  **Parent branch:** `feat/<milestone-slug>`
   **Parent spec:** `YYYY-MM-DD-<milestone-slug>-design.md`
   ```
-- Do NOT create any branches. Do NOT switch branches.
-- After writing all task plan files, commit them to the current (milestone) branch and push:
+- For each task, create its branch from the milestone branch and push it, then return:
+  ```bash
+  git checkout -b task/<slug>
+  git push -u origin task/<slug>
+  git checkout feat/<milestone-slug>
+  ```
+- After all task branches are created and all plan files are written, commit the plans to the milestone branch and push:
   `git add docs/superpowers/plans/ && git commit -m "docs: add task plans for <milestone-slug>" && git push`
 
 ### Quick mode
