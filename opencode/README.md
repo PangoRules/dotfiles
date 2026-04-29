@@ -6,178 +6,177 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 
 | Path | Purpose |
 |------|---------|
-| `opencode.json` | Base config: schema, default model, Ollama provider + models |
-| `agents/brainstorm.md` | GPT-5.3 Codex — explores approaches, writes design spec |
-| `agents/architect.md` | MiniMax-M2.7 — writes implementation plan for developer |
-| `agents/developer.md` | qwen3-coder (local) — executes plans, fixes reviews, creates PRs, cleans up |
-| `agents/reviewer.md` | glm-4.7-flash (local) — reviews diffs, finds bugs, no edits |
-| `agents/docs.md` | glm-4.7-flash (local) — updates docs, commits to branch |
+| `opencode.json` | Base config: default model, Ollama provider + available models |
+| `agents/brainstorm.md` | Explores approaches, writes design spec |
+| `agents/architect.md` | Reads spec, writes step-by-step implementation plan |
+| `agents/developer.md` | qwen3-coder (local) — executes plans, commits + pushes incrementally |
+| `agents/reviewer.md` | glm-4.7-flash (local) — reviews diffs against plan, finds bugs |
+| `agents/docs.md` | glm-4.7-flash (local) — updates project docs, commits to branch |
+| `agents/git.md` | glm-4.7-flash (local) — creates PRs, runs post-merge cleanup |
 | `agents/builder.md` | Active model — general-purpose, no agent restrictions |
-| `skills/caveman/SKILL.md` | Cross-cutting: terse chat responses (~65% token reduction) |
-| `skills/post-merge-cleanup/SKILL.md` | After PR merges: delete plan file, switch to main, pull, delete branch |
+| `skills/caveman/SKILL.md` | Terse chat responses (~65% token reduction) |
+| `skills/post-merge-cleanup/SKILL.md` | After PR merges: update spec, delete plan + branch |
 | `skills/test-failure-diagnosis/SKILL.md` | Diagnose test failures before investigating values |
+| `skills/manual-validation-matrix/SKILL.md` | Output a test matrix for manual validation |
 | `commands/prompt.md` | `/prompt <text>` — optimizes a prompt using Claude best practices |
-
-## Development flow
-
-```
-┌─────────────┬────────────────────┬────────────────────────────────────────────────────┐
-│ Agent       │ Model              │ Skill(s) invoked                                   │
-├─────────────┼────────────────────┼────────────────────────────────────────────────────┤
-│ brainstorm  │ GPT-5.3 Codex      │ brainstorming (+frontend-design if UI work)        │
-│ architect   │ MiniMax-M2.7       │ writing-plans (+using-git-worktrees for large feat)│
-│ developer   │ qwen3-coder        │ executing-plans, tdd, verification-before-done     │
-│ reviewer    │ glm-4.7-flash      │ requesting-code-review                             │
-│ developer   │ qwen3-coder        │ receiving-code-review, verification-before-done    │
-│ docs        │ glm-4.7-flash      │ documentation-writer                               │
-│ docs        │ glm-4.7-flash      │ **CRITICAL: Do NOT invoke post-merge-cleanup or**
-│ docs        │ glm-4.7-flash      │ **any skill that switches branches or merges.** 
-│ docs        │ glm-4.7-flash      │ **Main is untouchable—only PRs merge to main.**    │
-│ developer   │ qwen3-coder        │ finishing-a-development-branch → creates PR        │
-│ developer   │ qwen3-coder        │ post-merge-cleanup → after PR is merged            │
-└─────────────┴────────────────────┴────────────────────────────────────────────────────┘
-```
 
 ---
 
-## Example: adding ingredient search (single feature)
+## Agent responsibilities
 
-**Step 1 — switch to `brainstorm`**
-```
-I want to add ingredient search. Users type a name, get matching
-ingredients filtered by dietary restriction. What are my options?
-```
-→ Invokes `brainstorming`. Returns 2-3 approaches with trade-offs.
-  Writes spec to `docs/superpowers/specs/YYYY-MM-DD-ingredient-search-design.md`.
-  You pick one.
+| Agent | Creates branches | Commits | Pushes | Creates PR | Cleanup |
+|-------|-----------------|---------|--------|------------|---------|
+| developer | Yes (task branches) | Yes | Yes (after each commit) | **No** | **No** |
+| git | No | No | Yes (PR branch) | **Yes** | **Yes** |
+| reviewer | No | No | No | No | No |
+| docs | No | Yes (docs only) | No | No | No |
 
-**Step 2 — switch to `architect`**
-```
-Go with approach 2 — client-side fuzzy search with a preloaded index.
-Turn this into a step-by-step implementation plan.
-```
-→ Checks current branch. If on main, creates `feat/ingredient-search` before writing anything.
-  Invokes `writing-plans`. For a single task: outputs plan to chat only (no file).
-  For a full feature: writes `docs/superpowers/plans/YYYY-MM-DD-ingredient-search.md`.
-  No code written.
+**Main is read-only.** No agent merges to main directly. Only PRs merge to main.
 
-**Step 3 — switch to `developer`**
-```
-Execute the plan above.
-```
-→ Invokes `executing-plans`. If plan has parallel steps, invokes `subagent-driven-development`.
-  Implements exactly what the plan says. One sentence when done.
+---
 
-**Step 4 — switch to `reviewer`**
-```
-Review the changes against the plan.
-```
-→ Runs tests first, then reads the diff. Invokes `requesting-code-review`.
-  Returns numbered findings or "LGTM".
+## The full flow
 
-**Step 5 — switch back to `developer`** (if findings)
+### Phase 1 — Create the spec
+
+**Who:** `brainstorm`
+**What:** Explores the problem, writes a design spec.
+**Output:** `docs/superpowers/specs/YYYY-MM-DD-<slug>-design.md`
+**You:** Read it. Approve an approach or ask for changes. This is your first checkpoint.
+
+```
+/brainstorm
+I want to add ingredient search — users type a name and get matching
+inventory items filtered by dietary restriction. What are my options?
+```
+
+```
+/brainstorm
+Milestone 2 is the frontend. Based on docs/01-Architecture.md and
+docs/02-DataModel.md, design the component structure, routing, and state management.
+```
+
+> **Do NOT hand the spec to the reviewer.** The reviewer reviews code, not prose.
+> You are the reviewer of the spec — read it, approve it, then move on.
+
+---
+
+### Phase 2 — Create the tasks
+
+**Who:** `architect`
+**What:** Reads the spec, writes a step-by-step implementation plan.
+**Output:** `docs/superpowers/plans/YYYY-MM-DD-<task-slug>.md` (one file per task for milestones)
+**You:** Read each plan. Approve or send back to architect. This is your second checkpoint.
+
+```
+/architect
+Go with approach 2 from the spec. Turn this into an implementation plan.
+```
+
+For a milestone with multiple tasks:
+```
+/architect
+Spec is at docs/superpowers/specs/2026-04-27-milestone-2-frontend-design.md.
+Break it into individual task plans. One file per task.
+```
+
+> **Architect creates the branch.** If you're on main, architect creates `feat/<slug>` automatically.
+> For milestone tasks, branches follow: `feat/<milestone-slug>/task-N-<slug>`
+
+> **Do NOT hand the plan to the reviewer.** Plans are yours to approve, not the reviewer's job.
+
+---
+
+### Phase 3 — Get the tasks done
+
+Repeat this cycle for each task:
+
+#### Step 1 — Implement `/dev`
+```
+Work from docs/superpowers/plans/2026-04-27-task-04-dashboard.md
+```
+Developer branches off the milestone branch, implements step by step, commits and pushes after each meaningful unit. One sentence when done.
+
+#### Step 2 — Review `/reviewer`
+```
+Review this branch against docs/superpowers/plans/2026-04-27-task-04-dashboard.md
+```
+Reviewer runs tests, reads the diff, returns numbered findings or "LGTM".
+
+#### Step 3 — Fix (if needed) `/dev`
 ```
 Fix the reviewer findings.
 ```
-→ Invokes `receiving-code-review` (evaluates feedback critically, doesn't blindly implement).
-  Fixes, then `verification-before-completion` before signalling done.
+Developer evaluates feedback critically, fixes, verifies before signalling done.
 
-**Step 6 — switch to `docs`**
+#### Step 4 — Update docs `/docs`
 ```
-Summarise what changed. Update the relevant docs and commit.
+Reviewer gave LGTM on this branch. Update docs.
 ```
-→ Invokes `documentation-writer`. Knows the standard docs layout — updates the right
-  existing file instead of creating a new one. Commits docs to the current branch.
+Docs agent updates `03-RepoStructure.md`, `04-Roadmap.md`, and the milestone spec. Does NOT touch plan files.
 
-**Step 7 — switch back to `developer`**
+#### Step 5 — Submit PR `/git`
 ```
-Reviewer gave LGTM. Create the PR.
+Submit PR feat/milestone-2-frontend/task-04-dashboard to feat/milestone-2-frontend
 ```
-→ Invokes `finishing-a-development-branch`. Validates tests pass, creates PR via `gh`.
+Or just:
+```
+Submit PR
+```
+Git agent detects current branch and suggests source/target — you confirm before it proceeds.
 
-**Step 8 — switch back to `developer`** (after PR is merged)
+#### Step 6 — Merge on GitHub
+Review the PR yourself. Merge it.
+
+#### Step 7 — Cleanup `/git`
 ```
-PR was merged. Clean up.
+PR merged
 ```
-→ Invokes `post-merge-cleanup`. Deletes the plan file, switches to main, pulls,
-  deletes the feature branch locally and remotely.
+Git agent: pulls target branch, deletes task branch (local + remote), removes plan file, updates spec.
+If all milestone tasks are now done, asks:
+> "All tasks complete. Ready to merge feat/milestone-2-frontend to main?"
+
+You say yes → milestone PR created. You say no → stops.
 
 ---
 
-## Example: starting a full milestone (e.g. Milestone 2 — Frontend)
+## Flow at a glance
 
-A milestone is multi-step work. Architect writes a feature plan file (not chat-only)
-and flags independent steps for parallel execution.
-
-**Step 1 — switch to `brainstorm`**
 ```
-Milestone 2 is the Frontend. Based on docs/01-Architecture.md and
-docs/02-DataModel.md, explore what the component structure, routing,
-and state management should look like.
+brainstorm → [you approve spec]
+    → architect → [you approve plan(s)]
+        → for each task:
+            dev → reviewer → [fix if needed] → docs → git (PR) → [merge] → git (cleanup)
+        → git asks: merge milestone to main?
 ```
-→ Invokes `brainstorming` + `frontend-design` (UI work detected automatically).
-  Writes spec to `docs/superpowers/specs/YYYY-MM-DD-milestone-2-frontend-design.md`.
-
-**Step 2 — switch to `architect`**
-```
-Go with approach 2. This is the full frontend milestone — write a feature plan.
-Flag any steps that can run in parallel.
-```
-→ Creates `feat/milestone-2-frontend` if on main.
-  Writes plan to `docs/superpowers/plans/YYYY-MM-DD-milestone-2-frontend.md`.
-  Parallel steps are flagged for developer to use `subagent-driven-development`.
-
-**Steps 3–8:** same as single-feature flow above.
 
 ---
 
 ## Edge cases
 
 **Small task / bugfix — skip brainstorm:**
-If the answer is obvious (fix a null check, rename a field, small config change),
-go straight to `architect`. Architect outputs the plan to chat only — no file needed.
 ```
-architect → "The login form crashes when email is empty. Fix it."
+/architect
+The login form crashes when email is empty. Write a fix plan.
 ```
-Architect reads the relevant file(s), writes a concise plan in chat, no branch needed
-if you're already on a feature branch.
-
-**Architect creates the branch:**
-Architect always checks your current branch before writing the plan. If you're on
-`main` or `master`, it creates `feat/<slug>` automatically before outputting anything.
-You don't need to create the branch yourself.
+Architect reads the relevant files, writes a concise plan. For trivial fixes, plan may be chat-only (no file).
 
 **Reviewer finds nothing:**
-If reviewer returns "LGTM", skip step 5 entirely. Go straight to docs (step 6).
+Skip the fix step. Go straight to docs:
 ```
-developer → "Reviewer gave LGTM. Create the PR."
+/docs
+Reviewer gave LGTM on this branch. Update docs.
 ```
 
-**Reviewer findings need discussion:**
-Developer uses `receiving-code-review` which means it evaluates findings critically.
-If a finding is wrong or debatable, developer will say so rather than blindly fixing it.
-Trust this — it prevents unnecessary churn.
+**Reviewer feedback is wrong:**
+Developer uses `receiving-code-review` which evaluates findings critically. It will push back on incorrect or unnecessary feedback rather than blindly implementing it.
 
-**Feature too large for one plan:**
-Architect invokes `using-git-worktrees` for large features that need full isolation
-from the current workspace. It creates an isolated worktree, then developer works there.
-
-**Parallel plan steps:**
-When architect flags steps as independent, developer invokes `subagent-driven-development`
-to run them concurrently. Faster for milestones with many independent components
-(e.g. multiple unrelated UI pages, separate API endpoints).
-
-**Post-merge on a squash/rebase merge:**
-`post-merge-cleanup` uses `git branch -d` (safe delete). If the PR was squash-merged,
-the local branch won't show as merged — use `git branch -D` instead and confirm first
-that `gh pr view --json state` returns `MERGED`.
+**Large milestone with parallel tasks:**
+When architect flags steps as independent, developer invokes `subagent-driven-development` to run them concurrently.
 
 ---
 
 ## Docs structure (all projects)
-
-Every project follows this layout. `docs` agent is aware of it and updates existing
-files rather than creating new ones:
 
 ```
 docs/
@@ -186,52 +185,38 @@ docs/
 ├── 02-DataModel.md       — entity definitions, relationships
 ├── 03-RepoStructure.md   — folder layout, entry points, API reference
 ├── 04-Setup.md           — local dev setup, env vars, prerequisites
-├── 05-Roadmap.md         — milestones, current state, what's next
+├── 04-Roadmap.md         — milestones, current state, what's next
 └── decisions/            — one ADR per architectural decision
 ```
 
-Write an ADR in `decisions/` when introducing a new architectural pattern,
-replacing a system, or making a cross-cutting choice. Filename: `YYYY-MM-DD-<slug>.md`.
-Specs and plans live in `docs/superpowers/` (managed by the agent flow, deleted on merge).
+Specs and plans live in `docs/superpowers/` — managed by the agent flow, deleted after merge.
 
 ---
 
 ## Local model requirements
 
-Both `developer` and `reviewer`/`docs` agents require local Ollama models:
-
 ```bash
 ollama pull qwen3-coder:latest   # developer + builder default
-ollama pull glm-4.7-flash        # reviewer + docs
+ollama pull glm-4.7-flash        # reviewer + docs + git
 ```
 
-On a machine without Ollama, agents with a `model: ollama/...` line will show a
-model-not-found error. Fix: comment out the `model:` line in the agent frontmatter
-to fall back to the opencode default, or replace with a cloud model ID.
+Optional upgrade for developer:
+```bash
+ollama pull qwen3.6:27b          # better coding, fits in 24GB VRAM
+```
+
+On a machine without Ollama, agents with `model: ollama/...` will error.
+Fix: replace with a cloud model ID or comment out the `model:` line to use the opencode default.
 
 ---
 
-## Per-machine configuration
+## Per-machine setup
 
-`opencode.json` in dotfiles includes the full Ollama provider config. On a new machine:
+1. Run `bash ~/dotfiles/bootstrap.sh`
+2. Pull required Ollama models (see above)
+3. Set API keys for cloud agents via `/connect` inside opencode or in your environment
 
-1. Run `bash ~/dotfiles/bootstrap.sh` — symlinks are created
-2. The active config at `~/.config/opencode/opencode.json` is **not** a symlink —
-   it's a standalone file. Copy it from dotfiles after bootstrap:
-   ```bash
-   cp ~/dotfiles/opencode/opencode.json ~/.config/opencode/opencode.json
-   ```
-3. Pull the required Ollama models (see above)
-4. Set API keys for cloud agents (`OPENAI_API_KEY`, MiniMax credentials) via `/connect`
-   inside opencode or in your environment
-
-### Global Safety Rules
-
-- **Main branch is read-only** for all agents unless via PR
-- **No auto-merging to main**—only PRs merge to main
-- **No automatic branch switching** by documentation or any other agents outside of PR flow
-
-### Current provider config (opencode.json)
+### Current provider config
 
 ```json
 {
@@ -245,27 +230,16 @@ to fall back to the opencode default, or replace with a cloud model ID.
       "options": { "baseURL": "http://127.0.0.1:11434/v1" },
       "models": {
         "qwen3-coder:latest": { "name": "qwen3-coder:latest" },
-        "glm-4.7-flash":      { "name": "glm-4.7-flash" }
+        "glm-4.7-flash":      { "name": "glm-4.7-flash" },
+        "qwen3.6:27b":        { "name": "qwen3.6:27b" }
       }
     }
   }
 }
 ```
 
-### Anthropic (cloud fallback)
-
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "model": "anthropic/claude-sonnet-4-6",
-  "plugin": ["superpowers@git+https://github.com/obra/superpowers.git"]
-}
-```
-Set `ANTHROPIC_API_KEY` in your environment or run `/connect` inside opencode.
-
 ---
 
 ## Adding new agents, skills, or commands
 
-Add files to `agents/`, `skills/`, or `commands/` in this repo and commit.
-They'll be available on every machine that uses these dotfiles.
+Add files to `agents/`, `skills/`, or `commands/` and commit. Available on every machine using these dotfiles.

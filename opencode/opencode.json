@@ -15,6 +15,9 @@
         },
         "glm-4.7-flash": {
           "name": "glm-4.7-flash"
+        },
+        "qwen3.6:27b": {
+          "name": "qwen3.6:27b"
         }
       }
     }
