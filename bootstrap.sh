@@ -187,6 +187,7 @@ make_symlink "$DOTFILES_DIR/opencode/skills"          "$HOME/.config/opencode/sk
 make_symlink "$DOTFILES_DIR/claude/settings.json"       "$HOME/.claude/settings.json"
 make_symlink "$DOTFILES_DIR/claude/settings.local.json" "$HOME/.claude/settings.local.json"
 make_symlink "$DOTFILES_DIR/agents/skills"              "$HOME/.agents/skills"
+make_symlink "$DOTFILES_DIR/agents/skills/graphify"     "$HOME/.claude/skills/graphify"
 make_symlink "$DOTFILES_DIR/gemini/settings.json"       "$HOME/.gemini/settings.json"
 make_symlink "$DOTFILES_DIR/codex/config.toml"          "$HOME/.codex/config.toml"
 
@@ -262,6 +263,11 @@ echo -e "
   5. ${YELLOW}Codex${RESET}
      Authenticate after installing (API key or OAuth):
        codex
+
+  6. ${YELLOW}graphify (knowledge graph CLI)${RESET}
+     Install via uv:
+       uv tool install graphifyy
+     Used by the brainstorm agent and /graphify skill.
 
   7. ${YELLOW}Powerlevel10k${RESET}
      If the prompt looks wrong, re-run the config wizard:
