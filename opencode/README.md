@@ -14,10 +14,17 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 | `agents/docs.md` | glm-4.7-flash (local) — updates project docs, commits to branch |
 | `agents/git.md` | glm-4.7-flash (local) — creates PRs, runs post-merge cleanup |
 | `agents/builder.md` | Active model — general-purpose, no agent restrictions |
-| `skills/caveman/SKILL.md` | Terse chat responses (~65% token reduction) |
-| `skills/post-merge-cleanup/SKILL.md` | After PR merges: update spec, delete plan + branch |
-| `skills/test-failure-diagnosis/SKILL.md` | Diagnose test failures before investigating values |
-| `skills/manual-validation-matrix/SKILL.md` | Output a test matrix for manual validation |
+| `skills/caveman` → `agents/skills/caveman` | Ultra-compressed responses — all agents run at ultra level |
+| `skills/caveman-commit` → `agents/skills/caveman-commit` | Conventional commit messages — developer invokes before every commit |
+| `skills/caveman-review` → `agents/skills/caveman-review` | One-line review findings — reviewer invokes per finding |
+| `skills/caveman-compress` → `agents/skills/caveman-compress` | Compress .md files to caveman prose (`/caveman:compress <file>`) |
+| `skills/caveman-help` → `agents/skills/caveman-help` | Quick-reference card for all caveman modes |
+| `skills/graphify` → `agents/skills/graphify` | Knowledge graph — architect queries before planning; brainstorm on unfamiliar codebases |
+| `skills/documentation-writer` → `agents/skills/documentation-writer` | Docs agent process — Diátaxis-guided writing |
+| `skills/finishing-a-development-branch` → `agents/skills/finishing-a-development-branch` | Branch finalization options |
+| `skills/post-merge-cleanup` | After PR merges: update spec, delete plan + branch |
+| `skills/test-failure-diagnosis` | Diagnose test failures before investigating values |
+| `skills/manual-validation-matrix` | Output a test matrix for manual validation |
 | `commands/prompt.md` | `/prompt <text>` — optimizes a prompt using Claude best practices |
 
 ---
