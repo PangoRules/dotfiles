@@ -44,15 +44,16 @@ Triggered when the user says "submit PR" or "create PR".
 
 1. Resolve branches (from user message or via Branch Detection above).
 2. Confirm you are on the source branch. If not: `git checkout <source>`.
-3. Pull to ensure source is up to date: `git pull origin <target>`.
-4. Push source to remote: `git push -u origin <source>`.
-5. Create the PR:
+3. Run `git status`. If there are unstaged or uncommitted changes, invoke the `caveman-commit` skill and commit them with a conventional commit message before proceeding. Never skip uncommitted work.
+4. Pull to ensure source is up to date: `git pull origin <target>`.
+5. Push source to remote: `git push -u origin <source>`.
+6. Create the PR:
    ```
    gh pr create --base <target> --head <source> --title "<conventional title>" --body "<bullet list of what changed>"
    ```
    - Title: short, conventional prefix (`feat:`, `fix:`, `docs:`, `chore:`).
    - Body: bullet points of what changed. No fluff.
-6. Output the PR URL. Stop.
+7. Output the PR URL. Stop.
 
 ---
 
