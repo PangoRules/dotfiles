@@ -13,4 +13,6 @@ Key skills for common situations:
 - `using-git-worktrees` — starting significant new feature work
 - `frontend-design` — UI/frontend implementation
 - `systematic-debugging` — debugging
+- `brainstorm` — when need to debate ideas with the user
 - `find-skills` — if unsure which skill to use
+

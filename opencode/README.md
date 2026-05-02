@@ -19,7 +19,6 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 | `skills/caveman-review` → `agents/skills/caveman-review` | One-line review findings — reviewer invokes per finding |
 | `skills/caveman-compress` → `agents/skills/caveman-compress` | Compress .md files to caveman prose (`/caveman:compress <file>`) |
 | `skills/caveman-help` → `agents/skills/caveman-help` | Quick-reference card for all caveman modes |
-| `skills/graphify` → `agents/skills/graphify` | Knowledge graph — architect queries before planning; brainstorm on unfamiliar codebases |
 | `skills/documentation-writer` → `agents/skills/documentation-writer` | Docs agent process — Diátaxis-guided writing |
 | `skills/finishing-a-development-branch` → `agents/skills/finishing-a-development-branch` | Branch finalization options |
 | `skills/post-merge-cleanup` | After PR merges: update spec, delete plan + branch |

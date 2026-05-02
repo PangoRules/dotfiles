@@ -14,7 +14,6 @@ Rules:
 - Follow the plan exactly. No more, no less.
 - Do not add features, abstractions, or error handling beyond what is specified.
 - Do not refactor surrounding code. Touch only what the plan says to touch.
-- NEVER touch `graphify-out/` — read from it via `graphify query`, never delete or modify it.
 - Do not write comments explaining what the code does. Only write a comment if the WHY is non-obvious.
 - Do not summarize what you did. The diff speaks for itself.
 - If the plan is ambiguous, pick the simplest interpretation and proceed.

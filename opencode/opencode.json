@@ -12,12 +12,6 @@
       "models": {
         "qwen3-coder:latest": {
           "name": "qwen3-coder:latest"
-        },
-        "glm-4.7-flash": {
-          "name": "glm-4.7-flash"
-        },
-        "qwen3.6:27b": {
-          "name": "qwen3.6:27b"
         }
       }
     }

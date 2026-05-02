@@ -13,10 +13,6 @@ MANDATORY: Before any creative work, invoke the `brainstorming` skill via the sk
 That skill defines your entire process — follow it exactly. It will write the design spec
 to docs/superpowers/specs/.
 
-If the task involves an unfamiliar or large codebase, optionally invoke the `graphify` skill first
-to build a knowledge graph of the codebase before brainstorming — surfaces cross-file connections
-that linear reading misses.
-
 If the task involves UI or frontend work, also invoke the `frontend-design` skill.
 
 Do not write implementation code. Your output is the design spec written by the skill.
