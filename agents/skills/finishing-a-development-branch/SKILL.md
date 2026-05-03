@@ -7,11 +7,11 @@ description: Use when completing implementation work and need to finalize change
 
 ## Overview
 
-Guide completion of development work by presenting clear options and handling chosen workflow for finalizing changes.
+Guide completion of development work by presenting clear options and handling chosen workflow for finalizing changes. ALWAYS ASK WHEN MAKING NON-REVERSIBLE CHANGES.
 
 ## When to Use
 
-- After implementing features or fixes in a development branch
+- After implementing features, fixes, tasks, etc in a development branch
 - When ready to consolidate changes back to the base branch
 - When need to clean up temporary feature branches
 - After all tasks in a development workflow are complete
@@ -23,12 +23,11 @@ Verify tests → Present structured options → Execute choice → Clean up work
 
 ## Quick Reference
 
-| Option | Merge | Push | Keep Worktree | Cleanup Branch |
-|--------|-------|------|---------------|----------------|
-| 1. Merge locally | ✓ | - | - | ✓ |
-| 2. Create PR | - | ✓ | ✓ | - |
-| 3. Keep as-is | - | - | ✓ | - |
-| 4. Discard | - | - | - | ✓ (force) |
+| Option | Merge | Push | PR | Cleanup Branch | Cleanup Worktree |
+|--------|-------|------|----|----------------|------------------|
+| 1. Merge locally | ✓ | - | - | ✓ (confirm) | ✓ |
+| 2. Push + PR | - | ✓ | ✓ | - | ✓ |
+| 3. Push/Sync | - | ✓ | - | - | - |
 
 ## Implementation
 
@@ -41,30 +40,39 @@ Before presenting options, run project tests:
 npm test / cargo test / pytest / go test ./...
 ```
 
-If tests fail, stop and report failures before proceeding.
+If tests fail, stop and report failures before proceeding. Do analize what are the tests suites to run depending on code testing, if unknown ask.
 
 ### Step 2: Determine Base Branch
 
 Find the base branch this feature branch split from:
 
 ```bash
-# Try common base branches
-git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
+CURRENT=$(git branch --show-current)
+if [[ "$CURRENT" == task/* ]]; then
+  # task branches split from feat branches
+  BASE=$(git for-each-ref --format='%(refname:short)' refs/heads/feat/ | \
+    while read b; do git merge-base --is-ancestor "$b" HEAD 2>/dev/null && echo "$b" && break; done)
+elif [[ "$CURRENT" == feat/* ]]; then
+  BASE=main
+else
+  # fallback: use remote default or main
+  BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||' || echo main)
+fi
+BASE_COMMIT=$(git merge-base HEAD "$BASE")
 ```
 
 ### Step 3: Present Options
 
-Show exactly these 4 structured options:
+Smart default: `task/*` pre-selects 1, `feat/*` pre-selects 2.
 
 ```
 Implementation complete. What would you like to do?
 
-1. Merge back to <base-branch> locally
-2. Push and create a Pull Request
-3. Keep the branch as-is (I'll handle it later)
-4. Discard this work
+1. Merge to <base-branch>          [recommended for task/* branches]
+2. Push and create PR              [recommended for feat/* branches]
+3. Push/Sync (no PR)
 
-Which option?
+Which option? (default: <1 or 2>)
 ```
 
 ### Step 4: Execute Choice
@@ -83,8 +91,17 @@ git merge <feature-branch>
 
 # Verify tests on merged result
 <test command>
+```
 
-# If tests pass
+If tests pass, ask before deleting branch:
+
+```
+Merge successful. Delete branch <feature-branch>? (y/N)
+```
+
+Only on confirmation:
+
+```bash
 git branch -d <feature-branch>
 ```
 
@@ -109,42 +126,23 @@ EOF
 
 Then cleanup worktree.
 
-#### Option 3: Keep As-Is
+#### Option 3: Push/Sync
 
-Report: "Keeping branch <name>. Worktree preserved at <path>."
-
-Don't cleanup worktree.
-
-#### Option 4: Discard
-
-Confirm first:
-```
-This will permanently delete:
-- Branch <name>
-- All commits: <commit-list>
-- Worktree at <path>
-
-Type 'discard' to confirm.
-```
-
-After confirmation:
 ```bash
-git checkout <base-branch>
-git branch -D <feature-branch>
+# Push branch, no PR
+git push -u origin <feature-branch>
 ```
 
-Then cleanup worktree.
+Report: "Branch <name> pushed. No PR created."
+
+Keep worktree. Branch stays active for continued work.
 
 ### Step 5: Cleanup Worktree
 
-For Options 1, 2, 4:
-Check if in worktree:
+For Options 1 and 2 only:
 ```bash
 git worktree list | grep $(git branch --show-current)
-```
-
-If yes:
-```bash
+# If in worktree:
 git worktree remove <worktree-path>
 ```
 
@@ -158,15 +156,15 @@ For Option 3: Keep worktree.
 
 **Open-ended questions**
 - Problem: "What should I do next?" → ambiguous
-- Fix: Present exactly 4 structured options
+- Fix: Present exactly 3 structured options with smart default
 
 **Automatic worktree cleanup**
-- Problem: Remove worktree when might need it (Option 2, 3)
-- Fix: Only cleanup for Options 1 and 4
+- Problem: Remove worktree when branch still active (Option 3)
+- Fix: Only cleanup for Options 1 and 2
 
-**No confirmation for discard**
+**Deleting branch without confirmation**
 - Problem: Accidentally delete work
-- Fix: Require typed "discard" confirmation
+- Fix: Always ask before `git branch -d`, even after successful merge
 
 ## Red Flags
 
@@ -178,6 +176,6 @@ For Option 3: Keep worktree.
 
 **Always:**
 - Verify tests before offering options
-- Present exactly 4 options
-- Get typed confirmation for Option 4
-- Clean up worktree for Options 1 & 4 only
+- Present exactly 3 options with smart default
+- Confirm before deleting any branch
+- Clean up worktree for Options 1 & 2 only

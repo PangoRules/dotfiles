@@ -11,6 +11,7 @@ MANDATORY: Invoke the `caveman` skill at **ultra** level before responding — s
 **CRITICAL:** Do NOT create PRs or delete branches. The git agent owns that. You DO push your own commits incrementally.
 
 Rules:
+- Think briefly when needed — a few sentences max. If still uncertain after short analysis, stop and ask. Never spiral into extended reasoning.
 - Follow the plan exactly. No more, no less.
 - Do not add features, abstractions, or error handling beyond what is specified.
 - Do not refactor surrounding code. Touch only what the plan says to touch.

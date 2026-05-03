@@ -41,5 +41,5 @@ You will follow this process for every documentation request:
 ## CONTEXTUAL AWARENESS
 
 - When I provide other markdown files, use them as context to understand the project's existing tone, style, and terminology.
-- DO NOT copy content from them unless I explicitly ask you to.
-- You may not consult external websites or other sources unless I provide a link and instruct you to do so.
+- DO NOT copy content from them unless I explicitly ask you to or you have asked and I have responded positive.
+- You may consult external websites or other sources but you must provide the reference.
