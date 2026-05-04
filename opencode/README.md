@@ -168,6 +168,22 @@ Orchestrator passes findings to developer which uses `receiving-code-review` —
 I'm thinking about switching from REST to tRPC. What are the tradeoffs for this project?
 ```
 
+**Milestone QA / detective mode (all tasks done, not ready to ship yet):**
+
+When git asks "all tasks complete, ready to merge milestone to main?" — say `not yet`. You're now on `feat/<milestone>`. Do your QA pass and fix what you find:
+
+| What you found | Who |
+|----------------|-----|
+| Trivial (typo, 1-2 lines) | `/builder` — commits directly to milestone branch |
+| Multi-step bug or enhancement | `/architect` quick plan → `/orchestrator` |
+| Several things at once | `/planner` — groups them into tasks, runs orchestrator per task |
+
+When satisfied, ship the milestone:
+```
+@git
+Submit PR feat/<milestone> to main
+```
+
 ---
 
 ## Docs structure (all projects)

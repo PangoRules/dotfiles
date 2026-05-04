@@ -11,37 +11,41 @@ First, identify which path you're on:
 
 ```bash
 git branch --show-current
-ls docs/superpowers/plans/ 2>/dev/null
 ```
 
-### Path A — Milestone task branch (`feat/<milestone>/task-N-<slug>`)
+### Path A — Milestone task branch (`task/<slug>`)
 
-Find the matching task plan file in `docs/superpowers/plans/`. It will have a `**Parent spec:**` line.
+Current branch matches `task/*` pattern.
 
-**0a. Mark the task done in the spec:**
+**0a. Find parent branch from merged PR:**
 ```bash
-# Read the Parent spec: value from the task plan file
-grep "Parent spec:" docs/superpowers/plans/<task-plan-file>.md
+gh pr list --state merged --head $(git branch --show-current) --json baseRefName -q '.[0].baseRefName'
 ```
-Open the spec file at `docs/superpowers/specs/<parent-spec-file>.md`.
-Find the checkbox line matching this task. Change `- [ ]` to `- [x]`. Save.
+This returns the milestone branch (e.g. `feat/milestone2-1-frontend-improvements`). Store it — needed for Step 2.
+
+**0b. Mark the task done in the spec:**
+
+Find the spec file in `docs/superpowers/specs/`. It matches the milestone slug from the parent branch name.
+Find the checkbox line matching this task branch name. Change `- [ ]` to `- [x]`. Save.
 ```bash
+git checkout <parent-branch>
+git pull origin <parent-branch>
 git add docs/superpowers/specs/<parent-spec-file>.md
-git commit -m "docs: mark task-N complete in <milestone-slug> spec"
+git commit -m "docs: mark <task-slug> complete in spec"
 git push
 ```
 
-**0b. Delete the task plan file (if docs agent hasn't already):**
+**0c. Delete the task plan file (if docs agent hasn't already):**
 ```bash
 if [ -f docs/superpowers/plans/<task-plan-file>.md ]; then
   rm docs/superpowers/plans/<task-plan-file>.md
   git add docs/superpowers/plans/<task-plan-file>.md
-  git commit -m "docs: remove completed task-N plan"
+  git commit -m "docs: remove completed task plan"
   git push
 fi
 ```
 
-**0c. Check if all tasks are done:**
+**0d. Check if all tasks are done:**
 ```bash
 grep "\- \[ \]" docs/superpowers/specs/<parent-spec-file>.md
 ```
@@ -81,10 +85,10 @@ Expected: `MERGED`. If not merged, stop and report back.
 
 ## Step 2 — Switch to parent branch and pull
 
-**Milestone task:** parent is the milestone branch.
+**Milestone task (`task/*`):** use the parent branch resolved in Step 0a.
 ```bash
-git checkout feat/<milestone-slug>
-git pull origin feat/<milestone-slug>
+git checkout <parent-branch>
+git pull origin <parent-branch>
 ```
 
 **All other branches:** parent is `main`.
