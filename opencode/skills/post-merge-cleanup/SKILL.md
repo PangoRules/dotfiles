@@ -31,12 +31,14 @@ git commit -m "docs: mark task-N complete in <milestone-slug> spec"
 git push
 ```
 
-**0b. Delete the task plan file:**
+**0b. Delete the task plan file (if docs agent hasn't already):**
 ```bash
-rm docs/superpowers/plans/<task-plan-file>.md
-git add docs/superpowers/plans/<task-plan-file>.md
-git commit -m "docs: remove completed task-N plan"
-git push
+if [ -f docs/superpowers/plans/<task-plan-file>.md ]; then
+  rm docs/superpowers/plans/<task-plan-file>.md
+  git add docs/superpowers/plans/<task-plan-file>.md
+  git commit -m "docs: remove completed task-N plan"
+  git push
+fi
 ```
 
 **0c. Check if all tasks are done:**

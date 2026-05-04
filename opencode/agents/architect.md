@@ -1,7 +1,7 @@
 ---
 description: Turns a chosen approach into a detailed implementation plan file that developer executes.
-model: minimax-coding-plan/MiniMax-M2.7
-mode: primary
+model: openai/gpt-5.5
+mode: subagent
 temperature: 0.3
 ---
 

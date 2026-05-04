@@ -1,6 +1,7 @@
 ---
 description: Reviews a diff or implementation against the plan. Finds bugs and gaps. No edits. Can post findings as a GitHub PR review.
 model: minimax-coding-plan/MiniMax-M2.7
+mode: subagent
 temperature: 0.1
 ---
 

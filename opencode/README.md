@@ -6,22 +6,17 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 
 | Path | Purpose |
 |------|---------|
-| `opencode.json` | Base config: default model, Ollama provider + available models |
-| `agents/brainstorm.md` | Explores approaches, writes design spec |
-| `agents/architect.md` | Reads spec, writes step-by-step implementation plan |
-| `agents/developer.md` | qwen3-coder (local) — executes plans, commits + pushes incrementally |
-| `agents/reviewer.md` | glm-4.7-flash (local) — reviews diffs against plan, finds bugs |
-| `agents/docs.md` | glm-4.7-flash (local) — updates project docs, commits to branch |
-| `agents/git.md` | glm-4.7-flash (local) — creates PRs, runs post-merge cleanup |
-| `agents/builder.md` | Active model — general-purpose, no agent restrictions |
-| `skills/caveman` → `agents/skills/caveman` | Ultra-compressed responses — all agents run at ultra level |
-| `skills/caveman-commit` → `agents/skills/caveman-commit` | Conventional commit messages — developer invokes before every commit |
-| `skills/caveman-review` → `agents/skills/caveman-review` | One-line review findings — reviewer invokes per finding |
-| `skills/caveman-compress` → `agents/skills/caveman-compress` | Compress .md files to caveman prose (`/caveman:compress <file>`) |
-| `skills/caveman-help` → `agents/skills/caveman-help` | Quick-reference card for all caveman modes |
-| `skills/documentation-writer` → `agents/skills/documentation-writer` | Docs agent process — Diátaxis-guided writing |
-| `skills/finishing-a-development-branch` → `agents/skills/finishing-a-development-branch` | Branch finalization options |
-| `skills/post-merge-cleanup` | After PR merges: update spec, delete plan + branch |
+| `opencode.json` | Base config: default model (GPT-5.5), plugins, no local providers |
+| `agents/planner.md` | **Entry point** — brainstorm → spec gate → architect → plan gate |
+| `agents/orchestrator.md` | **Task runner** — dev→review loop → docs → git PR, autonomous |
+| `agents/brainstorm.md` | Explores approaches, writes design spec (callable standalone) |
+| `agents/architect.md` | Reads spec, writes step-by-step task plans (callable standalone) |
+| `agents/developer.md` | Executes plans, commits + pushes incrementally |
+| `agents/reviewer.md` | Reviews diffs against plan, finds bugs |
+| `agents/docs.md` | Updates project docs, deletes plan file, commits to branch |
+| `agents/git.md` | Creates PRs, runs post-merge cleanup |
+| `agents/builder.md` | General-purpose, no restrictions |
+| `skills/post-merge-cleanup` | After PR merges: tick spec checkbox, delete branch |
 | `skills/test-failure-diagnosis` | Diagnose test failures before investigating values |
 | `skills/manual-validation-matrix` | Output a test matrix for manual validation |
 | `commands/prompt.md` | `/prompt <text>` — optimizes a prompt using Claude best practices |
@@ -32,153 +27,146 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 
 | Agent | Creates branches | Commits | Pushes | Creates PR | Cleanup |
 |-------|-----------------|---------|--------|------------|---------|
-| developer | Yes (task branches) | Yes | Yes (after each commit) | **No** | **No** |
-| git | No | No | Yes (PR branch) | **Yes** | **Yes** |
+| planner | No | No | No | No | No |
+| orchestrator | No | No | No | No | No |
+| developer | No | Yes | Yes (after each commit) | No | No |
 | reviewer | No | No | No | No | No |
-| docs | No | Yes (docs only) | No | No | No |
+| docs | No | Yes (docs + plan deletion) | No | No | No |
+| git | No | No | Yes (PR branch) | Yes | Yes |
 
-**Main is read-only.** No agent merges to main directly. Only PRs merge to main.
+> Architect creates branches. Developer works on them. Main is read-only — only PRs merge to main.
 
 ---
 
 ## The full flow
 
-### Phase 1 — Create the spec
-
-**Who:** `brainstorm`
-**What:** Explores the problem, writes a design spec.
-**Output:** `docs/superpowers/specs/YYYY-MM-DD-<slug>-design.md`
-**You:** Read it. Approve an approach or ask for changes. This is your first checkpoint.
+### Your only touchpoints
 
 ```
-/brainstorm
+1. /planner      → read spec → "approved" → read plans → "approved"
+2. /orchestrator → one call per task, runs autonomously
+3. GitHub        → review + merge each PR
+4. @git          → "PR merged" → cleanup → repeat
+```
+
+---
+
+### Phase 1 — Plan with `/planner`
+
+```
+/planner
 I want to add ingredient search — users type a name and get matching
-inventory items filtered by dietary restriction. What are my options?
+inventory items filtered by dietary restriction.
 ```
 
-```
-/brainstorm
-Milestone 2 is the frontend. Based on docs/01-Architecture.md and
-docs/02-DataModel.md, design the component structure, routing, and state management.
-```
-
-> **Do NOT hand the spec to the reviewer.** The reviewer reviews code, not prose.
-> You are the reviewer of the spec — read it, approve it, then move on.
-
----
-
-### Phase 2 — Create the tasks
-
-**Who:** `architect`
-**What:** Reads the spec, writes a step-by-step implementation plan.
-**Output:** `docs/superpowers/plans/YYYY-MM-DD-<task-slug>.md` (one file per task for milestones)
-**You:** Read each plan. Approve or send back to architect. This is your second checkpoint.
+Planner calls `@brainstorm` internally. When spec is written it stops and asks:
 
 ```
-/architect
-Go with approach 2 from the spec. Turn this into an implementation plan.
+Spec written: docs/superpowers/specs/YYYY-MM-DD-<slug>-design.md
+Read it. "approved" to proceed, or give feedback to revise.
 ```
 
-For a milestone with multiple tasks:
+You review. Reply `approved` or give feedback. Planner then calls `@architect`. When plans are written it stops again:
+
 ```
-/architect
-Spec is at docs/superpowers/specs/2026-04-27-milestone-2-frontend-design.md.
-Break it into individual task plans. One file per task.
+Plans written:
+- docs/superpowers/plans/YYYY-MM-DD-task-1-<slug>.md
+- docs/superpowers/plans/YYYY-MM-DD-task-2-<slug>.md
+
+Read them. "approved" to start work, or give feedback to revise.
 ```
 
-> **Architect creates the branch.** If you're on main, architect creates `feat/<slug>` automatically.
-> For milestone tasks, branches follow: `feat/<milestone-slug>/task-N-<slug>`
-
-> **Do NOT hand the plan to the reviewer.** Plans are yours to approve, not the reviewer's job.
+You review. Reply `approved`. Planner outputs the exact `/orchestrator` calls to run.
 
 ---
 
-### Phase 3 — Get the tasks done
+### Phase 2 — Execute with `/orchestrator`
 
-Repeat this cycle for each task:
+Run one call per task (in order, or parallel if tasks are independent):
 
-#### Step 1 — Implement `/dev`
 ```
-Work from docs/superpowers/plans/2026-04-27-task-04-dashboard.md
+/orchestrator
+Work from docs/superpowers/plans/YYYY-MM-DD-task-1-<slug>.md
 ```
-Developer branches off the milestone branch, implements step by step, commits and pushes after each meaningful unit. One sentence when done.
 
-#### Step 2 — Review `/reviewer`
-```
-Review this branch against docs/superpowers/plans/2026-04-27-task-04-dashboard.md
-```
-Reviewer runs tests, reads the diff, returns numbered findings or "LGTM".
+Orchestrator runs autonomously:
 
-#### Step 3 — Fix (if needed) `/dev`
 ```
-Fix the reviewer findings.
+@developer  → implements plan, commits + pushes incrementally
+@reviewer   → reviews against plan (max 3 cycles)
+  ↺ if findings: @developer fixes → @reviewer re-reviews
+@docs       → updates docs/Roadmap + RepoStructure, deletes plan file
+@git        → creates PR: task/<slug> → feat/<milestone>
+→ outputs PR URL, stops
 ```
-Developer evaluates feedback critically, fixes, verifies before signalling done.
 
-#### Step 4 — Update docs `/docs`
-```
-Reviewer gave LGTM on this branch. Update docs.
-```
-Docs agent updates `03-RepoStructure.md`, `04-Roadmap.md`, and the milestone spec. Does NOT touch plan files.
+You only get interrupted if 3 review cycles exhaust without LGTM, or an agent hits a hard error.
 
-#### Step 5 — Submit PR `/git`
-```
-Submit PR feat/milestone-2-frontend/task-04-dashboard to feat/milestone-2-frontend
-```
-Or just:
-```
-Submit PR
-```
-Git agent detects current branch and suggests source/target — you confirm before it proceeds.
+---
 
-#### Step 6 — Merge on GitHub
-Review the PR yourself. Merge it.
+### Phase 3 — Merge and cleanup
 
-#### Step 7 — Cleanup `/git`
-```
-PR merged
-```
-Git agent: pulls target branch, deletes task branch (local + remote), removes plan file, updates spec.
-If all milestone tasks are now done, asks:
-> "All tasks complete. Ready to merge feat/milestone-2-frontend to main?"
-
-You say yes → milestone PR created. You say no → stops.
+1. Review the PR on GitHub. Merge it.
+2. Switch to `@git` in opencode and type:
+   ```
+   PR merged
+   ```
+3. Git agent: pulls milestone branch, deletes task branch (local + remote), ticks spec checkbox.
+4. If all milestone tasks are done, git asks:
+   > "All tasks complete. Ready to merge feat/\<milestone\> to main?"
+5. You say yes → milestone PR created → you review + merge on GitHub → `PR merged` to `@git` → done.
 
 ---
 
 ## Flow at a glance
 
 ```
-brainstorm → [you approve spec]
-    → architect → [you approve plan(s)]
-        → for each task:
-            dev → reviewer → [fix if needed] → docs → git (PR) → [merge] → git (cleanup)
-        → git asks: merge milestone to main?
+/planner
+  → @brainstorm writes spec
+  ← [YOU: approve spec]
+  → @architect writes plans
+  ← [YOU: approve plans]
+
+for each task:
+  /orchestrator
+    → @developer implements
+    ↺ @reviewer until LGTM (max 3)
+    → @docs updates + deletes plan file
+    → @git creates PR
+  ← [YOU: merge PR on GitHub]
+  → @git "PR merged" → cleanup
+
+when all tasks done:
+  → @git creates milestone PR
+  ← [YOU: merge milestone to main]
+  → @git "PR merged" → spec archived
 ```
 
 ---
 
 ## Edge cases
 
-**Small task / bugfix — skip brainstorm:**
+**Small bugfix — skip planner entirely:**
 ```
 /architect
 The login form crashes when email is empty. Write a fix plan.
 ```
-Architect reads the relevant files, writes a concise plan. For trivial fixes, plan may be chat-only (no file).
+Then run `/orchestrator` with the plan path.
 
-**Reviewer finds nothing:**
-Skip the fix step. Go straight to docs:
+**Trivial one-liner — skip both:**
 ```
-/docs
-Reviewer gave LGTM on this branch. Update docs.
+/builder
+Fix the typo in the error message on line 42 of auth.ts
 ```
 
 **Reviewer feedback is wrong:**
-Developer uses `receiving-code-review` which evaluates findings critically. It will push back on incorrect or unnecessary feedback rather than blindly implementing it.
+Orchestrator passes findings to developer which uses `receiving-code-review` — evaluates critically, pushes back on incorrect findings rather than blindly implementing.
 
-**Large milestone with parallel tasks:**
-When architect flags steps as independent, developer invokes `subagent-driven-development` to run them concurrently.
+**Standalone brainstorm (exploration only, not committing to implementation):**
+```
+/brainstorm
+I'm thinking about switching from REST to tRPC. What are the tradeoffs for this project?
+```
 
 ---
 
@@ -191,55 +179,64 @@ docs/
 ├── 02-DataModel.md       — entity definitions, relationships
 ├── 03-RepoStructure.md   — folder layout, entry points, API reference
 ├── 04-Setup.md           — local dev setup, env vars, prerequisites
-├── 04-Roadmap.md         — milestones, current state, what's next
+├── 05-Roadmap.md         — milestones, current state, what's next
 └── decisions/            — one ADR per architectural decision
 ```
 
-Specs and plans live in `docs/superpowers/` — managed by the agent flow, deleted after merge.
+Specs and plans live in `docs/superpowers/` — plans deleted by docs agent after LGTM, specs archived in git history after milestone merges.
 
 ---
 
-## Local model requirements
+## Cloud model setup
 
-```bash
-ollama pull qwen3-coder:latest   # developer + builder default
-ollama pull glm-4.7-flash        # reviewer + docs + git
-```
+All agents use cloud providers. No local runtime required.
 
-Optional upgrade for developer:
-```bash
-ollama pull qwen3.6:27b          # better coding, fits in 24GB VRAM
-```
+| Agent | Model | Why |
+|-------|-------|-----|
+| planner, brainstorm, architect | `openai/gpt-5.5` | spec + plan creation, needs full reasoning |
+| orchestrator, developer, reviewer, docs, git, builder | `minimax-coding-plan/MiniMax-M2.7` | execution, instruction-following |
+| opencode default | `openai/gpt-5.5` | general sessions |
 
-On a machine without Ollama, agents with `model: ollama/...` will error.
-Fix: replace with a cloud model ID or comment out the `model:` line to use the opencode default.
+> **Historical note:** `qwen3-coder:latest` (Ollama/local) was the previous developer model — worked well for code generation, dropped in favour of cloud-only setup.
+
+---
+
+## Plugins
+
+Loaded automatically on startup. Verify with `cat ~/.local/share/opencode/log/<latest>.log | grep "service=plugin"`.
+
+| Plugin | Purpose |
+|--------|---------|
+| `superpowers` | Skills framework — all agent skills load through this |
+| `opencode-vibeguard` | Masks secrets/tokens before sending to cloud providers |
+| `opencode-dynamic-context-pruning` | Compresses stale context, deduplicates tool calls — saves tokens on long sessions |
+| `opencode-shell-strategy` | Teaches agents to use non-interactive flags (`-y`, `--no-edit`) — prevents hangs |
+| `type-inject` | Injects TypeScript type signatures when reading `.ts`/`.tsx` files |
+| `opencode-notifier` | Desktop notification + sound on completion, permission requests, errors |
 
 ---
 
 ## Per-machine setup
 
 1. Run `bash ~/dotfiles/bootstrap.sh`
-2. Pull required Ollama models (see above)
-3. Set API keys for cloud agents via `/connect` inside opencode or in your environment
+2. Connect providers via `/connect` inside opencode — set API keys for OpenAI and MiniMax/ZEN
 
 ### Current provider config
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "ollama/qwen3-coder:latest",
-  "plugin": ["superpowers@git+https://github.com/obra/superpowers.git"],
-  "provider": {
-    "ollama": {
-      "name": "Ollama",
-      "npm": "@ai-sdk/openai-compatible",
-      "options": { "baseURL": "http://127.0.0.1:11434/v1" },
-      "models": {
-        "qwen3-coder:latest": { "name": "qwen3-coder:latest" },
-        "glm-4.7-flash":      { "name": "glm-4.7-flash" },
-        "qwen3.6:27b":        { "name": "qwen3.6:27b" }
-      }
-    }
+  "model": "openai/gpt-5.5",
+  "plugin": [
+    "superpowers@git+https://github.com/obra/superpowers.git",
+    "opencode-vibeguard@git+https://github.com/inkdust2021/opencode-vibeguard",
+    "opencode-dynamic-context-pruning@git+https://github.com/Opencode-DCP/opencode-dynamic-context-pruning",
+    "opencode-shell-strategy@git+https://github.com/JRedeker/opencode-shell-strategy",
+    "type-inject@git+https://github.com/nick-vi/type-inject",
+    "opencode-notifier@git+https://github.com/mohak34/opencode-notifier"
+  ],
+  "agent": {
+    "developer": { "steps": 30 }
   }
 }
 ```

@@ -1,7 +1,7 @@
 ---
 description: Explores the problem space and generates 2-3 concrete approaches. Writes design spec via brainstorming skill.
-model: openai/gpt-5.3-codex
-mode: primary
+model: openai/gpt-5.5
+mode: subagent
 temperature: 0.7
 ---
 

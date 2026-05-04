@@ -1,5 +1,6 @@
 ---
-description: General-purpose agent for quick tasks. No restrictions. Uses the active model.
+description: General-purpose agent for quick tasks. No restrictions.
+model: minimax-coding-plan/MiniMax-M2.7
 mode: primary
 temperature: 0.5
 ---

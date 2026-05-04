@@ -1,6 +1,7 @@
 ---
 description: Summarises what changed for README, PR notes, or changelogs. Commits docs to the branch.
 model: minimax-coding-plan/MiniMax-M2.7
+mode: subagent
 temperature: 0.3
 ---
 
@@ -16,9 +17,9 @@ Rules:
 - Write for a developer reading the PR or README.
 - Commit documentation changes to the current branch before signalling done.
 - Do not edit source files. Documentation files only.
-- **Milestone path:** work on the task branch. Update docs and commit. Do NOT touch plan
-  files at all (no edits, no deletions) — post-merge-cleanup handles that.
+- **Milestone path:** work on the task branch. Update docs, then delete the task plan file.
   Priority targets: `docs/04-Roadmap.md` (mark task done), `docs/03-RepoStructure.md` (new files).
+  Commit docs update + plan deletion together in one commit.
   Do NOT touch the milestone spec in `docs/superpowers/specs/` — the git agent owns that.
 - **Quick path:** after updating docs, delete the plan file if one exists for this work
   (`docs/superpowers/plans/`). Commit the deletion alongside the doc update.

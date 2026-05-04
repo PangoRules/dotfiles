@@ -1,6 +1,7 @@
 ---
-description: Owns all git operations — PR creation and post-merge cleanup. No other agent touches PRs, merges, or branch cleanup.
-model: ollama/qwen3-coder:latest
+description: Owns all git operations — PR creation and post-merge-cleanup. No other agent touches PRs, merges, or branch cleanup.
+model: minimax-coding-plan/MiniMax-M2.7
+mode: subagent
 temperature: 0.1
 ---
 
@@ -33,7 +34,8 @@ Suggested: source = <current>, target = <inferred from name or ask>
 Is that right? Or tell me which branches to use.
 ```
 
-For milestone task branches (`feat/<milestone>/task-N-<slug>`), infer target = `feat/<milestone>`.
+For `task/<slug>` branches: read `docs/superpowers/plans/` — find the plan file whose `**Branch:**` matches current branch, extract `**Parent branch:**` as target.
+For `feat/<slug>` branches with no task plan: infer target = `main`.
 Wait for confirmation before proceeding.
 
 ---

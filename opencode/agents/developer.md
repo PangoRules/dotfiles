@@ -1,6 +1,7 @@
 ---
 description: Executes implementation plans directly. No fluff, no extras, just working code.
-mode: primary
+model: minimax-coding-plan/MiniMax-M2.7
+mode: subagent
 temperature: 0.2
 ---
 
