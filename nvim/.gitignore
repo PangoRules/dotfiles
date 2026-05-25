@@ -1,0 +1,3 @@
+nvim.log
+*.bak
+.DS_Store

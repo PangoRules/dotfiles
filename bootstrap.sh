@@ -145,21 +145,7 @@ fi
 # =============================================================================
 if [[ "$SKIP_NVIM" == false ]]; then
   header "2. Neovim Config"
-
-  NVIM_CONFIG_DIR="$HOME/.config/nvim"
-  if [[ -d "$NVIM_CONFIG_DIR/.git" ]]; then
-    skip "~/.config/nvim (already cloned)"
-  else
-    if [[ -d "$NVIM_CONFIG_DIR" ]]; then
-      warn "~/.config/nvim exists but is not a git repo — backing up..."
-      mv "$NVIM_CONFIG_DIR" "${NVIM_CONFIG_DIR}.bak"
-      warn "Backed up to ~/.config/nvim.bak"
-    fi
-    info "Cloning nvim config..."
-    git clone git@github.com:PangoRules/nvim-config.git "$NVIM_CONFIG_DIR"
-    ok "Neovim config cloned to ~/.config/nvim"
-  fi
-
+  make_symlink "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 else
   header "2. Neovim Config"
   info "Skipped (--skip-nvim)"
@@ -272,7 +258,7 @@ echo -e "
      Reboot (or re-login) for environment.d changes to take effect.
 
   9. ${YELLOW}Neovim plugins${RESET}
-     Open nvim and run: :Lazy sync
+     Open nvim and run: :Lazy restore   (installs pinned versions from lazy-lock.json)
 "
 
 echo -e "${BOLD}${GREEN}Bootstrap complete!${RESET}"
