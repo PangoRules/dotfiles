@@ -1189,6 +1189,7 @@ require('lazy').setup({
         'dockerfile-language-server',    -- dockerls
         'docker-compose-language-service', -- docker_compose_language_service
         'sql-formatter',                 -- SQL formatting via conform
+        'marksman',                      -- markdown LSP: link navigation (gd), hover, completions
       },
     },
   },
@@ -1217,7 +1218,8 @@ require('lazy').setup({
 
       vim.lsp.config('dockerls', { capabilities = cap })
       vim.lsp.config('docker_compose_language_service', { capabilities = cap })
-      vim.lsp.enable { 'dockerls', 'docker_compose_language_service' }
+      vim.lsp.config('marksman', { capabilities = cap })
+      vim.lsp.enable { 'dockerls', 'docker_compose_language_service', 'marksman' }
 
       -- Treesitter: dockerfile + yaml --------------------------------------
       pcall(function() require('nvim-treesitter').install { 'dockerfile', 'yaml' } end)

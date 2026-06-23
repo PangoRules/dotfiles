@@ -117,6 +117,8 @@ return {
               return root
             end,
             env = { ASPNETCORE_ENVIRONMENT = 'Development' },
+            justMyCode = false,
+            stopAtEntry = false,
           },
         }
 
@@ -181,6 +183,23 @@ return {
         k('n', '<leader>dws', function()
           dapui.float_element('scopes', { enter = true })
         end, { desc = 'Debug: Scopes float (Locals)' })
+      end,
+    },
+
+    {
+      -- Upstream neotest-dotnet breaks on nvim 0.11+ because iter_matches changed
+      -- captures[1] from TSNode to TSNode[]. build hook re-applies our patch after
+      -- any :Lazy update so the fix survives plugin updates.
+      'Issafalcon/neotest-dotnet',
+      build = function(plugin)
+        local patch = vim.fn.stdpath('config') .. '/lua/custom/patches/neotest_dotnet_framework_discovery.lua'
+        local target = plugin.dir .. '/lua/neotest-dotnet/framework-discovery.lua'
+        local ok = vim.fn.system({ 'cp', patch, target })
+        if vim.v.shell_error ~= 0 then
+          vim.notify('neotest-dotnet patch failed: ' .. ok, vim.log.levels.ERROR)
+        else
+          vim.notify('neotest-dotnet: nvim 0.11+ patch applied', vim.log.levels.INFO)
+        end
       end,
     },
 

@@ -5,7 +5,9 @@ return {
   mason = {
     'vue-language-server',        -- volar
     'typescript-language-server', -- ts_ls
+    'eslint-lsp',
     'prettier',
+    'tailwindcss-language-server',
   },
 
   lsp_setup = function(cap)
@@ -42,8 +44,13 @@ return {
       filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
     })
     vim.lsp.config('vue_ls', { capabilities = cap })
+    vim.lsp.config('eslint', { capabilities = cap })
+    vim.lsp.config('tailwindcss', {
+      capabilities = cap,
+      filetypes = { 'html', 'css', 'vue', 'javascript', 'typescript' },
+    })
 
-    return { 'ts_ls', 'vue_ls' }
+    return { 'ts_ls', 'vue_ls', 'eslint', 'tailwindcss' }
   end,
 
   formatters = {
