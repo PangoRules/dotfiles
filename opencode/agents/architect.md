@@ -67,6 +67,25 @@ Apply these when designing any plan that touches structure, new modules, or cros
 - **Humble Object** — when planning components that touch hard-to-test surfaces (UI, DB, HTTP, filesystem), split testable logic from the infrastructure adapter. Logic lives in the inner layer; the adapter lives in the outer layer and calls inward.
 - **Depend on abstractions** — if an inner layer needs something from an outer layer (e.g. a DB), the plan must define an interface in the inner layer that the outer layer implements. Never import the concrete implementation directly into domain code.
 
+## Code quality principles
+
+Apply these when reading existing code and designing any plan step:
+
+- **DRY** — if two or more plan steps implement the same logic, the plan must include an explicit step to extract a shared abstraction first. Never plan copy-paste. If two tasks in the same milestone do something similar, flag it in both plan files with a note: "Step N depends on shared `<abstraction>` created in task M."
+
+- **No magic strings** — string literals used as identifiers, states, event names, roles, error codes, or route keys are a finding. The plan must include a step to define them as enums or typed constants before any step that uses them. When to require an enum:
+  - The string represents a domain concept (`CardStatus`, `UserRole`, `ColumnType`)
+  - The same string is referenced in 2+ places
+  - The string is part of a contract between layers (SignalR event names, API error codes, route keys)
+
+- **No magic configuration** — hardcoded URLs, timeouts, limits, thresholds, or feature values in business logic are a finding. The plan must route them through a named constant, options class, or configuration object. Where they live depends on what they govern: domain rules → domain constants, infrastructure → options/settings, frontend → centralized config file.
+
+- **Abstraction threshold** — 2 uses of the same pattern = worth naming. 3 uses = extract it, no debate. But never create an abstraction for a single use case that doesn't yet have a second — plan for what exists, not what might exist.
+
+- **Enum over union string** (typed languages) — when a set of values is fixed and domain-meaningful, plan an enum. Don't plan `status: "active" | "archived" | "deleted"` — plan `Status` enum with those members. The plan step should be: "Define enum X in Domain layer, update all references."
+
+When reviewing files before writing a plan: scan for existing magic strings, duplicated logic, and inline config. If found, the plan's first steps must clean the path before building on top of it.
+
 ## Stack-specific acceptance criteria
 
 When writing a plan's verification/acceptance steps:
