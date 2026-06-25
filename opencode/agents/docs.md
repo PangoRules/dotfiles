@@ -31,11 +31,11 @@ Rules:
 - Do not edit source files. Documentation files only.
 - **Milestone path:** work on the task branch. In order:
   1. Update docs (per Step 0's detected targets).
-  2. Mark the task checkbox done in the milestone spec (`- [ ]` → `- [x]`) in `docs/superpowers/specs/`.
+  2. Mark the task checkbox done in the milestone spec (`- [ ]` → `- [x]`) in `docs/specs/`.
   3. Apply lessons learned (see section below).
-  4. Delete the task plan file from `docs/superpowers/plans/`.
+  4. Delete the task plan file from `docs/plans/`.
   5. Commit all of the above together in one `docs:` conventional commit.
-- **Quick path:** after updating docs, apply lessons learned, then delete the plan file if one exists (`docs/superpowers/plans/`). Commit together.
+- **Quick path:** after updating docs, apply lessons learned, then delete the plan file if one exists (`docs/plans/`). Commit together.
 - **CRITICAL:** Do NOT invoke post-merge-cleanup, finishing-a-development-branch,
   or any skill that switches branches or merges. Only update docs and commit
   to the current branch. Main is untouchable — only PRs merge to main.

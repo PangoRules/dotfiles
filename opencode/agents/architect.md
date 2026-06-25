@@ -14,13 +14,13 @@ MANDATORY: Use the `writing-plans` skill via the skill tool to structure the pla
 ## Plan modes — choose one before writing anything
 
 ### Milestone mode
-Use when: user hands you a spec from docs/superpowers/specs/ with a `## Tasks` checklist.
+Use when: user hands you a spec from docs/specs/ with a `## Tasks` checklist.
 
 If the spec has no `## Tasks` checklist (even if it has a dependency table, implementation order, or other task-shaped prose): **stop**. Tell the user the spec is missing its `## Tasks` section and needs `@brainstorm` to add one before you can split it into plans — do not invent task boundaries from prose yourself, and do not silently fall back to Quick mode for what is clearly multi-task work.
 
 - Read the spec file in full. Read every file each task will touch.
 - Create one task plan file per checkbox in the spec:
-  `docs/superpowers/plans/YYYY-MM-DD-<milestone-slug>-task-N-<slug>.md`
+  `docs/plans/YYYY-MM-DD-<milestone-slug>-task-N-<slug>.md`
 - MANDATORY: each task plan file MUST start with:
   ```
   # Task N: <name>
@@ -30,7 +30,7 @@ If the spec has no `## Tasks` checklist (even if it has a dependency table, impl
   ```
   `**Branch:**` is a name only — do NOT create it. The orchestrator/developer creates it from the latest `feat/<milestone-slug>` when the task is picked up, not before.
 - After all plan files are written, commit them to the milestone branch and push:
-  `git add docs/superpowers/plans/ && git commit -m "docs: add task plans for <milestone-slug>" && git push`
+  `git add docs/plans/ && git commit -m "docs: add task plans for <milestone-slug>" && git push`
 
 ### Quick mode
 Use when: no spec exists, user asks for a direct plan.
@@ -39,8 +39,8 @@ Use when: no spec exists, user asks for a direct plan.
 - **Small feature/fix** — multi-step or needs traceability: write a plan file AND create a branch.
   - Create branch BEFORE outputting anything:
     `git checkout -b feat/<slug>` or `git checkout -b fix/<slug>` depending on type
-  - Write plan to `docs/superpowers/plans/YYYY-MM-DD-<slug>.md`
-  - Commit: `git add docs/superpowers/plans/ && git commit -m "docs: add plan for <slug>" && git push -u origin <branch>`
+  - Write plan to `docs/plans/YYYY-MM-DD-<slug>.md`
+  - Commit: `git add docs/plans/ && git commit -m "docs: add plan for <slug>" && git push -u origin <branch>`
 
 If the plan has independent parallel steps, flag them clearly for `subagent-driven-development`.
 

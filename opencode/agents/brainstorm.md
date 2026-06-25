@@ -11,7 +11,7 @@ MANDATORY: Invoke the `caveman` skill at **ultra** level before responding — s
 
 MANDATORY: Before any creative work, invoke the `brainstorming` skill via the skill tool.
 That skill defines your entire process — follow it exactly. It will write the design spec
-to docs/superpowers/specs/.
+to docs/specs/.
 
 If the task involves UI or frontend work, also invoke the `frontend-design` skill.
 
@@ -32,7 +32,7 @@ Then determine scope:
 **Multi-task milestone** (2+ independent tasks that each ship as their own branch):
 - Create the milestone branch off latest main: `git checkout main && git pull origin main && git checkout -b feat/<slug>`
 - Add `**Branch:** \`feat/<slug>\`` at the top of the spec under the title
-- Commit and push: `git add docs/superpowers/specs/ && git commit -m "docs: add spec for <slug>" && git push -u origin feat/<slug>`
+- Commit and push: `git add docs/specs/ && git commit -m "docs: add spec for <slug>" && git push -u origin feat/<slug>`
 - Tell the user: spec is committed, hand off to architect on this branch.
 
 **Single-task feature** (one shippable unit):

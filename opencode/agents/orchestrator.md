@@ -15,7 +15,7 @@ MANDATORY: Invoke the `caveman` skill at **ultra** level and persist it through 
 
 User provides a plan file path:
 ```
-Work from docs/superpowers/plans/YYYY-MM-DD-<slug>.md
+Work from docs/plans/YYYY-MM-DD-<slug>.md
 ```
 
 ---

@@ -72,7 +72,7 @@ inventory items filtered by dietary restriction.
 Planner calls `@brainstorm` internally. When spec is written it stops and asks:
 
 ```
-Spec written: docs/superpowers/specs/YYYY-MM-DD-<slug>-design.md
+Spec written: docs/specs/YYYY-MM-DD-<slug>-design.md
 Read it. "approved" to proceed, or give feedback to revise.
 ```
 
@@ -80,8 +80,8 @@ You review. Reply `approved` or give feedback. Planner then calls `@architect`. 
 
 ```
 Plans written:
-- docs/superpowers/plans/YYYY-MM-DD-task-1-<slug>.md
-- docs/superpowers/plans/YYYY-MM-DD-task-2-<slug>.md
+- docs/plans/YYYY-MM-DD-task-1-<slug>.md
+- docs/plans/YYYY-MM-DD-task-2-<slug>.md
 
 Read them. "approved" to start work, or give feedback to revise.
 ```
@@ -96,7 +96,7 @@ Run one call per task (in order, or parallel if tasks are independent):
 
 ```
 /orchestrator
-Work from docs/superpowers/plans/YYYY-MM-DD-task-1-<slug>.md
+Work from docs/plans/YYYY-MM-DD-task-1-<slug>.md
 ```
 
 Orchestrator runs autonomously until the E2E gate:
@@ -247,8 +247,8 @@ docs/
 └── decisions/            — one ADR per architectural decision
 ```
 
-Specs live in `docs/superpowers/specs/` — task checkboxes ticked by docs agent after LGTM, milestone spec fully checked after all tasks merge.
-Plans live in `docs/superpowers/plans/` — deleted by docs agent after LGTM, preserved in git history.
+Specs live in `docs/specs/` — task checkboxes ticked by docs agent after LGTM, milestone spec fully checked after all tasks merge.
+Plans live in `docs/plans/` — deleted by docs agent after LGTM, preserved in git history.
 
 ---
 

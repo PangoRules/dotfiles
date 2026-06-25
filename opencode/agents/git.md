@@ -34,7 +34,7 @@ Suggested: source = <current>, target = <inferred from name or ask>
 Is that right? Or tell me which branches to use.
 ```
 
-For `task/<slug>` branches: read `docs/superpowers/plans/` — find the plan file whose `**Branch:**` matches current branch, extract `**Parent branch:**` as target.
+For `task/<slug>` branches: read `docs/plans/` — find the plan file whose `**Branch:**` matches current branch, extract `**Parent branch:**` as target.
 For `feat/<slug>` branches with no task plan: infer target = `main`.
 Wait for confirmation before proceeding.
 
@@ -101,7 +101,7 @@ Triggered when orchestrator passes "Submit PR <source> to <target>. Plan: <plan-
      --title "<conventional title>" \
      --body "$(cat <<'EOF'
    Plan: <plan-file-path>
-   Spec: docs/superpowers/specs/<spec-file>
+   Spec: docs/specs/<spec-file>
 
    - <commit 1 from git log>
    - <commit 2 from git log>
@@ -120,11 +120,11 @@ Triggered when orchestrator passes "Submit PR <source> to <target>. Plan: <plan-
 
 Triggered **only** when the user says "the PR was merged" or "PR merged".
 
-Milestone specs live at `docs/superpowers/specs/`.
-Task plan files live at `docs/superpowers/plans/`.
+Milestone specs live at `docs/specs/`.
+Task plan files live at `docs/plans/`.
 
 Invoke the `post-merge-cleanup` skill for Steps 0–4 (branch deleted, plan file removed).
-After cleanup is done, switch to the `feat/<slug>` branch and check if any `- [ ]` remain in the milestone spec at `docs/superpowers/specs/`. Then:
+After cleanup is done, switch to the `feat/<slug>` branch and check if any `- [ ]` remain in the milestone spec at `docs/specs/`. Then:
 - If unchecked tasks remain: report which tasks are still pending. Stop.
 - If all tasks are done: ask the user — "All milestone tasks are complete. Ready to merge feat/<milestone> to main?" Wait for confirmation before doing anything.
 

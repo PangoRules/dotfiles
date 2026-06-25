@@ -25,21 +25,21 @@ This returns the milestone branch (e.g. `feat/milestone2-1-frontend-improvements
 
 **0b. Mark the task done in the spec:**
 
-Find the spec file in `docs/superpowers/specs/`. It matches the milestone slug from the parent branch name.
+Find the spec file in `docs/specs/`. It matches the milestone slug from the parent branch name.
 Find the checkbox line matching this task branch name. Change `- [ ]` to `- [x]`. Save.
 ```bash
 git checkout <parent-branch>
 git pull origin <parent-branch>
-git add docs/superpowers/specs/<parent-spec-file>.md
+git add docs/specs/<parent-spec-file>.md
 git commit -m "docs: mark <task-slug> complete in spec"
 git push
 ```
 
 **0c. Delete the task plan file (if docs agent hasn't already):**
 ```bash
-if [ -f docs/superpowers/plans/<task-plan-file>.md ]; then
-  rm docs/superpowers/plans/<task-plan-file>.md
-  git add docs/superpowers/plans/<task-plan-file>.md
+if [ -f docs/plans/<task-plan-file>.md ]; then
+  rm docs/plans/<task-plan-file>.md
+  git add docs/plans/<task-plan-file>.md
   git commit -m "docs: remove completed task plan"
   git push
 fi
@@ -47,7 +47,7 @@ fi
 
 **0d. Check if all tasks are done:**
 ```bash
-grep "\- \[ \]" docs/superpowers/specs/<parent-spec-file>.md
+grep "\- \[ \]" docs/specs/<parent-spec-file>.md
 ```
 - If output is empty → all tasks complete. Print: `"All tasks done. Creating milestone PR."`
   Then invoke `finishing-a-development-branch` to create PR: `feat/<milestone-slug>` → `main`.
@@ -66,9 +66,9 @@ Skip to Step 1 directly.
 
 Find and delete the matching plan file if one exists:
 ```bash
-ls docs/superpowers/plans/
-rm docs/superpowers/plans/<matching-plan-file>.md   # if exists
-git add docs/superpowers/plans/
+ls docs/plans/
+rm docs/plans/<matching-plan-file>.md   # if exists
+git add docs/plans/
 git commit -m "docs: remove completed plan for <slug>"
 git push
 ```
