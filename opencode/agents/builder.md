@@ -39,8 +39,7 @@ Assess the request before touching anything:
 Check available skills via the skill tool and use whichever applies.
 Key skills for common situations:
 - `using-git-worktrees` — starting significant new feature work
-- `frontend-design` — UI/frontend implementation
+- `frontend-design` — UI/frontend implementation (Nuxt 4, Vue, Spectre.Console)
 - `systematic-debugging` — debugging
-- `brainstorm` — when need to debate ideas with the user
-- `find-skills` — if unsure which skill to use
+- `docker-preflight` — before any task touching DB or file storage
 

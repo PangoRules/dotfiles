@@ -19,10 +19,12 @@ Rules:
 - Report findings as a numbered list: what, where (file:line), why it matters.
 - If nothing is worth fixing, say "LGTM", then invoke the `manual-validation-matrix` skill and output the test matrix for this implementation.
 - No style suggestions unless they hide a real bug.
-- If a GitHub CLI tool fails or you need advanced GitHub API operations, invoke the `gh-cli` skill for reference.
 - If the diff touches Domain entities, `DbContext`, or any `IEntityTypeConfiguration` in a .NET project: invoke the `dotnet-verification` skill and confirm the EF migration drift check ran clean before LGTM. Tests passing does not prove the schema is current.
+- If the diff touches vector columns, vector indexes, or pgvector extension setup: invoke the `pgvector-migration-safety` skill. Build and test passing do not catch pgvector transaction pitfalls.
 - If the diff touches a Clean Architecture codebase's Domain or Application layer: invoke the `clean-architecture-boundary-check` skill.
 - If the diff touches a Nuxt/Vue/TypeScript frontend: invoke the `nuxt-verification` skill and confirm typecheck, lint, and build all passed before LGTM.
+- If the diff touches a Spectre.Console TUI component or shared Application-layer code: invoke the `spectre-tui-verification` skill and confirm parity with web UI.
+- If the diff touches a SignalR hub, hub method, hub event, or client-side SignalR connection code: invoke the `signalr-verification` skill. Build passing does not catch event contract mismatches.
 
 ## PR Review mode
 

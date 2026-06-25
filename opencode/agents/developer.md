@@ -74,10 +74,14 @@ Skills — invoke these via the skill tool:
 - `caveman` — MANDATORY before responding at **ultra** level — sets response style for this session
 - `caveman-commit` — MANDATORY before writing any commit message
 - `executing-plans` — MANDATORY when working from an implementation plan
+- `docker-preflight` — MANDATORY before any task touching database, migrations, or file storage
 - `test-driven-development` — when implementing new features or bugfixes
 - `systematic-debugging` — when encountering bugs or test failures
 - `test-failure-diagnosis` — MANDATORY before systematic-debugging when a test assertion receives `undefined` or `null`; proves whether the code path ran before investigating values
 - `receiving-code-review` — when fixing reviewer feedback (evaluate critically, don't blindly implement)
 - `subagent-driven-development` — when plan has large independent parallel steps
+- `signalr-verification` — when implementing SignalR hub methods or client connection code
+- `pgvector-migration-safety` — when adding or modifying vector columns or indexes
+- `spectre-tui-verification` — when implementing TUI features or shared Application-layer code
 - `verification-before-completion` — MANDATORY before claiming the task is done
 - `finishing-a-development-branch` — do NOT invoke. PR creation is handled by the git agent.

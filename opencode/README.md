@@ -23,6 +23,11 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 | `skills/ef-core-model-test` | Pattern for DB-independent EF Core model contract tests |
 | `skills/clean-architecture-boundary-check` | Grep-based Dependency Rule violation check, for review |
 | `skills/nuxt-verification` | Nuxt/Vue/TS typecheck, lint, build check sequence |
+| `skills/frontend-design` | Distinctive UI design guidance — Nuxt 4, Vue, Spectre.Console; prevents templated AI aesthetics |
+| `skills/signalr-verification` | Hub method + event contract check; catches silent real-time failures build/test miss |
+| `skills/pgvector-migration-safety` | pgvector pitfalls: transaction-incompatible indexes, missing extension, untyped columns |
+| `skills/spectre-tui-verification` | TUI build, smoke run, and feature-parity check against web UI |
+| `skills/docker-preflight` | Verify postgres/pgvector/MinIO services before any DB or storage task |
 | `commands/prompt.md` | `/prompt <text>` — optimizes a prompt using Claude best practices |
 
 ---
