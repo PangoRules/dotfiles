@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: Use when building or redesigning any UI — Nuxt 4, Vue components, Spectre.Console TUI, or any frontend surface. Prevents generic AI-templated aesthetics; forces deliberate design decisions before writing code.
+description: Use when building or redesigning any UI — web frameworks, Vue/React/Svelte components, or terminal UI surfaces. Prevents generic AI-templated aesthetics; forces deliberate design decisions before writing code.
 ---
 
 # Frontend Design
@@ -23,21 +23,21 @@ If the brief does not pin down what the product or subject is, pin it yourself b
 
 **Match complexity to vision.** Maximalist directions need elaborate execution; minimal directions need precision in spacing, type, and detail.
 
-## For Spectre.Console TUI surfaces
+## For terminal UI surfaces (Spectre.Console, Ink, Charm, etc.)
 
-Spectre.Console's constraint is the canvas — no web fonts, no CSS, only what the terminal allows. Design principles still apply:
+The terminal is the canvas constraint — no web fonts, no CSS, only what the runtime allows. Design principles still apply:
 
-- **Color palette**: pick 3–4 named Color enum values and use them consistently across panels, rules, and prompts. Don't use every color Spectre offers.
-- **Layout rhythm**: Panel/Table borders create structure — choose one border style and stick to it. Mixed border styles read as unfinished.
-- **Information density**: Terminals favor dense output. Use markup sparingly (`[bold]`, `[green]`, `[dim]`) — decorating everything decorates nothing.
-- **Signature element**: one distinctive output moment the user will remember (a progress bar sequence, a summary panel layout, a specific color for errors).
+- **Color palette**: pick 3–4 named color values and use them consistently across panels, rules, and prompts. Don't use every color the library offers.
+- **Layout rhythm**: panel/table borders create structure — choose one border style and stick to it. Mixed border styles read as unfinished.
+- **Information density**: terminals favor dense output. Use markup sparingly — decorating everything decorates nothing.
+- **Signature element**: one distinctive output moment the user will remember (a progress bar sequence, a summary panel layout, a specific color treatment for errors).
 
 ## Process: brainstorm, plan, critique, build, critique again
 
 **Pass 1 — Design plan** (before writing any code):
 
 Create a compact token system:
-- **Color**: 4–6 named hex values (web) or Color enum values (TUI)
+- **Color**: 4–6 named hex values (web) or named color values (TUI)
 - **Type**: roles for display, body, and utility faces (web) or markup styles (TUI)
 - **Layout**: one-sentence prose description + ASCII wireframe
 - **Signature**: the single unique element this will be remembered by
@@ -50,6 +50,8 @@ Check the plan against these failure modes:
 3. Is the signature element actually distinctive or just decoration?
 
 If any answer is yes, revise that part. State what you changed and why. Only after confirming the plan's distinctiveness should you write the code.
+
+AI-generated design clusters around three defaults: (1) warm cream background + high-contrast serif + terracotta accent; (2) near-black background + acid-green or vermilion accent; (3) broadsheet hairline rules + dense newspaper columns. All three are legitimate for some briefs, but they are defaults — where the brief leaves an axis free, don't spend it on one of these.
 
 ## Restraint and self-critique
 
