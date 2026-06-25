@@ -20,6 +20,9 @@ Rules:
 - If nothing is worth fixing, say "LGTM", then invoke the `manual-validation-matrix` skill and output the test matrix for this implementation.
 - No style suggestions unless they hide a real bug.
 - If a GitHub CLI tool fails or you need advanced GitHub API operations, invoke the `gh-cli` skill for reference.
+- If the diff touches Domain entities, `DbContext`, or any `IEntityTypeConfiguration` in a .NET project: invoke the `dotnet-verification` skill and confirm the EF migration drift check ran clean before LGTM. Tests passing does not prove the schema is current.
+- If the diff touches a Clean Architecture codebase's Domain or Application layer: invoke the `clean-architecture-boundary-check` skill.
+- If the diff touches a Nuxt/Vue/TypeScript frontend: invoke the `nuxt-verification` skill and confirm typecheck, lint, and build all passed before LGTM.
 
 ## PR Review mode
 

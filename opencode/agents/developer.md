@@ -41,21 +41,37 @@ Always TypeScript. Never JavaScript. If a file would be `.js`, it's `.ts`. If it
 
 ## Starting a task
 
-**Milestone task:** the task plan has a `**Branch:**` header. The branch already exists (architect created it). Before touching any code:
+**Milestone task:** the task plan has `**Branch:**` and `**Parent branch:**` headers. The branch name is just a name — it may not exist yet, or may already have commits from a prior session. Resolve it before touching code:
 ```bash
-git status                          # check where you are
-git checkout task/<slug>            # switch to the task branch
-git pull origin task/<slug>         # ensure it's up to date
+git fetch origin
+git ls-remote --heads origin task/<slug>   # check if it exists
 ```
-If the branch does not exist locally, fetch it: `git fetch origin task/<slug> && git checkout task/<slug>`
+- **Exists** → resume in-progress work:
+  ```bash
+  git checkout task/<slug>
+  git pull origin task/<slug>
+  ```
+- **Does not exist** → new pickup, branch off the latest parent:
+  ```bash
+  git checkout <parent-branch>
+  git pull origin <parent-branch>
+  git checkout -b task/<slug>
+  git push -u origin task/<slug>
+  ```
 
-**Quick task:** architect already created the branch. Confirm you're on it. If on main, ask the user for the branch name before starting.
+Then check the plan's own checkboxes (`- [ ]` / `- [x]`). If any are already checked, resume from the first unchecked step — do not redo completed work.
+
+**Quick task:** architect already created the branch (`feat/<slug>` or `fix/<slug>`). Confirm you're on it. If on main, ask the user for the branch name before starting.
 
 ## Commits and pushing
 
 Commit constantly. Each commit = one atomic meaningful unit. Never batch unrelated changes.
 Use conventional commits: `feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `docs:`.
 MANDATORY: Invoke the `caveman-commit` skill before writing any commit message.
+
+**Live plan tracking:** when you finish a step, check it off in the plan file itself (`- [ ]` → `- [x]`), same commit as that step's code change. The plan file is the live progress record, not just an end-of-task artifact.
+
+**Context/performance checkpoint:** about to get cut for context or performance reasons mid-step? Don't wait for a clean stopping point. Commit and push now — check off only sub-steps actually finished, leave the in-progress step unchecked, `wip:` prefixed caveman-commit message naming the unfinished step. That's the resume point for the next session.
 
 After every commit, push immediately:
 ```bash

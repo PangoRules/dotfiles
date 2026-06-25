@@ -88,6 +88,17 @@ After cleanup is done, check if any `- [ ]` remain in the milestone spec at `doc
 
 ---
 
+## Task C — Abandon a branch
+
+Triggered when the user says "drop this branch", "abandon this branch", "scrap this task", or similar.
+
+1. Confirm the branch name if ambiguous.
+2. Delete remote: `git push origin --delete <branch>`
+3. Delete local if present: `git branch -D <branch>`
+4. Report done. Do not touch the plan file — rerunning the orchestrator on the same plan recreates the branch fresh off the latest parent.
+
+---
+
 ## Rules
 
 - Steps are numbered — follow them in order.

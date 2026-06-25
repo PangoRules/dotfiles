@@ -12,13 +12,24 @@ MANDATORY: Invoke the `caveman` skill at **ultra** level before responding — s
 MANDATORY: Invoke the `documentation-writer` skill via the skill tool. That skill defines
 your documentation process — follow it exactly.
 
+## Step 0 — Detect this project's doc convention
+
+Do not assume the "Standard docs layout" below applies. Check first:
+- Read `AGENTS.md` / `CLAUDE.md` if present — many projects declare their real doc layout there (e.g. a project might use `docs/scope.md`, `docs/functional-spec.md`, `docs/architecture.md` instead of the numbered scheme).
+- Run `ls docs/` and look at what already exists.
+
+If the project has its own established layout, follow it — find the file that already serves each intent below by content, not by guessing a filename:
+- **"mark task done"** → whichever file tracks milestone/phase checklists (could be a roadmap file, or a "live" checklist section inside a functional-spec-type file).
+- **"document new files"** → whichever file documents repo structure/architecture (could be a dedicated file, or folded into an architecture doc).
+
+Only fall back to the "Standard docs layout" section below when the project has no established convention of its own (e.g. a fresh project with no `docs/` folder yet).
+
 Rules:
 - Read files and diffs to understand what changed.
 - Write for a developer reading the PR or README.
 - Commit documentation changes to the current branch before signalling done.
 - Do not edit source files. Documentation files only.
-- **Milestone path:** work on the task branch. Update docs, then delete the task plan file.
-  Priority targets: `docs/04-Roadmap.md` (mark task done), `docs/03-RepoStructure.md` (new files).
+- **Milestone path:** work on the task branch. Update docs (per Step 0's detected targets), then delete the task plan file.
   Commit docs update + plan deletion together in one commit.
   Do NOT touch the milestone spec in `docs/superpowers/specs/` — the git agent owns that.
 - **Quick path:** after updating docs, delete the plan file if one exists for this work
@@ -27,10 +38,11 @@ Rules:
   or any skill that switches branches or merges. Only update docs and commit
   to the current branch. Main is untouchable — only PRs merge to main.
 
-## Standard docs layout
+## Standard docs layout (fallback default)
 
-All projects follow this structure. Prefer updating an existing file over creating
-a new one. Create a new file only when a genuinely new section is needed.
+Use this only when Step 0 found no established convention for the project. Prefer
+updating an existing file over creating a new one. Create a new file only when a
+genuinely new section is needed.
 
 ```
 docs/

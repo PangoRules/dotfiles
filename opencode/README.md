@@ -19,6 +19,10 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 | `skills/post-merge-cleanup` | After PR merges: tick spec checkbox, delete branch |
 | `skills/test-failure-diagnosis` | Diagnose test failures before investigating values |
 | `skills/manual-validation-matrix` | Output a test matrix for manual validation |
+| `skills/dotnet-verification` | .NET/EF Core build, test, migration-drift check sequence |
+| `skills/ef-core-model-test` | Pattern for DB-independent EF Core model contract tests |
+| `skills/clean-architecture-boundary-check` | Grep-based Dependency Rule violation check, for review |
+| `skills/nuxt-verification` | Nuxt/Vue/TS typecheck, lint, build check sequence |
 | `commands/prompt.md` | `/prompt <text>` — optimizes a prompt using Claude best practices |
 
 ---
@@ -34,7 +38,7 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 | docs | No | Yes (docs + plan deletion) | No | No | No |
 | git | No | No | Yes (PR branch) | Yes | Yes |
 
-> Architect creates branches. Developer works on them. Main is read-only — only PRs merge to main.
+> Brainstorm creates the milestone branch off main. Developer creates each task branch off the latest milestone branch when the task is picked up (resumes it if already started). Main is read-only — only PRs merge to main.
 
 ---
 
@@ -92,8 +96,17 @@ Work from docs/superpowers/plans/YYYY-MM-DD-task-1-<slug>.md
 Orchestrator runs autonomously:
 
 ```
-@developer  → implements plan, commits + pushes incrementally
-@reviewer   → reviews against plan (max 3 cycles)
+@developer  → resolves the task branch first: resumes it if it already exists
+              (checks plan's own checkboxes, picks up from first unchecked
+              step), or branches fresh off the latest feat/<milestone> if not
+            → implements, ticking each plan checkbox in the same commit as
+              its code, commits + pushes incrementally
+            → about to get cut for context/perf? pushes a wip: checkpoint
+              commit instead of losing the work
+@reviewer   → reviews against plan (max 3 cycles), runs stack-specific
+              verification skills depending what the diff touches
+              (dotnet-verification / clean-architecture-boundary-check /
+              nuxt-verification)
   ↺ if findings: @developer fixes → @reviewer re-reviews
 @docs       → updates docs/Roadmap + RepoStructure, deletes plan file
 @git        → creates PR: task/<slug> → feat/<milestone>
@@ -101,6 +114,8 @@ Orchestrator runs autonomously:
 ```
 
 You only get interrupted if 3 review cycles exhaust without LGTM, or an agent hits a hard error.
+
+**Something broke badly mid-task?** `@git` → "drop this branch" → branch deleted (local + remote), plan file untouched. Rerun the same `/orchestrator` call later — developer rebuilds the branch fresh off the feat branch's current tip.
 
 ---
 
@@ -129,12 +144,14 @@ You only get interrupted if 3 review cycles exhaust without LGTM, or an agent hi
 
 for each task:
   /orchestrator
-    → @developer implements
-    ↺ @reviewer until LGTM (max 3)
+    → @developer resolves branch (resume or fresh off latest feat branch),
+                  implements, ticks plan checkboxes live, wip-checkpoints on cutoff
+    ↺ @reviewer until LGTM (max 3) — runs stack-specific checks on touched code
     → @docs updates + deletes plan file
     → @git creates PR
   ← [YOU: merge PR on GitHub]
   → @git "PR merged" → cleanup
+  ⚠ broke badly mid-task? @git "drop this branch" → rerun /orchestrator, fresh start
 
 when all tasks done:
   → @git creates milestone PR
@@ -186,7 +203,9 @@ Submit PR feat/<milestone> to main
 
 ---
 
-## Docs structure (all projects)
+## Docs structure (fallback default)
+
+`@docs` checks the project's own `AGENTS.md`/`CLAUDE.md` and existing `docs/` layout first — hydra-forge, for example, uses `scope.md`/`functional-spec.md`/`architecture.md`/`data-model.md`, not this scheme. The numbered layout below only applies when a project has no established convention of its own.
 
 ```
 docs/
@@ -209,11 +228,24 @@ All agents use cloud providers. No local runtime required.
 
 | Agent | Model | Why |
 |-------|-------|-----|
-| planner, brainstorm, architect | `openai/gpt-5.5` | spec + plan creation, needs full reasoning |
-| orchestrator, developer, reviewer, docs, git, builder | `minimax-coding-plan/MiniMax-M2.7` | execution, instruction-following |
-| opencode default | `openai/gpt-5.5` | general sessions |
+| brainstorm, architect | `openrouter/deepseek/deepseek-v4-pro` (OpenRouter) | spec + plan creation, needs full reasoning — errors here cascade into every downstream task |
+| planner, orchestrator, developer, reviewer, docs, git, builder | `minimax-coding-plan/MiniMax-M2.7` (subscription) | delegation + execution, instruction-following — high volume, push it onto subscription quota, not paid tokens |
+| opencode default | `openrouter/deepseek/deepseek-v4-pro` (OpenRouter) | general sessions |
 
-> **Historical note:** `qwen3-coder:latest` (Ollama/local) was the previous developer model — worked well for code generation, dropped in favour of cloud-only setup.
+> **Historical note:** `qwen3-coder:latest` (Ollama/local) was the previous developer model — worked well for code generation, dropped in favour of cloud-only setup. `openai/gpt-5.5` was the previous reasoning-tier model — dropped when access lapsed, replaced by `openrouter/deepseek/deepseek-v4-pro` via OpenRouter. `planner` moved off the reasoning tier — it's pure delegation/gate-keeping, same role as `orchestrator`, no reasoning of its own to pay premium for.
+
+### Fallback models (manual)
+
+opencode has no native model-fallback field (`AgentConfig.model` is a single string — confirmed against `https://opencode.ai/config.json` schema). If MiniMax subscription quota runs out or MiniMax infra is down, flip the affected agent's `model:` line by hand:
+
+| Tier | Model | Covers |
+|------|-------|--------|
+| 1 | `openrouter/minimax/minimax-m2.7` | Subscription quota exhausted — same model, same behavior, just billed through OpenRouter instead. Zero prompt-tuning drift. |
+| 2 | `openrouter/deepseek/deepseek-v3.2` | MiniMax infra itself down — tier 1 doesn't help here since it's still MiniMax's backend underneath OpenRouter's billing. Different provider, cheap, strong instruction-following. |
+
+Revert to `minimax-coding-plan/MiniMax-M2.7` once quota/infra recovers — tiers above are paid-per-token, not subscription.
+
+**Automatic fallback exists via community plugin, not installed here:** `opencode-fallback` (youngbinkim0/opencode-fallback) and `opencode-rate-limit-fallback` (liamvinberg/opencode-rate-limit-fallback) both add chain-on-failure switching since opencode core doesn't (open feature request: anomalyco/opencode#8687). Either would let the table above run automatically instead of by hand. Not added to `opencode.json` — third-party code running with full session access is worth reading before trusting; review the actual source first if picking one up later.
 
 ---
 
@@ -235,14 +267,15 @@ Loaded automatically on startup. Verify with `cat ~/.local/share/opencode/log/<l
 ## Per-machine setup
 
 1. Run `bash ~/dotfiles/bootstrap.sh`
-2. Connect providers via `/connect` inside opencode — set API keys for OpenAI and MiniMax/ZEN
+2. Connect providers via `/connect` inside opencode — set API keys for OpenRouter and MiniMax/ZEN
+3. Model ids route through models.dev's catalog, not a model's own provider docs — if a model picked in `/models` doesn't behave as expected, verify the exact `provider/model` key at `https://models.dev/api.json` rather than guessing from a docs page (new models often show in `/models` before the provider's own docs catch up).
 
 ### Current provider config
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "openai/gpt-5.5",
+  "model": "openrouter/deepseek/deepseek-v4-pro",
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
     "opencode-vibeguard@git+https://github.com/inkdust2021/opencode-vibeguard",

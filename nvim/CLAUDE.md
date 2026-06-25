@@ -54,9 +54,15 @@ lua/custom/
 | `python` | `servers` | `pyright` | `ruff_fix`, `ruff_format` | — |
 | `node` | `servers` | `ts_ls`, `eslint` | `prettier` | — |
 | `react` | `servers` | `ts_ls`, `eslint` | `prettier` | — |
-| `vue` | `lsp_setup` | `ts_ls`, `vue_ls` | `prettier` | — |
+| `vue` | `lsp_setup` | `ts_ls`, `vue_ls` | `eslint_d` (+ `prettier` if project depends on it) | — |
 | `dotnet` | none (roslyn.nvim auto-attaches on `ft=cs`) | roslyn | `csharpier` | roslyn.nvim, nvim-dap + dapui + dap-virtual-text, neotest + neotest-dotnet |
 | `rest` | none | — | — | kulala.nvim (`ft=http`), buffer-local `<leader>R*` keymaps via FileType autocmd + first-buf guard |
+
+**Vue formatter detection (`lua/custom/profiles/_shared.lua`):** `js_formatters(bufnr)` checks
+the nearest `package.json` for a `prettier` dependency. If present: `{ prettier, eslint_d }`
+(prettier formats first, eslint_d's fixes land last so they aren't undone). If absent: `{ eslint_d }`
+alone — covers projects whose ESLint config (e.g. Nuxt's `@nuxt/eslint` with `stylistic: true`)
+owns formatting instead of prettier, where running both fights forever.
 
 **Vue hybrid mode:** `ts_ls` + `vue_ls` run together. `@vue/typescript-plugin` is registered
 in `ts_ls.init_options` (location = Mason's volar package). `ts_ls.filetypes` is extended to

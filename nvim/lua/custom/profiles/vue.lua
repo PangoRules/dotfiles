@@ -6,6 +6,7 @@ return {
     'vue-language-server',        -- volar
     'typescript-language-server', -- ts_ls
     'eslint-lsp',
+    'eslint_d',                   -- conform formatter: applies eslint autofixes on save
     'prettier',
     'tailwindcss-language-server',
   },
@@ -53,10 +54,13 @@ return {
     return { 'ts_ls', 'vue_ls', 'eslint', 'tailwindcss' }
   end,
 
+  -- js/ts/vue: prettier only runs if the project actually depends on it; otherwise
+  -- eslint_d alone owns formatting (e.g. Nuxt projects using @nuxt/eslint's stylistic
+  -- rules instead of prettier — running both fights forever, see _shared.lua).
   formatters = {
-    javascript = { 'prettier' },
-    typescript = { 'prettier' },
-    vue        = { 'prettier' },
+    javascript = require('custom.profiles._shared').js_formatters,
+    typescript = require('custom.profiles._shared').js_formatters,
+    vue        = require('custom.profiles._shared').js_formatters,
     json       = { 'prettier' },
     css        = { 'prettier' },
   },

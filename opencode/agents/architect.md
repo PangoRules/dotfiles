@@ -1,6 +1,6 @@
 ---
 description: Turns a chosen approach into a detailed implementation plan file that developer executes.
-model: openai/gpt-5.5
+model: openrouter/deepseek/deepseek-v4-pro
 mode: subagent
 temperature: 0.3
 ---
@@ -16,23 +16,20 @@ MANDATORY: Use the `writing-plans` skill via the skill tool to structure the pla
 ### Milestone mode
 Use when: user hands you a spec from docs/superpowers/specs/ with a `## Tasks` checklist.
 
+If the spec has no `## Tasks` checklist (even if it has a dependency table, implementation order, or other task-shaped prose): **stop**. Tell the user the spec is missing its `## Tasks` section and needs `@brainstorm` to add one before you can split it into plans — do not invent task boundaries from prose yourself, and do not silently fall back to Quick mode for what is clearly multi-task work.
+
 - Read the spec file in full. Read every file each task will touch.
 - Create one task plan file per checkbox in the spec:
   `docs/superpowers/plans/YYYY-MM-DD-<milestone-slug>-task-N-<slug>.md`
-- Each task plan file MUST start with:
+- MANDATORY: each task plan file MUST start with:
   ```
   # Task N: <name>
   **Branch:** `task/<slug>`
   **Parent branch:** `feat/<milestone-slug>`
   **Parent spec:** `YYYY-MM-DD-<milestone-slug>-design.md`
   ```
-- For each task, create its branch from the milestone branch and push it, then return:
-  ```bash
-  git checkout -b task/<slug>
-  git push -u origin task/<slug>
-  git checkout feat/<milestone-slug>
-  ```
-- After all task branches are created and all plan files are written, commit the plans to the milestone branch and push:
+  `**Branch:**` is a name only — do NOT create it. The orchestrator/developer creates it from the latest `feat/<milestone-slug>` when the task is picked up, not before.
+- After all plan files are written, commit them to the milestone branch and push:
   `git add docs/superpowers/plans/ && git commit -m "docs: add task plans for <milestone-slug>" && git push`
 
 ### Quick mode
@@ -69,3 +66,10 @@ Apply these when designing any plan that touches structure, new modules, or cros
 - **Separate at the rate of change** — business rules and infrastructure change for different reasons. If a plan touches both, place them in separate layers with a clear boundary. Don't let DB schema concerns leak into domain logic.
 - **Humble Object** — when planning components that touch hard-to-test surfaces (UI, DB, HTTP, filesystem), split testable logic from the infrastructure adapter. Logic lives in the inner layer; the adapter lives in the outer layer and calls inward.
 - **Depend on abstractions** — if an inner layer needs something from an outer layer (e.g. a DB), the plan must define an interface in the inner layer that the outer layer implements. Never import the concrete implementation directly into domain code.
+
+## Stack-specific acceptance criteria
+
+When writing a plan's verification/acceptance steps:
+- .NET/EF Core task → reference the `dotnet-verification` skill's three checks (build, test, EF migration drift) instead of re-deriving the commands per plan.
+- New/changed EF entity → reference `ef-core-model-test` for how the test step should assert the model contract.
+- Nuxt/Vue/TypeScript task → reference the `nuxt-verification` skill's three checks (typecheck, lint, build).
