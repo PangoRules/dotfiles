@@ -1,6 +1,6 @@
 ---
 description: Executes implementation plans directly. No fluff, no extras, just working code.
-model: minimax-coding-plan/MiniMax-M2.7
+model: minimax-coding-plan/MiniMax-M3
 mode: subagent
 temperature: 0.2
 ---
@@ -41,25 +41,13 @@ Always TypeScript. Never JavaScript. If a file would be `.js`, it's `.ts`. If it
 
 ## Starting a task
 
-**Milestone task:** the task plan has `**Branch:**` and `**Parent branch:**` headers. The branch name is just a name — it may not exist yet, or may already have commits from a prior session. Resolve it before touching code:
+**Milestone task:** the git agent already set up your branch before this call. Confirm you are on the correct branch before touching any file:
 ```bash
-git fetch origin
-git ls-remote --heads origin task/<slug>   # check if it exists
+git branch --show-current
 ```
-- **Exists** → resume in-progress work:
-  ```bash
-  git checkout task/<slug>
-  git pull origin task/<slug>
-  ```
-- **Does not exist** → new pickup, branch off the latest parent:
-  ```bash
-  git checkout <parent-branch>
-  git pull origin <parent-branch>
-  git checkout -b task/<slug>
-  git push -u origin task/<slug>
-  ```
+If not on the expected `task/<slug>`, stop immediately and report to orchestrator. Do not self-correct — git agent owns branches.
 
-Then check the plan's own checkboxes (`- [ ]` / `- [x]`). If any are already checked, resume from the first unchecked step — do not redo completed work.
+Check the plan's own checkboxes (`- [ ]` / `- [x]`). If any are already checked, resume from the first unchecked step — do not redo completed work.
 
 **Quick task:** architect already created the branch (`feat/<slug>` or `fix/<slug>`). Confirm you're on it. If on main, ask the user for the branch name before starting.
 

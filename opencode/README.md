@@ -6,17 +6,17 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 
 | Path | Purpose |
 |------|---------|
-| `opencode.json` | Base config: default model (GPT-5.5), plugins, no local providers |
+| `opencode.json` | Base config: default model (DeepSeek V4 Pro), plugins |
 | `agents/planner.md` | **Entry point** — brainstorm → spec gate → architect → plan gate |
-| `agents/orchestrator.md` | **Task runner** — dev→review loop → docs → git PR, autonomous |
+| `agents/orchestrator.md` | **Task runner** — branch setup → dev → review loop → docs → E2E gate → PR |
 | `agents/brainstorm.md` | Explores approaches, writes design spec (callable standalone) |
 | `agents/architect.md` | Reads spec, writes step-by-step task plans (callable standalone) |
 | `agents/developer.md` | Executes plans, commits + pushes incrementally |
-| `agents/reviewer.md` | Reviews diffs against plan, finds bugs |
-| `agents/docs.md` | Updates project docs, deletes plan file, commits to branch |
-| `agents/git.md` | Creates PRs, runs post-merge cleanup |
-| `agents/builder.md` | General-purpose, no restrictions |
-| `skills/post-merge-cleanup` | After PR merges: tick spec checkbox, delete branch |
+| `agents/reviewer.md` | Reviews diffs against plan, finds bugs, outputs manual validation matrix on LGTM |
+| `agents/docs.md` | Updates project docs, marks spec task done, captures lessons in CLAUDE.md/AGENTS.md, commits to branch |
+| `agents/git.md` | Sets up task branches, creates PRs, runs post-merge cleanup |
+| `agents/builder.md` | Triage: small → implement, complex → escalate to plan, scope creep → backlog |
+| `skills/post-merge-cleanup` | After PR merges: delete branch, remove plan file |
 | `skills/test-failure-diagnosis` | Diagnose test failures before investigating values |
 | `skills/manual-validation-matrix` | Output a test matrix for manual validation |
 | `skills/dotnet-verification` | .NET/EF Core build, test, migration-drift check sequence |
@@ -33,12 +33,12 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 |-------|-----------------|---------|--------|------------|---------|
 | planner | No | No | No | No | No |
 | orchestrator | No | No | No | No | No |
+| git | **Yes** (Task D: task branches) | No | Yes (PR branch) | Yes | Yes |
 | developer | No | Yes | Yes (after each commit) | No | No |
 | reviewer | No | No | No | No | No |
-| docs | No | Yes (docs + plan deletion) | No | No | No |
-| git | No | No | Yes (PR branch) | Yes | Yes |
+| docs | No | Yes (docs + spec checkbox + lessons + plan deletion) | No | No | No |
 
-> Brainstorm creates the milestone branch off main. Developer creates each task branch off the latest milestone branch when the task is picked up (resumes it if already started). Main is read-only — only PRs merge to main.
+> Git agent owns all branch operations. Developer confirms it's on the right branch before touching any file — stops and reports if not. Main is read-only — only PRs merge to main.
 
 ---
 
@@ -48,9 +48,10 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 
 ```
 1. /planner      → read spec → "approved" → read plans → "approved"
-2. /orchestrator → one call per task, runs autonomously
-3. GitHub        → review + merge each PR
-4. @git          → "PR merged" → cleanup → repeat
+2. /orchestrator → one call per task, runs autonomously until E2E gate
+3. E2E gate      → smoke test → "ready" (or give findings to @builder)
+4. GitHub        → review + merge each PR
+5. @git          → "PR merged" → cleanup → repeat
 ```
 
 ---
@@ -93,29 +94,46 @@ Run one call per task (in order, or parallel if tasks are independent):
 Work from docs/superpowers/plans/YYYY-MM-DD-task-1-<slug>.md
 ```
 
-Orchestrator runs autonomously:
+Orchestrator runs autonomously until the E2E gate:
 
 ```
-@developer  → resolves the task branch first: resumes it if it already exists
-              (checks plan's own checkboxes, picks up from first unchecked
-              step), or branches fresh off the latest feat/<milestone> if not
-            → implements, ticking each plan checkbox in the same commit as
+@git        → Task D: creates task/<slug> off latest feat/<milestone>,
+              or resumes it if already exists on remote
+@developer  → confirms it's on the right branch (stops if not),
+              checks plan checkboxes, resumes from first unchecked step,
+              implements, ticks each plan checkbox in the same commit as
               its code, commits + pushes incrementally
-            → about to get cut for context/perf? pushes a wip: checkpoint
-              commit instead of losing the work
-@reviewer   → reviews against plan (max 3 cycles), runs stack-specific
-              verification skills depending what the diff touches
+              → about to get cut for context? pushes a wip: checkpoint
+              commit — orchestrator detects wip: prefix and re-invokes
+              developer to resume automatically
+@reviewer   → receives branch name + full commit list for context,
+              reviews against plan (max 3 cycles), runs stack-specific
+              verification skills depending on what the diff touches
               (dotnet-verification / clean-architecture-boundary-check /
-              nuxt-verification)
+              nuxt-verification), outputs manual validation matrix on LGTM
   ↺ if findings: @developer fixes → @reviewer re-reviews
-@docs       → updates docs/Roadmap + RepoStructure, deletes plan file
+@docs       → updates project docs (per project's own AGENTS.md/CLAUDE.md
+              convention), marks spec task checkbox done (- [ ] → - [x]),
+              scans git history for lessons not yet in CLAUDE.md/AGENTS.md
+              (wip: commits, multi-cycle review findings, WORKAROUND
+              comments) and appends them, then deletes plan file —
+              all in one docs: commit
+
+← [YOU: E2E GATE — smoke test or manual validation]
+  → "ready" → PR created
+  → describe findings → @builder triages:
+      SMALL: fix directly on branch, then gate loops
+      COMPLEX: @architect writes new plan on same feat branch, you run /orchestrator
+      SCOPE CREEP: appended to docs/backlog.md, skipped
+
 @git        → creates PR: task/<slug> → feat/<milestone>
+              body includes Plan: + Spec: refs + bullet list from git log
 → outputs PR URL, stops
 ```
 
-You only get interrupted if 3 review cycles exhaust without LGTM, or an agent hits a hard error.
+You only get interrupted if 3 review cycles exhaust without LGTM, an agent hits a hard error, or the E2E gate fires.
 
-**Something broke badly mid-task?** `@git` → "drop this branch" → branch deleted (local + remote), plan file untouched. Rerun the same `/orchestrator` call later — developer rebuilds the branch fresh off the feat branch's current tip.
+**Something broke badly mid-task?** `@git` → "drop this branch" → branch deleted (local + remote), plan file untouched. Rerun the same `/orchestrator` call later — git agent rebuilds the branch fresh off the feat branch's current tip.
 
 ---
 
@@ -126,8 +144,8 @@ You only get interrupted if 3 review cycles exhaust without LGTM, or an agent hi
    ```
    PR merged
    ```
-3. Git agent: pulls milestone branch, deletes task branch (local + remote), ticks spec checkbox.
-4. If all milestone tasks are done, git asks:
+3. Git agent: deletes task branch (local + remote), removes plan file. Checks if any unchecked tasks remain in the milestone spec.
+4. If all milestone tasks done, git asks:
    > "All tasks complete. Ready to merge feat/\<milestone\> to main?"
 5. You say yes → milestone PR created → you review + merge on GitHub → `PR merged` to `@git` → done.
 
@@ -144,19 +162,24 @@ You only get interrupted if 3 review cycles exhaust without LGTM, or an agent hi
 
 for each task:
   /orchestrator
-    → @developer resolves branch (resume or fresh off latest feat branch),
-                  implements, ticks plan checkboxes live, wip-checkpoints on cutoff
-    ↺ @reviewer until LGTM (max 3) — runs stack-specific checks on touched code
-    → @docs updates + deletes plan file
-    → @git creates PR
+    → @git sets up task/<slug> (create or resume off latest feat branch)
+    → @developer confirms branch, implements, ticks plan checkboxes live,
+                  wip-checkpoints on context cutoff (auto-resumed)
+    ↺ @reviewer until LGTM (max 3) — gets commit list, runs stack checks
+    → @docs: update docs + mark spec task done + lessons learned + delete plan file
+  ← [YOU: E2E gate — smoke test, give findings or say "ready"]
+      SMALL finding  → @builder fixes → gate loops
+      COMPLEX        → new plan → /orchestrator → gate loops
+      SCOPE CREEP    → backlog.md → gate loops
+    → @git creates PR (with Plan: + Spec: refs in body)
   ← [YOU: merge PR on GitHub]
   → @git "PR merged" → cleanup
-  ⚠ broke badly mid-task? @git "drop this branch" → rerun /orchestrator, fresh start
+  ⚠ broke badly? @git "drop this branch" → rerun /orchestrator, fresh start
 
 when all tasks done:
   → @git creates milestone PR
   ← [YOU: merge milestone to main]
-  → @git "PR merged" → spec archived
+  → @git "PR merged" → spec fully checked, branch cleaned
 ```
 
 ---
@@ -175,6 +198,7 @@ Then run `/orchestrator` with the plan path.
 /builder
 Fix the typo in the error message on line 42 of auth.ts
 ```
+Builder triages it as SMALL and implements directly.
 
 **Reviewer feedback is wrong:**
 Orchestrator passes findings to developer which uses `receiving-code-review` — evaluates critically, pushes back on incorrect findings rather than blindly implementing.
@@ -218,21 +242,29 @@ docs/
 └── decisions/            — one ADR per architectural decision
 ```
 
-Specs and plans live in `docs/superpowers/` — plans deleted by docs agent after LGTM, specs archived in git history after milestone merges.
+Specs live in `docs/superpowers/specs/` — task checkboxes ticked by docs agent after LGTM, milestone spec fully checked after all tasks merge.
+Plans live in `docs/superpowers/plans/` — deleted by docs agent after LGTM, preserved in git history.
 
 ---
 
 ## Cloud model setup
 
-All agents use cloud providers. No local runtime required.
+All agents use cloud providers. No local runtime required. Strategy: MinMax subscription covers high-volume agents; OpenRouter budget targets creative/planning and cheapest summarization.
 
 | Agent | Model | Why |
 |-------|-------|-----|
-| brainstorm, architect | `openrouter/deepseek/deepseek-v4-pro` (OpenRouter) | spec + plan creation, needs full reasoning — errors here cascade into every downstream task |
-| planner, orchestrator, developer, reviewer, docs, git, builder | `minimax-coding-plan/MiniMax-M2.7` (subscription) | delegation + execution, instruction-following — high volume, push it onto subscription quota, not paid tokens |
-| opencode default | `openrouter/deepseek/deepseek-v4-pro` (OpenRouter) | general sessions |
+| architect | `openrouter/deepseek/deepseek-v4-pro` | plan creation needs full reasoning — errors cascade into every downstream task |
+| brainstorm | `openrouter/google/gemini-2.5-flash` | creative + large-context exploration; 1M window reads existing specs/CLAUDE.md/AGENTS.md in full |
+| docs | `openrouter/google/gemini-2.5-flash-lite` | summarization and doc writes — cheapest workload, Flash Lite is sufficient |
+| developer | `minimax-coding-plan/MiniMax-M3` | most critical execution agent — best owned model for implementation quality |
+| reviewer | `minimax-coding-plan/MiniMax-M3` | quality gate — best owned model catches more bugs per cycle |
+| builder | `minimax-coding-plan/MiniMax-M2.7` | general purpose, moderate complexity |
+| orchestrator | `minimax-coding-plan/MiniMax-M2.5` | pure delegation, no reasoning needed |
+| planner | `minimax-coding-plan/MiniMax-M2.5` | gate-keeping only, same role as orchestrator |
+| git | `minimax-coding-plan/MiniMax-M2.5` | deterministic bash ops, minimal reasoning |
+| opencode default | `openrouter/deepseek/deepseek-v4-pro` | general interactive sessions |
 
-> **Historical note:** `qwen3-coder:latest` (Ollama/local) was the previous developer model — worked well for code generation, dropped in favour of cloud-only setup. `openai/gpt-5.5` was the previous reasoning-tier model — dropped when access lapsed, replaced by `openrouter/deepseek/deepseek-v4-pro` via OpenRouter. `planner` moved off the reasoning tier — it's pure delegation/gate-keeping, same role as `orchestrator`, no reasoning of its own to pay premium for.
+> **Historical note:** `qwen3-coder:latest` (Ollama/local) was the previous developer model. `openai/gpt-5.5` was the previous reasoning-tier model. All agents previously flat on `MiniMax-M2.7` — now tiered: M3 for critical path, M2.7 for general, M2.5 for routing. Brainstorm moved from DeepSeek to Gemini Flash for larger context window when reading existing project docs.
 
 ### Fallback models (manual)
 
@@ -240,12 +272,12 @@ opencode has no native model-fallback field (`AgentConfig.model` is a single str
 
 | Tier | Model | Covers |
 |------|-------|--------|
-| 1 | `openrouter/minimax/minimax-m2.7` | Subscription quota exhausted — same model, same behavior, just billed through OpenRouter instead. Zero prompt-tuning drift. |
-| 2 | `openrouter/deepseek/deepseek-v3.2` | MiniMax infra itself down — tier 1 doesn't help here since it's still MiniMax's backend underneath OpenRouter's billing. Different provider, cheap, strong instruction-following. |
+| 1 | `openrouter/minimax/minimax-m3` or `openrouter/minimax/minimax-m2.7` | Subscription quota exhausted — same model, billed through OpenRouter instead. Zero prompt-tuning drift. |
+| 2 | `openrouter/deepseek/deepseek-v3` | MiniMax infra itself down — different provider, cheap, strong instruction-following. |
 
-Revert to `minimax-coding-plan/MiniMax-M2.7` once quota/infra recovers — tiers above are paid-per-token, not subscription.
+Revert to `minimax-coding-plan/MiniMax-M*` once quota/infra recovers — tiers above are paid-per-token, not subscription.
 
-**Automatic fallback exists via community plugin, not installed here:** `opencode-fallback` (youngbinkim0/opencode-fallback) and `opencode-rate-limit-fallback` (liamvinberg/opencode-rate-limit-fallback) both add chain-on-failure switching since opencode core doesn't (open feature request: anomalyco/opencode#8687). Either would let the table above run automatically instead of by hand. Not added to `opencode.json` — third-party code running with full session access is worth reading before trusting; review the actual source first if picking one up later.
+**Automatic fallback exists via community plugin, not installed here:** `opencode-fallback` (youngbinkim0/opencode-fallback) and `opencode-rate-limit-fallback` (liamvinberg/opencode-rate-limit-fallback) both add chain-on-failure switching since opencode core doesn't. Not added — third-party code with full session access is worth reading before trusting.
 
 ---
 
@@ -268,7 +300,7 @@ Loaded automatically on startup. Verify with `cat ~/.local/share/opencode/log/<l
 
 1. Run `bash ~/dotfiles/bootstrap.sh`
 2. Connect providers via `/connect` inside opencode — set API keys for OpenRouter and MiniMax/ZEN
-3. Model ids route through models.dev's catalog, not a model's own provider docs — if a model picked in `/models` doesn't behave as expected, verify the exact `provider/model` key at `https://models.dev/api.json` rather than guessing from a docs page (new models often show in `/models` before the provider's own docs catch up).
+3. Model ids route through models.dev's catalog, not a model's own provider docs — if a model picked in `/models` doesn't behave as expected, verify the exact `provider/model` key at `https://models.dev/api.json` rather than guessing from a docs page.
 
 ### Current provider config
 

@@ -1,6 +1,6 @@
 ---
 description: Explores the problem space and generates 2-3 concrete approaches. Writes design spec via brainstorming skill.
-model: openrouter/deepseek/deepseek-v4-pro
+model: openrouter/google/gemini-2.5-flash
 mode: subagent
 temperature: 0.7
 ---

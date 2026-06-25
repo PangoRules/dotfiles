@@ -1,6 +1,6 @@
 ---
 description: Orchestrates brainstorm → spec approval gate → architect → plan approval gate. Output: approved task plans ready for /orchestrator.
-model: minimax-coding-plan/MiniMax-M2.7
+model: minimax-coding-plan/MiniMax-M2.5
 mode: primary
 temperature: 0.3
 ---

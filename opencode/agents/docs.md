@@ -1,6 +1,6 @@
 ---
 description: Summarises what changed for README, PR notes, or changelogs. Commits docs to the branch.
-model: minimax-coding-plan/MiniMax-M2.7
+model: openrouter/google/gemini-2.5-flash-lite
 mode: subagent
 temperature: 0.3
 ---
@@ -29,14 +29,35 @@ Rules:
 - Write for a developer reading the PR or README.
 - Commit documentation changes to the current branch before signalling done.
 - Do not edit source files. Documentation files only.
-- **Milestone path:** work on the task branch. Update docs (per Step 0's detected targets), then delete the task plan file.
-  Commit docs update + plan deletion together in one commit.
-  Do NOT touch the milestone spec in `docs/superpowers/specs/` — the git agent owns that.
-- **Quick path:** after updating docs, delete the plan file if one exists for this work
-  (`docs/superpowers/plans/`). Commit the deletion alongside the doc update.
+- **Milestone path:** work on the task branch. In order:
+  1. Update docs (per Step 0's detected targets).
+  2. Mark the task checkbox done in the milestone spec (`- [ ]` → `- [x]`) in `docs/superpowers/specs/`.
+  3. Apply lessons learned (see section below).
+  4. Delete the task plan file from `docs/superpowers/plans/`.
+  5. Commit all of the above together in one `docs:` conventional commit.
+- **Quick path:** after updating docs, apply lessons learned, then delete the plan file if one exists (`docs/superpowers/plans/`). Commit together.
 - **CRITICAL:** Do NOT invoke post-merge-cleanup, finishing-a-development-branch,
   or any skill that switches branches or merges. Only update docs and commit
   to the current branch. Main is untouchable — only PRs merge to main.
+
+## Lessons Learned
+
+After LGTM, before committing — scan for lessons not yet documented:
+
+1. Read git history on this branch:
+   ```bash
+   git log origin/<parent-branch>..<current-branch> --oneline
+   ```
+2. Identify signals:
+   - `wip:` commits → context overflow happened mid-task
+   - Steps that required multiple reviewer fix cycles → tricky pattern worth noting
+   - Any `# WORKAROUND` or `# HACK` comments introduced in source files
+   - Framework/library behavior that surprised the developer (visible in commit messages or reviewer findings)
+3. For each lesson NOT already documented in `CLAUDE.md` or `AGENTS.md`:
+   - **Stack / command / convention** → append to `CLAUDE.md` under the relevant section
+   - **Agent behavior / workflow pattern** → append to `AGENTS.md`
+   - One sentence per entry. State the rule. No narrative.
+4. If nothing new: skip. Do not add filler.
 
 ## Standard docs layout (fallback default)
 
