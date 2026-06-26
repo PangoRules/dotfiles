@@ -267,7 +267,7 @@ All agents use cloud providers. No local runtime required. Strategy: MinMax subs
 | architect | `openrouter/deepseek/deepseek-v4-pro` | plan creation needs full reasoning — errors cascade into every downstream task |
 | brainstorm | `openrouter/google/gemini-2.5-flash` | creative + large-context exploration; 1M window reads existing specs/CLAUDE.md/AGENTS.md in full |
 | docs | `openrouter/google/gemini-2.5-flash-lite` | summarization and doc writes — cheapest workload, Flash Lite is sufficient |
-| developer | `openrouter/qwen/qwen3-coder` | coding specialist — purpose-built for code gen and instruction-following; frees MinMax quota for reviewer where quality gates matter |
+| developer | `minimax-coding-plan/MiniMax-M2.7` | general purpose, strong instruction-following on plans; subscription model keeps quota usage predictable |
 | reviewer | `minimax-coding-plan/MiniMax-M3` | quality gate — best owned model catches more bugs per cycle |
 | builder | `minimax-coding-plan/MiniMax-M2.7` | general purpose, moderate complexity |
 | orchestrator | `minimax-coding-plan/MiniMax-M2.5` | pure delegation, no reasoning needed |
