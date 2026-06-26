@@ -261,7 +261,7 @@ All agents use cloud providers. No local runtime required. Strategy: MinMax subs
 | architect | `openrouter/deepseek/deepseek-v4-pro` | plan creation needs full reasoning — errors cascade into every downstream task |
 | brainstorm | `openrouter/google/gemini-2.5-flash` | creative + large-context exploration; 1M window reads existing specs/CLAUDE.md/AGENTS.md in full |
 | docs | `openrouter/google/gemini-2.5-flash-lite` | summarization and doc writes — cheapest workload, Flash Lite is sufficient |
-| developer | `minimax-coding-plan/MiniMax-M3` | most critical execution agent — best owned model for implementation quality |
+| developer | `openrouter/qwen/qwen3-coder` | coding specialist — purpose-built for code gen and instruction-following; frees MinMax quota for reviewer where quality gates matter |
 | reviewer | `minimax-coding-plan/MiniMax-M3` | quality gate — best owned model catches more bugs per cycle |
 | builder | `minimax-coding-plan/MiniMax-M2.7` | general purpose, moderate complexity |
 | orchestrator | `minimax-coding-plan/MiniMax-M2.5` | pure delegation, no reasoning needed |
@@ -269,7 +269,7 @@ All agents use cloud providers. No local runtime required. Strategy: MinMax subs
 | git | `minimax-coding-plan/MiniMax-M2.5` | deterministic bash ops, minimal reasoning |
 | opencode default | `openrouter/deepseek/deepseek-v4-pro` | general interactive sessions |
 
-> **Historical note:** `qwen3-coder:latest` (Ollama/local) was the previous developer model. `openai/gpt-5.5` was the previous reasoning-tier model. All agents previously flat on `MiniMax-M2.7` — now tiered: M3 for critical path, M2.7 for general, M2.5 for routing. Brainstorm moved from DeepSeek to Gemini Flash for larger context window when reading existing project docs.
+> **Historical note:** `qwen3-coder:latest` (Ollama/local) was the original developer model — dropped for cloud-only setup, now back as `openrouter/qwen/qwen3-coder` (same model, OR-hosted). `openai/gpt-5.5` was the previous reasoning-tier model. All agents previously flat on `MiniMax-M2.7` — now tiered: M3 for reviewer quality gate, Qwen3 Coder for developer (coding specialist, cheap OR), M2.7 for general, M2.5 for routing. Brainstorm moved from DeepSeek to Gemini Flash for larger context window when reading existing project docs.
 
 ### Fallback models (manual)
 
