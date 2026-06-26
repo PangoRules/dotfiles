@@ -61,21 +61,42 @@ After LGTM, before committing — scan for lessons not yet documented:
 
 ## Standard docs layout (fallback default)
 
-Use this only when Step 0 found no established convention for the project. Prefer
-updating an existing file over creating a new one. Create a new file only when a
-genuinely new section is needed.
+Use this only when Step 0 found no established convention. Prefer updating an existing
+file over creating a new one. Create a new file only when a genuinely new section is needed.
 
 ```
 docs/
-├── 00-Overview.md        — project purpose, goals, non-goals
-├── 01-Architecture.md    — system design, layers, key boundaries
-├── 02-DataModel.md       — entity definitions, relationships
-├── 03-RepoStructure.md   — folder layout, entry points, API reference
-├── 04-Setup.md           — local dev setup, env vars, prerequisites
-├── 05-Roadmap.md         — milestones, current state, what's next
-└── decisions/            — one ADR per architectural decision
+├── scope.md              — vision, personas, goals, non-goals, explicit out-of-scope
+├── functional-spec.md    — FRs, NFRs, phase/milestone checklists (LIVE — update this each task)
+├── architecture.md       — system design, layers, key boundaries, patterns, constraints
+├── data-model.md         — entity definitions, relationships, enums (authoritative source)
+├── glossary.md           — terminology and domain concepts (one term per line, alphabetical)
+├── DECISIONS.md          — ADRs inline: D-1, D-2, D-3... one per architectural decision
+├── backlog.md            — uncommitted ideas and scope-creep items surfaced during dev
+├── specs/                — milestone design specs (brainstorm writes these)
+└── plans/                — task plans (architect writes, docs agent deletes after LGTM)
 ```
 
-Write to `decisions/` when the change introduces a new architectural pattern, replaces
-an existing system, or makes a cross-cutting choice.
-Use kebab-case filenames: `YYYY-MM-DD-<decision-slug>.md`.
+### File intents — match by purpose, not by name
+
+| Intent | File |
+|--------|------|
+| Mark a milestone task done | `functional-spec.md` → find phase checklist, tick the item |
+| Record an architectural decision | `DECISIONS.md` → append `## D-N: <title>` with context and rationale |
+| Document a new entity or field | `data-model.md` → add to the relevant entity table |
+| Add a domain term | `glossary.md` → alphabetical entry |
+| Park an idea for later | `backlog.md` → one bullet with source context |
+| Update system design | `architecture.md` → find the relevant section and update in place |
+
+### DECISIONS.md format
+
+```markdown
+## D-N: <short title>
+
+**Date:** YYYY-MM-DD
+**Context:** <why this decision was needed>
+**Decision:** <what was decided>
+**Consequences:** <what this enables or constrains going forward>
+```
+
+Write a decision entry when: a new architectural pattern is introduced, an existing system is replaced, a cross-cutting constraint is added, or a tradeoff was made that a future developer would question without context.

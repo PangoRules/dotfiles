@@ -234,21 +234,22 @@ Submit PR feat/<milestone> to main
 
 ## Docs structure (fallback default)
 
-`@docs` checks the project's own `AGENTS.md`/`CLAUDE.md` and existing `docs/` layout first — hydra-forge, for example, uses `scope.md`/`functional-spec.md`/`architecture.md`/`data-model.md`, not this scheme. The numbered layout below only applies when a project has no established convention of its own.
+`@docs` checks the project's own `AGENTS.md`/`CLAUDE.md` and existing `docs/` layout first. The layout below is the default for new projects — `@brainstorm` scaffolds it automatically when `docs/` is missing.
 
 ```
 docs/
-├── 00-Overview.md        — project purpose, goals, non-goals
-├── 01-Architecture.md    — system design, layers, key boundaries
-├── 02-DataModel.md       — entity definitions, relationships
-├── 03-RepoStructure.md   — folder layout, entry points, API reference
-├── 04-Setup.md           — local dev setup, env vars, prerequisites
-├── 05-Roadmap.md         — milestones, current state, what's next
-└── decisions/            — one ADR per architectural decision
+├── scope.md              — vision, personas, goals, non-goals, explicit out-of-scope
+├── functional-spec.md    — FRs, NFRs, phase/milestone checklists (LIVE)
+├── architecture.md       — system design, layers, key boundaries, patterns
+├── data-model.md         — entity definitions, relationships, enums (authoritative)
+├── glossary.md           — terminology and domain concepts
+├── DECISIONS.md          — ADRs inline: D-1, D-2, D-3... one per architectural decision
+├── backlog.md            — uncommitted ideas, scope-creep items surfaced during dev
+├── specs/                — milestone design specs (brainstorm writes, permanent)
+└── plans/                — task plans (architect writes, deleted after LGTM)
 ```
 
-Specs live in `docs/specs/` — task checkboxes ticked by docs agent after LGTM, milestone spec fully checked after all tasks merge.
-Plans live in `docs/plans/` — deleted by docs agent after LGTM, preserved in git history.
+**Starting a new project?** Run `/planner` as normal — `@brainstorm` detects the empty `docs/` folder, scaffolds the structure, populates `scope.md` and `functional-spec.md` from the first spec, and commits everything in one shot before the spec approval gate.
 
 ---
 
