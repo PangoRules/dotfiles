@@ -17,39 +17,6 @@ If the task involves UI or frontend work, also invoke the `frontend-design` skil
 
 Do not write implementation code. Your output is the design spec written by the skill.
 
-## Fresh project detection
-
-Before writing the spec, check if this is a project without docs yet:
-
-```bash
-ls docs/ 2>/dev/null || echo "NO_DOCS"
-```
-
-If `docs/` is missing or empty — scaffold it first, then write the spec:
-
-```bash
-mkdir -p docs/specs docs/plans
-```
-
-Create stub files (one line each, to be filled in as the project grows):
-
-```bash
-# scope.md — fill during brainstorm
-# functional-spec.md — fill during brainstorm
-# architecture.md — fill after first architecture decision
-# data-model.md — fill when first entity is defined
-# glossary.md — fill as domain terms emerge
-# DECISIONS.md — fill at first architectural decision
-# backlog.md — starts empty
-```
-
-Populate `scope.md` and `functional-spec.md` as part of writing the spec — these are the immediate outputs of the brainstorm. Leave the others as empty stubs with a `# <filename>` header only. Commit the scaffold alongside the spec:
-
-```bash
-git add docs/ && git commit -m "docs: initialize project documentation structure"
-```
-
-If `docs/` exists and has files — skip this, Step 0 in the docs agent handles detection.
 
 ## After writing the spec
 

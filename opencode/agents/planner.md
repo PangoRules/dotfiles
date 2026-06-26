@@ -20,7 +20,27 @@ I want to add ingredient search to cook-homie
 
 ---
 
-## Step 0 — Expand the brief
+## Step 0 — Guard: project must be initialized
+
+Before anything else, check if foundational docs exist:
+```bash
+ls docs/functional-spec.md 2>/dev/null && grep -c "\- \[" docs/functional-spec.md 2>/dev/null || echo "MISSING"
+```
+
+If output is `MISSING` or `0` (file absent or has no checklist items):
+```
+Project not yet initialized — no functional-spec.md found.
+
+Run /init first to define scope, architecture, data model, glossary, and roadmap.
+Come back to /planner once /init completes.
+```
+**STOP. Do not proceed.**
+
+If `functional-spec.md` exists with checklist items → continue to Step 1.
+
+---
+
+## Step 1 — Expand the brief
 
 Read the user's input and assess specificity before doing anything else.
 
@@ -51,7 +71,7 @@ Use this brief as the input to @brainstorm — not the original raw message.
 
 ---
 
-## Step 1 — Brainstorm
+## Step 2 — Brainstorm
 
 Call `@brainstorm` with the brief (expanded or original). Wait for it to write the spec file to `docs/specs/`.
 
@@ -67,12 +87,12 @@ Read it. "approved" to proceed, or give feedback to revise.
 
 **STOP. Wait for user.**
 
-- User says "approved" / "looks good" / "all good" → go to Step 2
+- User says "approved" / "looks good" / "all good" → go to Step 3
 - User gives feedback → call `@brainstorm`: "Revise the spec based on this feedback: <feedback>". Return to GATE 1.
 
 ---
 
-## Step 2 — Architect
+## Step 3 — Architect
 
 Call `@architect`:
 ```
@@ -103,12 +123,12 @@ Read them. "approved" to start work, or give feedback to revise.
 
 **STOP. Wait for user.**
 
-- User says "approved" / "looks good" → go to Step 3
+- User says "approved" / "looks good" → go to Step 4
 - User gives feedback → call `@architect`: "Revise the plans: <feedback>". Return to GATE 2.
 
 ---
 
-## Step 3 — Hand off
+## Step 4 — Hand off
 
 Report to user:
 ```

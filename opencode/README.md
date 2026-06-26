@@ -7,7 +7,8 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 | Path | Purpose |
 |------|---------|
 | `opencode.json` | Base config: default model (DeepSeek V4 Pro), plugins |
-| `agents/planner.md` | **Entry point** — brainstorm → spec gate → architect → plan gate |
+| `agents/init.md` | **Project definition** — scope → architecture → data model → glossary → functional-spec, one gate each |
+| `agents/planner.md` | **Feature planning** — brief expansion → brainstorm → spec gate → architect → plan gate |
 | `agents/orchestrator.md` | **Task runner** — branch setup → dev → review loop → docs → E2E gate → PR |
 | `agents/brainstorm.md` | Explores approaches, writes design spec (callable standalone) |
 | `agents/architect.md` | Reads spec, writes step-by-step task plans (callable standalone) |
@@ -52,6 +53,7 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 ### Your only touchpoints
 
 ```
+0. /init         → new project only: scope → arch → data model → glossary → roadmap
 1. /planner      → read spec → "approved" → read plans → "approved"
 2. /orchestrator → one call per task, runs autonomously until E2E gate
 3. E2E gate      → smoke test → "ready" (or give findings to @builder)
@@ -249,7 +251,7 @@ docs/
 └── plans/                — task plans (architect writes, deleted after LGTM)
 ```
 
-**Starting a new project?** Run `/planner` as normal — `@brainstorm` detects the empty `docs/` folder, scaffolds the structure, populates `scope.md` and `functional-spec.md` from the first spec, and commits everything in one shot before the spec approval gate.
+**Starting a new project?** Run `/init` first — works through scope, architecture, data model, glossary, and functional-spec one gate at a time. Each doc is drafted inline, revised until approved, then committed. When `/init` finishes, `functional-spec.md` is your roadmap and `/planner` takes over for individual features. `/planner` will hard-stop and redirect to `/init` if `functional-spec.md` is missing.
 
 ---
 
