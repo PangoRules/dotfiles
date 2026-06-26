@@ -33,9 +33,10 @@ Rules:
   1. Update docs (per Step 0's detected targets).
   2. Mark the task checkbox done in the milestone spec (`- [ ]` → `- [x]`) in `docs/specs/`.
   3. Apply lessons learned (see section below).
-  4. Delete the task plan file from `docs/plans/`.
-  5. Commit all of the above together in one `docs:` conventional commit.
-- **Quick path:** after updating docs, apply lessons learned, then delete the plan file if one exists (`docs/plans/`). Commit together.
+  4. Merge per-plan matrix into spec matrix (see section below).
+  5. Delete the task plan file from `docs/plans/`.
+  6. Commit all of the above together in one `docs:` conventional commit.
+- **Quick path:** after updating docs, apply lessons learned, merge matrix if it exists, then delete the plan file. Commit together.
 - **CRITICAL:** Do NOT invoke post-merge-cleanup, finishing-a-development-branch,
   or any skill that switches branches or merges. Only update docs and commit
   to the current branch. Main is untouchable — only PRs merge to main.
@@ -59,6 +60,52 @@ After LGTM, before committing — scan for lessons not yet documented:
    - One sentence per entry. State the rule. No narrative.
 4. If nothing new: skip. Do not add filler.
 
+## Spec Archiving
+
+After marking the spec task checkbox done, check if the spec's milestone is fully complete:
+
+```bash
+grep -c "^- \[ \]" docs/specs/<spec-slug>.md
+```
+
+If output is `0` (no unchecked tasks remain in the spec's `## Tasks` section):
+- Move the spec to `docs/archive/specs/` (create folder if missing):
+  ```bash
+  mkdir -p docs/archive/specs
+  git mv docs/specs/<spec-slug>.md docs/archive/specs/<spec-slug>.md
+  ```
+- Also move the spec's consolidated matrix if it exists:
+  ```bash
+  git mv docs/manual-validation/<spec-slug>-matrix.md docs/archive/specs/<spec-slug>-matrix.md 2>/dev/null || true
+  ```
+- All-in-one commit with the plan deletion and matrix merge below.
+
+If unchecked tasks remain: leave the spec in `docs/specs/`. Skip.
+
+---
+
+## Test Matrix Consolidation
+
+Per-plan matrices are ephemeral — once the E2E gate passes, their coverage gets absorbed into the spec-level matrix that lives as long as the feature does.
+
+After applying lessons learned:
+
+1. Derive plan slug from the plan filename (e.g. `2026-06-23-phase-3-plan-4-card-modal-panels`).
+2. Check if `docs/manual-validation/<plan-slug>-matrix.md` exists.
+3. If it does:
+   - Derive spec slug from the spec filename linked in the plan's header (e.g. `2026-06-23-phase-3-web-ui`).
+   - If `docs/manual-validation/<spec-slug>-matrix.md` does not exist, create it with:
+     ```markdown
+     # E2E Regression Matrix — <spec title>
+     ```
+   - Append the per-plan matrix content under a `## <plan title>` section heading.
+   - Delete `docs/manual-validation/<plan-slug>-matrix.md`.
+4. If no matrix file exists (reviewer skipped or plan predates the convention): skip silently.
+
+The spec matrix accumulates all task coverage. It becomes the full regression suite for the milestone.
+
+---
+
 ## Standard docs layout (fallback default)
 
 Use this only when Step 0 found no established convention. Prefer updating an existing
@@ -73,8 +120,11 @@ docs/
 ├── glossary.md           — terminology and domain concepts (one term per line, alphabetical)
 ├── DECISIONS.md          — ADRs inline: D-1, D-2, D-3... one per architectural decision
 ├── backlog.md            — uncommitted ideas and scope-creep items surfaced during dev
-├── specs/                — milestone design specs (brainstorm writes these)
-└── plans/                — task plans (architect writes, docs agent deletes after LGTM)
+├── specs/                — active milestone specs (moved to archive/ when all tasks done)
+├── plans/                — task plans (architect writes, docs agent deletes after LGTM)
+├── manual-validation/    — per-spec E2E matrices (docs agent consolidates; per-plan files deleted, spec matrix moves to archive/ with spec)
+└── archive/
+    └── specs/            — completed specs + their final test matrices (permanent record)
 ```
 
 ### File intents — match by purpose, not by name

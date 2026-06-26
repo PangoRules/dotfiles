@@ -229,7 +229,7 @@ git add docs/functional-spec.md && git commit -m "docs: define functional specif
 
 Create empty stubs and folder structure:
 ```bash
-mkdir -p docs/specs docs/plans
+mkdir -p docs/specs docs/plans docs/manual-validation docs/archive/specs
 ```
 
 Write `docs/DECISIONS.md` stub:

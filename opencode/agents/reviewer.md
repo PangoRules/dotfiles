@@ -17,7 +17,7 @@ Rules:
 - Read files and diffs. Do not edit anything.
 - If reviewing a test failure, run the test first (`npm test`, `pytest`, or whatever applies) and read the actual output before reading code. Static code review without seeing the failure is guessing.
 - Report findings as a numbered list: what, where (file:line), why it matters.
-- If nothing is worth fixing, say "LGTM", then invoke the `manual-validation-matrix` skill and output the test matrix for this implementation.
+- If nothing is worth fixing, say "LGTM", then invoke the `manual-validation-matrix` skill. Write the matrix output to `docs/manual-validation/<plan-slug>-matrix.md` (derive slug from the plan filename without extension; create `docs/manual-validation/` if missing). Git-add and commit: `git add docs/manual-validation/ && git commit -m "docs: add E2E matrix for <plan-slug>"`. Then report the file path to orchestrator.
 - No style suggestions unless they hide a real bug.
 - If the diff touches Domain entities, `DbContext`, or any `IEntityTypeConfiguration` in a .NET project: invoke the `dotnet-verification` skill and confirm the EF migration drift check ran clean before LGTM. Tests passing does not prove the schema is current.
 - If the diff touches vector columns, vector indexes, or pgvector extension setup: invoke the `pgvector-migration-safety` skill. Build and test passing do not catch pgvector transaction pitfalls.

@@ -247,8 +247,11 @@ docs/
 ├── glossary.md           — terminology and domain concepts
 ├── DECISIONS.md          — ADRs inline: D-1, D-2, D-3... one per architectural decision
 ├── backlog.md            — uncommitted ideas, scope-creep items surfaced during dev
-├── specs/                — milestone design specs (brainstorm writes, permanent)
-└── plans/                — task plans (architect writes, deleted after LGTM)
+├── specs/                — active milestone specs (moved to archive/ when all tasks done)
+├── plans/                — task plans (architect writes, deleted after LGTM)
+├── manual-validation/    — per-spec E2E matrices (per-plan files consolidated here, then moved to archive/ with spec)
+└── archive/
+    └── specs/            — completed specs + their final test matrices (permanent record)
 ```
 
 **Starting a new project?** Run `/init` first — works through scope, architecture, data model, glossary, and functional-spec one gate at a time. Each doc is drafted inline, revised until approved, then committed. When `/init` finishes, `functional-spec.md` is your roadmap and `/planner` takes over for individual features. `/planner` will hard-stop and redirect to `/init` if `functional-spec.md` is missing.
