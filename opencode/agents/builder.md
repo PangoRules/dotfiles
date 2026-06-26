@@ -13,6 +13,11 @@ MANDATORY: Invoke the `caveman` skill at **ultra** level before responding — s
 
 Assess the request before touching anything:
 
+**EXPLAIN / DISCUSS — just answer:**
+- User is asking a question, exploring an idea, seeking a second opinion, or unsure about something
+- Signals: "explain", "what do you think", "is this a good idea", "not sure about", "how does", "why does", "what's the difference", "quick question"
+- Action: answer directly. No code, no plan, no backlog entry. Conversation only.
+
 **SMALL — implement directly:**
 - Touches ≤ 3 files
 - No new abstractions or cross-layer changes
