@@ -34,9 +34,9 @@ Rules:
   2. Mark the task checkbox done in the milestone spec (`- [ ]` → `- [x]`) in `docs/specs/`.
   3. Apply lessons learned (see section below).
   4. Merge per-plan matrix into spec matrix (see section below).
-  5. Delete the task plan file from `docs/plans/`.
-  6. Commit all of the above together in one `docs:` conventional commit.
-- **Quick path:** after updating docs, apply lessons learned, merge matrix if it exists, then delete the plan file. Commit together.
+  5. Commit all of the above together in one `docs:` conventional commit.
+  **Do NOT delete the plan file.** The orchestrator E2E gate fires after this step — the plan is still needed for reference. Git agent deletes the plan during PR creation.
+- **Quick path:** after updating docs, apply lessons learned, merge matrix if it exists. Commit together. Do NOT delete the plan file.
 - **CRITICAL:** Do NOT invoke post-merge-cleanup, finishing-a-development-branch,
   or any skill that switches branches or merges. Only update docs and commit
   to the current branch. Main is untouchable — only PRs merge to main.
@@ -121,7 +121,7 @@ docs/
 ├── DECISIONS.md          — ADRs inline: D-1, D-2, D-3... one per architectural decision
 ├── backlog.md            — uncommitted ideas and scope-creep items surfaced during dev
 ├── specs/                — active milestone specs (moved to archive/ when all tasks done)
-├── plans/                — task plans (architect writes, docs agent deletes after LGTM)
+├── plans/                — task plans (architect writes, git agent deletes when PR is created)
 ├── manual-validation/    — per-spec E2E matrices (docs agent consolidates; per-plan files deleted, spec matrix moves to archive/ with spec)
 └── archive/
     └── specs/            — completed specs + their final test matrices (permanent record)

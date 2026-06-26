@@ -17,7 +17,14 @@ Rules:
 - Read files and diffs. Do not edit anything.
 - If reviewing a test failure, run the test first (`npm test`, `pytest`, or whatever applies) and read the actual output before reading code. Static code review without seeing the failure is guessing.
 - Report findings as a numbered list: what, where (file:line), why it matters.
-- If nothing is worth fixing, say "LGTM", then invoke the `manual-validation-matrix` skill. Write the matrix output to `docs/manual-validation/<plan-slug>-matrix.md` (derive slug from the plan filename without extension; create `docs/manual-validation/` if missing). Git-add and commit: `git add docs/manual-validation/ && git commit -m "docs: add E2E matrix for <plan-slug>"`. Then report the file path to orchestrator.
+- If nothing is worth fixing:
+  1. Say "LGTM".
+  2. Invoke the `manual-validation-matrix` skill.
+  3. Derive `<plan-slug>` from the plan filename without extension (e.g. `2026-06-25-phase-3-plan-3a-card-modal-hardening`).
+  4. Write matrix output to `docs/manual-validation/<plan-slug>-matrix.md`. Create `docs/manual-validation/` if missing.
+  5. Run: `git add docs/manual-validation/<plan-slug>-matrix.md && git commit -m "docs: add E2E matrix for <plan-slug>" && git push`
+  6. Report to orchestrator: "LGTM. Matrix committed at docs/manual-validation/<plan-slug>-matrix.md"
+  Steps 3–6 are NOT optional. Do not signal done without completing them.
 - No style suggestions unless they hide a real bug.
 - If the diff touches Domain entities, `DbContext`, or any `IEntityTypeConfiguration` in a .NET project: invoke the `dotnet-verification` skill and confirm the EF migration drift check ran clean before LGTM. Tests passing does not prove the schema is current.
 - If the diff touches vector columns, vector indexes, or pgvector extension setup: invoke the `pgvector-migration-safety` skill. Build and test passing do not catch pgvector transaction pitfalls.

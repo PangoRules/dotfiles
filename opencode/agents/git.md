@@ -94,8 +94,13 @@ Triggered when orchestrator passes "Submit PR <source> to <target>. Plan: <plan-
    gh auth status
    ```
    If not authenticated: stop and report. Do not proceed.
-8. Push source to remote: `git push -u origin <source>`.
-9. Create the PR:
+8. Delete the plan file if it still exists (plan survives until PR — gate reference):
+   ```bash
+   git rm <plan-file-path> 2>/dev/null && git commit -m "chore: delete plan <plan-slug> after E2E gate" && git push || true
+   ```
+   If the file is already gone (docs agent deleted it early): skip silently.
+9. Push source to remote: `git push -u origin <source>`.
+10. Create the PR:
    ```bash
    gh pr create --base <target> --head <source> \
      --title "<conventional title>" \

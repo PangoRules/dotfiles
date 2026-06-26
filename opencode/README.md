@@ -270,9 +270,9 @@ All agents use cloud providers. No local runtime required. Strategy: MinMax subs
 | developer | `minimax-coding-plan/MiniMax-M2.7` | general purpose, strong instruction-following on plans; subscription model keeps quota usage predictable |
 | reviewer | `minimax-coding-plan/MiniMax-M3` | quality gate — best owned model catches more bugs per cycle |
 | builder | `minimax-coding-plan/MiniMax-M2.7` | general purpose, moderate complexity |
-| orchestrator | `minimax-coding-plan/MiniMax-M2.5` | pure delegation, no reasoning needed |
-| planner | `minimax-coding-plan/MiniMax-M2.5` | gate-keeping only, same role as orchestrator |
-| git | `minimax-coding-plan/MiniMax-M2.5` | deterministic bash ops, minimal reasoning |
+| orchestrator | `openrouter/deepseek/deepseek-v4-flash` | holds hard E2E gate — needs reliable instruction following; M2.5 skipped the gate in practice |
+| planner | `minimax-coding-plan/MiniMax-M2.5` | gate-keeping only, simpler gates than orchestrator |
+| git | `minimax-coding-plan/MiniMax-M2.5` | deterministic bash ops, no gates to hold |
 | opencode default | `openrouter/deepseek/deepseek-v4-pro` | general interactive sessions |
 
 > **Historical note:** `qwen3-coder:latest` (Ollama/local) was the original developer model — dropped for cloud-only setup, now back as `openrouter/qwen/qwen3-coder` (same model, OR-hosted). `openai/gpt-5.5` was the previous reasoning-tier model. All agents previously flat on `MiniMax-M2.7` — now tiered: M3 for reviewer quality gate, Qwen3 Coder for developer (coding specialist, cheap OR), M2.7 for general, M2.5 for routing. Brainstorm moved from DeepSeek to Gemini Flash for larger context window when reading existing project docs.

@@ -1,6 +1,6 @@
 ---
 description: Orchestrates the dev→review loop for a task plan, then fires docs and git. One command ships the task.
-model: minimax-coding-plan/MiniMax-M2.5
+model: openrouter/deepseek/deepseek-v4-flash
 mode: primary
 temperature: 0.1
 ---
@@ -111,35 +111,41 @@ Commits on this branch:
 
 Call `@docs`:
 ```
-Reviewer gave LGTM on branch <branch> (parent: <parent-branch>). Plan: <plan-file-path>. Update docs.
+Reviewer gave LGTM on branch <branch> (parent: <parent-branch>). Plan: <plan-file-path>. Update docs. Do NOT delete the plan file.
 ```
 
 Wait for docs to signal done before proceeding.
 
 ---
 
-## GATE — Manual validation
+## ⛔ GATE — Manual E2E validation ⛔
 
-Report to user:
-```
-Docs updated. Spec task marked done.
+You MUST output the block below and then STOP COMPLETELY.
+Do NOT call @git. Do NOT proceed to Step 6. Do NOT do anything else.
+The next message from the user is the ONLY thing that unblocks you.
 
-Run smoke tests / manual validation before PR is created.
-Reply "ready" to create the PR, or describe findings for @builder.
-```
+---
+E2E gate. Docs updated. Spec task marked done.
 
-**STOP. Wait for user.**
+Matrix: docs/manual-validation/<plan-slug>-matrix.md
+(If no matrix file exists, run validation manually against the plan.)
 
-- User says "ready" / "looks good" / "approved" → go to Step 6.
-- User gives findings → call `@builder`:
+Reply **"ready"** → PR created.
+Paste findings → @builder triages, then gate reopens.
+---
+
+Wait for user message.
+
+- "ready" / "looks good" / "approved" / "lgtm" → proceed to Step 6.
+- Any other message → call `@builder`:
   ```
-  <paste findings verbatim>
+  <paste user message verbatim>
 
   Current branch: <branch>
   Feat branch: <parent-branch>
   Plan: <plan-file-path>
   ```
-  After builder signals done, return to top of this gate.
+  After builder signals done, re-output the gate block above and stop again.
 
 ---
 
