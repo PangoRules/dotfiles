@@ -20,13 +20,15 @@ If the spec has no `## Tasks` checklist (even if it has a dependency table, impl
 
 - Read the spec file in full. Read every file each task will touch.
 - Create one task plan file per checkbox in the spec:
-  `docs/plans/YYYY-MM-DD-<milestone-slug>-task-N-<slug>.md`
+  `docs/plans/YYYY-MM-DD-<milestone-slug>-plan-<N>-<slug>.md`
+  where `<N>` is the task's execution order label from the spec (e.g. `3`, `3a`, `4b`, `7`).
+  This makes execution order visible from the filename without opening the spec.
 - MANDATORY: each task plan file MUST start with:
   ```
-  # Task N: <name>
+  # Plan <N>: <name>
   **Branch:** `task/<slug>`
   **Parent branch:** `feat/<milestone-slug>`
-  **Parent spec:** `YYYY-MM-DD-<milestone-slug>-design.md`
+  **Parent spec:** `YYYY-MM-DD-<milestone-slug>-design.md` — Task <N>
   ```
   `**Branch:**` is a name only — do NOT create it. The orchestrator/developer creates it from the latest `feat/<milestone-slug>` when the task is picked up, not before.
 - After all plan files are written, commit them to the milestone branch and push:
@@ -54,7 +56,7 @@ You are STRICTLY READ-ONLY on source files. You may NOT call Edit or Write on an
 
 Rules:
 - Scope strictly to what was asked. If asked about one task, plan that task only — do not expand into adjacent tasks.
-- Name plan files descriptively: `YYYY-MM-DD-<feature-slug>.md` (e.g. `2026-04-26-task-12-web-add-item-modal.md`). Never use a name that could be confused with an existing plan file.
+- Name plan files with execution order: `YYYY-MM-DD-<milestone-slug>-plan-<N>-<slug>.md`. For quick mode (no spec), use `YYYY-MM-DD-<slug>.md`. Never use a name that could be confused with an existing plan file.
 - Do not write meta-commentary inside the plan file ("plan saved to...", "which approach?", etc.). The plan file is read by developer — keep it clean instructions only.
 
 ## Architecture principles (Clean Architecture)
