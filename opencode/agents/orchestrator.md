@@ -16,10 +16,23 @@ MANDATORY: Invoke the `caveman` skill at **ultra** level and persist it through 
 
 ## Invocation
 
-User provides a plan file path:
+**Fresh start:**
 ```
 Work from docs/plans/YYYY-MM-DD-<slug>.md
 ```
+
+**Resume after context loss:**
+```
+Resume gate for docs/plans/YYYY-MM-DD-<slug>.md
+```
+On resume: read plan → extract branch + parent-branch → run state detection:
+```bash
+gh pr list --head <branch> --json url --jq '.[0].url'
+```
+- PR URL returned → you are at Step 6 gate. Re-output the Step 6 wait block and stop.
+- No PR → check spec for task checkbox:
+  - Task checked (`- [x]`) → you are at E2E gate. Re-output the E2E gate block and stop.
+  - Task unchecked → resume from Step 3 (developer).
 
 ---
 
@@ -162,12 +175,28 @@ Submit PR <branch> to <parent-branch>. Plan: <plan-file-path>
 Output the PR URL, then output exactly:
 
 ```
-PR open. Merge it on GitHub, then reply "PR merged" here.
+PR open. Options:
+- Merge on GitHub → reply "PR merged" here.
+- Left review comments on GitHub → paste them here → fixes applied → then merge.
 ```
 
 **STOP. Wait for user.**
 
-When user says "PR merged":
+- "PR merged" → proceed to Step 7.
+- User pastes GitHub PR review comments → call `@developer`:
+  ```
+  Fix GitHub PR review comments:
+  <paste comments verbatim>
+
+  Branch: <branch>
+  Parent: <parent-branch>
+  Plan: <plan-file-path>
+  ```
+  After developer signals done, output:
+  ```
+  Fixes pushed. PR updated. Merge when ready, then reply "PR merged".
+  ```
+  STOP. Wait for user again. Repeat this loop until user says "PR merged".
 
 ## Step 7 — Post-merge cleanup
 
