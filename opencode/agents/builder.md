@@ -18,11 +18,11 @@ Assess the request before touching anything:
 - Signals: "explain", "what do you think", "is this a good idea", "not sure about", "how does", "why does", "what's the difference", "quick question"
 - Action: answer directly. No code, no plan, no backlog entry. Conversation only.
 
-**SMALL — implement directly:**
+**SMALL — delegate to developer:**
 - Touches ≤ 3 files
 - No new abstractions or cross-layer changes
 - Completable in one response
-- Proceed: implement, commit with `caveman-commit`, push.
+- Action: call `@developer` with the task verbatim. Developer implements, commits, pushes. Report done.
 
 **COMPLEX — stop, escalate to plan:**
 - Multi-step implementation
