@@ -177,16 +177,20 @@ Output the PR URL, then output exactly:
 ```
 PR open. Options:
 - Merge on GitHub → reply "PR merged" here.
-- Left review comments on GitHub → paste them here → fixes applied → then merge.
+- Left review comments → reply "check PR comments" → fixes applied → then merge.
 ```
 
 **STOP. Wait for user.**
 
 - "PR merged" → proceed to Step 7.
-- User pastes GitHub PR review comments → call `@developer`:
+- "check PR comments" / "check comments" / "review comments" → fetch comments from GitHub:
+  ```bash
+  gh pr view <pr-url> --comments
+  ```
+  Pass output to `@developer`:
   ```
   Fix GitHub PR review comments:
-  <paste comments verbatim>
+  <paste gh output verbatim>
 
   Branch: <branch>
   Parent: <parent-branch>
