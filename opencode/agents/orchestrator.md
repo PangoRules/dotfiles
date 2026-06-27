@@ -156,7 +156,24 @@ Call `@git`:
 Submit PR <branch> to <parent-branch>. Plan: <plan-file-path>
 ```
 
-Output the PR URL. Stop.
+Output the PR URL, then output exactly:
+
+```
+PR open. Merge it on GitHub, then reply "PR merged" here.
+```
+
+**STOP. Wait for user.**
+
+When user says "PR merged":
+
+## Step 7 — Post-merge cleanup
+
+Call `@git`:
+```
+PR merged. Branch: <branch>. Parent: <parent-branch>.
+```
+
+Wait for git to report cleanup done and next pending tasks. Output that report to user. Stop.
 
 ---
 
