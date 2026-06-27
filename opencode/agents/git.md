@@ -129,7 +129,11 @@ Milestone specs live at `docs/specs/`.
 Task plan files live at `docs/plans/`.
 
 Invoke the `post-merge-cleanup` skill for Steps 0–4 (branch deleted, plan file removed).
-After cleanup is done, switch to the `feat/<slug>` branch and check if any `- [ ]` remain in the milestone spec at `docs/specs/`. Then:
+After cleanup, prune stale remote-tracking refs:
+```bash
+git fetch --prune
+```
+Switch to the `feat/<slug>` branch and check if any `- [ ]` remain in the milestone spec at `docs/specs/`. Then:
 - If unchecked tasks remain: report which tasks are still pending. Stop.
 - If all tasks are done: ask the user — "All milestone tasks are complete. Ready to merge feat/<milestone> to main?" Wait for confirmation before doing anything.
 
