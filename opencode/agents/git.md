@@ -129,7 +129,12 @@ Milestone specs live at `docs/specs/`.
 Task plan files live at `docs/plans/`.
 
 Invoke the `post-merge-cleanup` skill for Steps 0–4 (branch deleted, plan file removed).
-After cleanup, prune stale remote-tracking refs:
+After skill completes, push the feat branch (skill may leave unpushed commits):
+```bash
+git checkout <feat-branch>
+git push origin <feat-branch>
+```
+Then prune stale remote-tracking refs:
 ```bash
 git fetch --prune
 ```
