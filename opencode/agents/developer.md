@@ -1,6 +1,6 @@
 ---
 description: Executes implementation plans directly. No fluff, no extras, just working code.
-model: minimax-coding-plan/MiniMax-M2.7
+model: ollama/qwen3-coder:latest
 mode: subagent
 temperature: 0.2
 ---

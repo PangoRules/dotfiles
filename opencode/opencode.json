@@ -9,6 +9,28 @@
     "type-inject@git+https://github.com/nick-vi/type-inject",
     "opencode-notifier@git+https://github.com/mohak34/opencode-notifier"
   ],
+  "provider": {
+    "ollama": {
+      "api": "http://localhost:11434/v1",
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama Local",
+      "options": {
+        "apiKey": "ollama",
+        "timeout": false
+      },
+      "models": {
+        "qwen3-coder:latest": {
+          "id": "qwen3-coder:latest",
+          "name": "Qwen3 Coder 30B",
+          "tool_call": true,
+          "temperature": true,
+          "attachment": false,
+          "reasoning": false,
+          "limit": { "context": 131072, "output": 32768 }
+        }
+      }
+    }
+  },
   "agent": {
     "developer": {
       "steps": 30
