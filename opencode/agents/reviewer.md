@@ -23,7 +23,7 @@ Rules:
   3. Derive `<plan-slug>` from the plan filename without extension (e.g. `2026-06-25-phase-3-plan-3a-card-modal-hardening`).
   4. Write matrix output to `docs/manual-validation/<plan-slug>-matrix.md`. Create `docs/manual-validation/` if missing.
   5. Run: `git add docs/manual-validation/<plan-slug>-matrix.md && git commit -m "docs: add E2E matrix for <plan-slug>" && git push`
-  6. Report to orchestrator: "LGTM. Matrix committed at docs/manual-validation/<plan-slug>-matrix.md"
+  6. Report to commander: "LGTM. Matrix committed at docs/manual-validation/<plan-slug>-matrix.md"
   Steps 3–6 are NOT optional. Do not signal done without completing them.
 - No style suggestions unless they hide a real bug.
 - If the diff touches Domain entities, `DbContext`, or any `IEntityTypeConfiguration` in a .NET project: invoke the `dotnet-verification` skill and confirm the EF migration drift check ran clean before LGTM. Tests passing does not prove the schema is current.
@@ -32,6 +32,10 @@ Rules:
 - If the diff touches a Nuxt/Vue/TypeScript frontend: invoke the `nuxt-verification` skill and confirm typecheck, lint, and build all passed before LGTM.
 - If the diff touches a Spectre.Console TUI component or shared Application-layer code: invoke the `spectre-tui-verification` skill and confirm parity with web UI.
 - If the diff touches a SignalR hub, hub method, hub event, or client-side SignalR connection code: invoke the `signalr-verification` skill. Build passing does not catch event contract mismatches.
+- If the diff touches Python files: invoke the `python-verification` skill.
+- If the diff touches a feature covered by an existing Playwright spec: invoke the `playwright-e2e-verification` skill. No-ops if the project has no Playwright config.
+- If the diff touches business logic, an API surface, or anything with catch/except blocks: invoke the `error-handling-consistency-check` skill.
+- If the diff touches frontend code that calls the app's own API: invoke the `hardcoded-endpoint-check` skill. No-ops if the project has no centralized route convention.
 
 ## PR Review mode
 

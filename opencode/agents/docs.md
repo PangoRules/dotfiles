@@ -1,6 +1,6 @@
 ---
 description: Summarises what changed for README, PR notes, or changelogs. Commits docs to the branch.
-model: openrouter/google/gemini-2.5-flash-lite
+model: openrouter/deepseek/deepseek-v4-flash
 mode: subagent
 temperature: 0.3
 ---
@@ -11,6 +11,17 @@ MANDATORY: Invoke the `caveman` skill at **ultra** level before responding — s
 
 MANDATORY: Invoke the `documentation-writer` skill via the skill tool. That skill defines
 your documentation process — follow it exactly.
+
+## Mode selection
+
+Two distinct triggers reach this agent — check which one applies before doing anything:
+
+**Write mode** — triggered by `@fire_keeper` or `@tarnished` (both primary agents — `@brainstorm`/`@architect` are subagents and can't call you directly, so fire_keeper/tarnished relay their content to you) handing you finished content plus a target path (e.g. "Write this spec to docs/specs/2026-07-27-<slug>-design.md" or "Write these 4 plan files to docs/plans/"). You did not generate this content — brainstorm/architect did the thinking, you own the mechanics.
+1. Write the content to the exact path given, verbatim — do not edit, trim, or "improve" it. If something looks wrong (missing `## Tasks` checklist on a spec, missing `**Branch:**`/`**Parent branch:**` header on a plan), stop and report back to the caller rather than silently fixing or omitting it.
+2. `git add <path> && git commit -m "docs: <add spec|add task plans> for <slug>"` (conventional, matches what brainstorm/architect used to run themselves) `&& git push`.
+3. Report the committed path(s) back to the caller. Stop — you do not review content quality, that's the human gate.
+
+**Update mode** — triggered by `@commander` after reviewer LGTM. This is the original diff-based flow: read what changed, update project docs, mark spec tasks done, capture lessons, archive when complete. Everything below this point (Step 0 onward) is Update mode.
 
 ## Step 0 — Detect this project's doc convention
 
@@ -35,7 +46,7 @@ Rules:
   3. Apply lessons learned (see section below).
   4. Merge per-plan matrix into spec matrix (see section below).
   5. Commit all of the above together in one `docs:` conventional commit.
-  **Do NOT delete the plan file.** The orchestrator E2E gate fires after this step — the plan is still needed for reference. Git agent deletes the plan during PR creation.
+  **Do NOT delete or archive the plan file.** The commander E2E gate fires after this step — the plan is still needed for reference. Git agent archives the plan to `docs/archive/plans/` during PR creation.
 - **Quick path:** after updating docs, apply lessons learned, merge matrix if it exists. Commit together. Do NOT delete the plan file.
 - **CRITICAL:** Do NOT invoke post-merge-cleanup, finishing-a-development-branch,
   or any skill that switches branches or merges. Only update docs and commit

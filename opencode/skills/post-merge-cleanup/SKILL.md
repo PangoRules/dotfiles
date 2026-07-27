@@ -35,15 +35,16 @@ git commit -m "docs: mark <task-slug> complete in spec"
 git push
 ```
 
-**0c. Delete the task plan file (if docs agent hasn't already):**
+**0c. Archive the task plan file (defensive — git agent already does this at PR creation; only fires if that step somehow got skipped):**
 ```bash
 if [ -f docs/plans/<task-plan-file>.md ]; then
-  rm docs/plans/<task-plan-file>.md
-  git add docs/plans/<task-plan-file>.md
-  git commit -m "docs: remove completed task plan"
+  mkdir -p docs/archive/plans
+  git mv docs/plans/<task-plan-file>.md docs/archive/plans/<task-plan-file>.md
+  git commit -m "docs: archive completed task plan"
   git push
 fi
 ```
+Never `rm` a plan file — it's a permanent record once archived, same as `docs/archive/specs/`.
 
 **0d. Check if all tasks are done:**
 ```bash
@@ -64,15 +65,15 @@ Skip to Step 1 directly.
 
 ### Path C — Quick feature/fix branch (`feat/<slug>` or `fix/<slug>`)
 
-Find and delete the matching plan file if one exists:
+Find and archive the matching plan file if one exists (defensive — git agent already does this at PR creation):
 ```bash
 ls docs/plans/
-rm docs/plans/<matching-plan-file>.md   # if exists
-git add docs/plans/
-git commit -m "docs: remove completed plan for <slug>"
+mkdir -p docs/archive/plans
+git mv docs/plans/<matching-plan-file>.md docs/archive/plans/<matching-plan-file>.md   # if exists
+git commit -m "docs: archive completed plan for <slug>"
 git push
 ```
-If no plan file exists (task was chat-only), skip.
+If no plan file exists (task was chat-only, or git agent already archived it), skip.
 
 ---
 

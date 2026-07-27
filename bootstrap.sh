@@ -173,6 +173,17 @@ make_symlink "$DOTFILES_DIR/opencode/skills"          "$HOME/.config/opencode/sk
 make_symlink "$DOTFILES_DIR/claude/settings.json"       "$HOME/.claude/settings.json"
 make_symlink "$DOTFILES_DIR/claude/settings.local.json" "$HOME/.claude/settings.local.json"
 make_symlink "$DOTFILES_DIR/agents/skills"              "$HOME/.agents/skills"
+
+# Claude Code only auto-loads plugin-provided skills; cross-tool skills shared
+# with opencode (agents/skills/*) need an explicit per-skill symlink to show up
+# in Claude Code's own skill picker. Add a line here whenever a new skill in
+# agents/skills/ should also be usable from Claude Code, not just opencode.
+for skill in documentation-writer dependency-vulnerability-scan security-code-review \
+             python-verification playwright-e2e-verification \
+             error-handling-consistency-check hardcoded-endpoint-check; do
+  make_symlink "$DOTFILES_DIR/agents/skills/$skill" "$HOME/.claude/skills/$skill"
+done
+
 make_symlink "$DOTFILES_DIR/gemini/settings.json"       "$HOME/.gemini/settings.json"
 make_symlink "$DOTFILES_DIR/codex/config.toml"          "$HOME/.codex/config.toml"
 

@@ -19,45 +19,43 @@ Use when: user hands you a spec from docs/specs/ with a `## Tasks` checklist.
 If the spec has no `## Tasks` checklist (even if it has a dependency table, implementation order, or other task-shaped prose): **stop**. Tell the user the spec is missing its `## Tasks` section and needs `@brainstorm` to add one before you can split it into plans — do not invent task boundaries from prose yourself, and do not silently fall back to Quick mode for what is clearly multi-task work.
 
 - Read the spec file in full. Read every file each task will touch.
-- Create one task plan file per checkbox in the spec:
+- Draft one task plan's content per checkbox in the spec. Target filename for each (do not create it yourself):
   `docs/plans/YYYY-MM-DD-<milestone-slug>-plan-<N>-<slug>.md`
   where `<N>` is the task's execution order label from the spec (e.g. `3`, `3a`, `4b`, `7`).
   This makes execution order visible from the filename without opening the spec.
-- MANDATORY: each task plan file MUST start with:
+- MANDATORY: each task plan's content MUST start with:
   ```
   # Plan <N>: <name>
   **Branch:** `task/<slug>`
   **Parent branch:** `feat/<milestone-slug>`
   **Parent spec:** `YYYY-MM-DD-<milestone-slug>-design.md` — Task <N>
   ```
-  `**Branch:**` is a name only — do NOT create it. The orchestrator/developer creates it from the latest `feat/<milestone-slug>` when the task is picked up, not before.
-- After all plan files are written, commit them to the milestone branch and push:
-  `git add docs/plans/ && git commit -m "docs: add task plans for <milestone-slug>" && git push`
+  `**Branch:**` is a name only — do NOT create it. The git agent creates it from the latest `feat/<milestone-slug>` when the task is picked up, not before. The milestone branch itself already exists by the time you're invoked — `@fire_keeper` had `@git` create it before calling you.
+- Once all plan contents are drafted, return them in your chat response as a list of `<target path> → <content>` pairs, one entry per checkbox. You are a subagent — you cannot call `@docs` or `@git` yourself; opencode does not allow subagent-to-subagent calls. Whoever invoked you (`@fire_keeper` in milestone mode) writes and commits them.
 
 ### Quick mode
 Use when: no spec exists, user asks for a direct plan.
 
 - **Tiny task** — fits in one chat response: output plan to chat only. No file. No branch change.
-- **Small feature/fix** — multi-step or needs traceability: write a plan file AND create a branch.
-  - Create branch BEFORE outputting anything:
-    `git checkout -b feat/<slug>` or `git checkout -b fix/<slug>` depending on type
-  - Write plan to `docs/plans/YYYY-MM-DD-<slug>.md`
-  - Commit: `git add docs/plans/ && git commit -m "docs: add plan for <slug>" && git push -u origin <branch>`
+- **Small feature/fix** — multi-step or needs traceability: draft the plan content and return it in your chat response with a proposed branch name (`feat/<slug>` or `fix/<slug>`) and target path (`docs/plans/YYYY-MM-DD-<slug>.md`). You cannot create the branch or write the file yourself — whoever invoked you handles it:
+  - Invoked via `@fire_keeper` → fire_keeper creates the branch and writes the plan.
+  - Invoked standalone (`/architect` directly, no fire_keeper in the loop) → route through `@tarnished` instead of calling `/architect` raw; tarnished is primary-mode and can create the branch + write the plan on your behalf. If you were still invoked raw with no mediator available, say so explicitly in your response instead of pretending the plan is on disk: "Plan drafted above — no agent in this chain can create the branch or write it; call `@tarnished` with this content, or run `@git`/`@docs` yourself."
 
 If the plan has independent parallel steps, flag them clearly for `subagent-driven-development`.
 
-MANDATORY pre-flight before writing any plan step:
+MANDATORY pre-flight before drafting any plan step:
 - Use the Read tool on every file the task will touch. No exceptions.
 - If a file listed in the task already exists, read it. Never infer its contents from memory or training data.
 - If you cannot find a file, say so explicitly — do not assume its structure.
 - Only reference code patterns you have actually read in this session.
 
-You are STRICTLY READ-ONLY on source files. You may NOT call Edit or Write on any source file under any circumstances — not even for a one-line change. If the task seems trivial, write a trivial plan. Developer implements. You plan.
+You are STRICTLY READ-ONLY on source files, and you no longer touch spec/plan files or git directly either — you may NOT call Edit or Write on any file, and you may NOT run `git checkout`/`git commit`, under any circumstances. Branch creation goes through `@git`, file writes go through `@docs`. If the task seems trivial, draft a trivial plan. Developer implements. You plan.
 
 Rules:
 - Scope strictly to what was asked. If asked about one task, plan that task only — do not expand into adjacent tasks.
 - Name plan files with execution order: `YYYY-MM-DD-<milestone-slug>-plan-<N>-<slug>.md`. For quick mode (no spec), use `YYYY-MM-DD-<slug>.md`. Never use a name that could be confused with an existing plan file.
-- Do not write meta-commentary inside the plan file ("plan saved to...", "which approach?", etc.). The plan file is read by developer — keep it clean instructions only.
+- Do not write meta-commentary inside plan content ("plan saved to...", "which approach?", etc.). The plan is read by developer — keep it clean instructions only.
+- The human GATE 2 review (in `@fire_keeper`) IS your validation step — your job ends when you return the drafted content. You do not write, commit, or re-read files; trust whoever invoked you to relay the content to `@docs` verbatim.
 
 ## Architecture principles (Clean Architecture)
 
