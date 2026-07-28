@@ -69,6 +69,46 @@ return {
           args = { '--interpreter=vscode' },
         }
 
+        -- Glob cwd for ASP.NET entry-point DLLs: name matches project folder,
+        -- has runtimeconfig.json + appsettings.json, and is not a test project.
+        local function find_entry_dlls(cwd)
+          local dlls = {}
+          local all = vim.fn.glob(cwd .. '/**/bin/Debug/net*/*.dll', false, true)
+          for _, dll in ipairs(all) do
+            -- Extract the directory name immediately before "/bin/" — this is the
+            -- project name (e.g. ".../MyApp/bin/Debug/net8.0/MyApp.dll" → "MyApp").
+            local project = dll:match '.*/([^/]+)/bin/'
+            -- Extract the filename without the .dll extension
+            -- (e.g. ".../MyApp.dll" → "MyApp").
+            local dllname = dll:match '/([^/]+)%.dll$'
+            if project and dllname == project and not dll:match '/tests/' then
+              local dir = dll:match '(.*)/[^/]+$'
+              local has_cfg      = vim.fn.filereadable((dll:gsub('%.dll$', '.runtimeconfig.json'))) == 1
+              local has_settings = vim.fn.filereadable(dir .. '/appsettings.json') == 1
+              if has_cfg and has_settings then table.insert(dlls, dll) end
+            end
+          end
+          return dlls
+        end
+
+        -- Pick which discovered dll to launch. Prefer the project that contains the
+        -- current buffer (so F5 in Server/Program.cs launches Server even if another
+        -- project, e.g. Tui, was built more recently); otherwise fall back to newest build.
+        local function pick_entry_dll(dlls)
+          if #dlls == 0 then return nil end
+          local bufpath = vim.api.nvim_buf_get_name(0)
+          if bufpath ~= '' then
+            for _, dll in ipairs(dlls) do
+              local proj_dir = dll:match '(.*)/bin/'
+              if proj_dir and bufpath:sub(1, #proj_dir) == proj_dir then return dll end
+            end
+          end
+          if #dlls > 1 then
+            table.sort(dlls, function(a, b) return vim.fn.getftime(a) > vim.fn.getftime(b) end)
+          end
+          return dlls[1]
+        end
+
         -- C# launch config — auto-detects the project dll, falls back to prompt
         dap.configurations.cs = {
           {
@@ -77,43 +117,14 @@ return {
             request = 'launch',
             program = function()
               local cwd = vim.fn.getcwd()
-              local dlls = {}
-              local all = vim.fn.glob(cwd .. '/**/bin/Debug/net*/*.dll', false, true)
-              for _, dll in ipairs(all) do
-                -- Extract the directory name immediately before "/bin/" — this is the
-                -- project name (e.g. ".../MyApp/bin/Debug/net8.0/MyApp.dll" → "MyApp").
-                local project = dll:match '.*/([^/]+)/bin/'
-                -- Extract the filename without the .dll extension
-                -- (e.g. ".../MyApp.dll" → "MyApp").
-                local dllname = dll:match '/([^/]+)%.dll$'
-                -- Keep only ASP.NET entry-point DLLs: name matches project folder,
-                -- has runtimeconfig.json + appsettings.json, and is not a test project.
-                if project and dllname == project and not dll:match '/tests/' then
-                  local dir = dll:match '(.*)/[^/]+$'
-                  local has_cfg      = vim.fn.filereadable((dll:gsub('%.dll$', '.runtimeconfig.json'))) == 1
-                  local has_settings = vim.fn.filereadable(dir .. '/appsettings.json') == 1
-                  if has_cfg and has_settings then table.insert(dlls, dll) end
-                end
-              end
-              if #dlls == 0 then return vim.fn.input('Path to dll: ', cwd .. '/', 'file') end
-              if #dlls > 1 then
-                table.sort(dlls, function(a, b) return vim.fn.getftime(a) > vim.fn.getftime(b) end)
-              end
-              return dlls[1]
+              local dll = pick_entry_dll(find_entry_dlls(cwd))
+              if not dll then return vim.fn.input('Path to dll: ', cwd .. '/', 'file') end
+              return dll
             end,
             cwd = function()
               local root = vim.fn.getcwd()
-              local all = vim.fn.glob(root .. '/**/bin/Debug/net*/*.dll', false, true)
-              for _, dll in ipairs(all) do
-                local project = dll:match '.*/([^/]+)/bin/'
-                local dllname = dll:match '/([^/]+)%.dll$'
-                if project and dllname == project and not dll:match '/tests/' then
-                  local dir = dll:match '(.*)/[^/]+$'
-                  local has_cfg      = vim.fn.filereadable((dll:gsub('%.dll$', '.runtimeconfig.json'))) == 1
-                  local has_settings = vim.fn.filereadable(dir .. '/appsettings.json') == 1
-                  if has_cfg and has_settings then return dll:match '(.*)/bin/' end
-                end
-              end
+              local dll = pick_entry_dll(find_entry_dlls(root))
+              if dll then return dll:match '(.*)/bin/' end
               return root
             end,
             env = { ASPNETCORE_ENVIRONMENT = 'Development' },
@@ -122,7 +133,28 @@ return {
           },
         }
 
-        dapui.setup()
+        dapui.setup {
+          layouts = {
+            {
+              elements = {
+                { id = 'scopes', size = 0.25 },
+                'breakpoints',
+                'stacks',
+                'watches',
+              },
+              size = 40,
+              position = 'left',
+            },
+            {
+              elements = {
+                { id = 'repl', size = 0.75 },
+                { id = 'console', size = 0.25 },
+              },
+              size = 0.3,
+              position = 'bottom',
+            },
+          },
+        }
 
         -- When the debugger starts (event_initialized fires after the adapter is ready),
         -- automatically open the DAP UI panels so the user doesn't have to do it manually.
