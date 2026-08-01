@@ -16,4 +16,6 @@ return {
     typescript = { 'prettier' },
     json       = { 'prettier' },
   },
+
+  workspace_diagnostics = function() require('custom.profiles._shared').run_tsc_diagnostics 'tsc' end,
 }

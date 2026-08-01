@@ -1418,7 +1418,15 @@ require('lazy').setup({
   {
     'folke/trouble.nvim',
     keys = {
-      { '<leader>xx', '<Cmd>Trouble diagnostics toggle<CR>', desc = 'Trouble: diagnostics' },
+      {
+        '<leader>xx',
+        function()
+          local ok, plugins = pcall(require, 'custom.plugins')
+          if ok and plugins.refresh_workspace_diagnostics then plugins.refresh_workspace_diagnostics() end
+          vim.cmd 'Trouble diagnostics toggle'
+        end,
+        desc = 'Trouble: diagnostics (workspace)',
+      },
       { '<leader>xb', '<Cmd>Trouble diagnostics toggle filter.buf=0<CR>', desc = 'Trouble: buffer diagnostics' },
       { '<leader>xq', '<Cmd>Trouble qflist toggle<CR>', desc = 'Trouble: quickfix' },
       { '<leader>xt', '<Cmd>Trouble todo toggle<CR>', desc = 'Trouble: todos' },

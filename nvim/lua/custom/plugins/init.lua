@@ -8,6 +8,10 @@
 --   lsp_setup   = function(cap) → configure servers, return { 'server_name', ... }  (complex)
 --   formatters  = { filetype = { 'formatter' }, ... }   (conform formatters_by_ft)
 --   extra_specs = { ... }   raw Lazy plugin specs (DAP, etc.)
+--   workspace_diagnostics = function() ... end   (optional: populate project-wide
+--                 diagnostics for servers that only analyze open buffers — see
+--                 node.lua/react.lua/vue.lua. Not needed if the server has its own
+--                 full-project analysis setting, e.g. dotnet.lua's Roslyn config.)
 --
 -- Usage in .zshrc:
 --   alias nvim-vue='NVIM_PROFILE=vue,dotnet nvim'
@@ -60,6 +64,7 @@ local function build_specs(raw)
   local setups    = {}                               -- LSP setup functions, one per profile
   local formatters = {}                              -- Conform formatters_by_ft (merged)
   local extra     = {}                               -- Raw lazy.nvim specs (e.g. DAP plugins)
+  local wsdiag    = {}                               -- workspace_diagnostics fns, one per profile
 
   -- Step 1: Parse the comma-separated NVIM_PROFILE string into individual profile names.
   -- Step 2: For each name, load its file from lua/custom/profiles/<name>.lua.
@@ -84,6 +89,7 @@ local function build_specs(raw)
       end
       if p.formatters then formatters = vim.tbl_extend('force', formatters, p.formatters) end
       for _, s in ipairs(p.extra_specs or {}) do table.insert(extra, s) end
+      if p.workspace_diagnostics then table.insert(wsdiag, p.workspace_diagnostics) end
     end
   end
 
@@ -140,6 +146,15 @@ local function build_specs(raw)
   end)
 
   vim.list_extend(specs, extra)
+
+  -- Named field on the specs table (not part of its array/ipairs portion, so
+  -- lazy.nvim's `{ import = 'custom.plugins' }` ignores it) — reachable via
+  -- `require('custom.plugins').refresh_workspace_diagnostics()` from the
+  -- <leader>xx keymap in init.lua.
+  specs.refresh_workspace_diagnostics = function()
+    for _, fn in ipairs(wsdiag) do pcall(fn) end
+  end
+
   return specs
 end
 

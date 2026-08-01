@@ -19,4 +19,6 @@ return {
     json            = { 'prettier' },
     css             = { 'prettier' },
   },
+
+  workspace_diagnostics = function() require('custom.profiles._shared').run_tsc_diagnostics 'tsc' end,
 }

@@ -33,4 +33,60 @@ function M.js_formatters(bufnr)
   return { 'eslint_d' }
 end
 
+-- Project-wide diagnostics for ts_ls-family profiles.
+--
+-- ts_ls/vue_ls (unlike Roslyn) have no "analyze whole project" server setting —
+-- they only ever report diagnostics for open buffers. To get solution-wide
+-- coverage under `<leader>xx` we instead shell out to the project's own
+-- compiler binary (tsc / vue-tsc), parse its output, and attach the results
+-- to buffers via vim.diagnostic.set — Trouble picks these up like any other
+-- diagnostic source and live-refreshes as they land.
+local diag_ns = vim.api.nvim_create_namespace 'workspace_diagnostics_tsc'
+local prev_bufs = {}
+
+local function local_bin(name, cwd)
+  local path = cwd .. '/node_modules/.bin/' .. name
+  if vim.fn.executable(path) == 1 then return path end
+  return nil
+end
+
+-- `bin_name` is 'tsc' or 'vue-tsc'. Silently no-ops if the project doesn't
+-- have it installed locally (no global fallback — avoids running some
+-- unrelated globally-installed compiler against the wrong project).
+function M.run_tsc_diagnostics(bin_name)
+  local cwd = vim.fn.getcwd()
+  local bin = local_bin(bin_name, cwd)
+  if not bin then return end
+
+  vim.system({ bin, '--noEmit', '--pretty', 'false' }, { cwd = cwd, text = true }, function(result)
+    local by_file = {}
+    for line in (result.stdout or ''):gmatch '[^\r\n]+' do
+      local file, lnum, col, sev, code, msg = line:match '^(.-)%((%d+),(%d+)%): (%a+) (TS%d+): (.*)$'
+      if file then
+        local abs = vim.fn.fnamemodify(file, ':p')
+        by_file[abs] = by_file[abs] or {}
+        table.insert(by_file[abs], {
+          lnum     = tonumber(lnum) - 1,
+          col      = tonumber(col) - 1,
+          severity = sev == 'error' and vim.diagnostic.severity.ERROR or vim.diagnostic.severity.WARN,
+          message  = code .. ': ' .. msg,
+          source   = bin_name,
+        })
+      end
+    end
+
+    vim.schedule(function()
+      -- Clear last run's diagnostics first so files that got fixed don't
+      -- keep showing stale errors.
+      for _, bufnr in ipairs(prev_bufs) do vim.diagnostic.set(diag_ns, bufnr, {}) end
+      prev_bufs = {}
+      for file, diags in pairs(by_file) do
+        local bufnr = vim.fn.bufadd(file)
+        vim.diagnostic.set(diag_ns, bufnr, diags)
+        table.insert(prev_bufs, bufnr)
+      end
+    end)
+  end)
+end
+
 return M

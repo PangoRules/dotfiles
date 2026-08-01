@@ -64,4 +64,7 @@ return {
     json       = { 'prettier' },
     css        = { 'prettier' },
   },
+
+  -- vue-tsc understands .vue SFCs; plain tsc would ignore them entirely.
+  workspace_diagnostics = function() require('custom.profiles._shared').run_tsc_diagnostics 'vue-tsc' end,
 }
