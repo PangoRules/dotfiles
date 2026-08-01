@@ -15,7 +15,10 @@
       "Bash(ollama ps *)",
       "Bash(env)",
       "Bash(systemctl --user list-unit-files)",
-      "Bash(systemctl list-unit-files *)"
+      "Bash(systemctl list-unit-files *)",
+      "Bash(systemctl status *)",
+      "Bash(systemctl list-units *)",
+      "Bash(ip link *)"
     ]
   }
 }
