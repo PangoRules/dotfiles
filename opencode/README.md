@@ -12,7 +12,7 @@ Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`) ke
 |---|---|---|---|
 | **The Well** | `init` | Murakami | descent into stillness to define the world before anything's built |
 | **Fire Keeper** | `planner` | Dark Souls | tends the flame between two checkpoints, turns raw intent into the structured thing others follow |
-| **Commander** | `orchestrator` | Attack on Titan | sends the squad into the loop, holds every hard gate, doesn't flinch when 3 review cycles exhaust |
+| **Commander** | `orchestrator` | Attack on Titan | sends the squad into the loop, holds every hard gate, doesn't flinch when the review loop runs long — knows the difference between stuck and just thorough |
 | **Tarnished** | `builder` | Elden Ring | no fixed path, wanders in and does whatever the moment needs |
 | **Carter** | `security` | Lovecraft (Randolph Carter) | investigator who goes looking for what's hidden and shouldn't be |
 
@@ -26,12 +26,12 @@ Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`) ke
 | `agents/well.md` | **The Well (init)** — thin wrapper around the `project-scaffolding` skill: scope → architecture → data model → glossary → functional-spec, one gate each |
 | `agents/fire_keeper.md` | **Fire Keeper (planner)** — brief expansion → brainstorm → spec gate → architect → plan gate |
 | `agents/commander.md` | **Commander (orchestrator)** — branch setup → dev → review loop → docs → docs recheck → E2E gate → PR |
-| `agents/brainstorm.md` | Explores approaches, produces design spec content (callable standalone). Thinks only — returns content in chat, never writes files or touches git; `@fire_keeper` relays it to `@git`/`@docs` (subagents can't call other subagents in opencode) |
-| `agents/architect.md` | Reads spec, drafts step-by-step task plan content (callable standalone). Thinks only — returns content in chat; `@fire_keeper` (milestone mode) or `@tarnished` (standalone quick mode) relays it to `@git`/`@docs` |
+| `agents/brainstorm.md` | Explores approaches, writes the finished design spec itself (callable standalone). `@fire_keeper` creates the branch and hands it the target path first — brainstorm Writes, commits (`caveman-commit`), and pushes its own file; still can't call `@git`/`@docs` itself (subagents can't call other subagents in opencode) |
+| `agents/architect.md` | Reads spec, writes step-by-step task plan file(s) itself, one per task, flagged `**Test scope:** unit\|http\|e2e` (callable standalone). `@fire_keeper` (milestone mode) or `@tarnished` (standalone quick mode) creates the branch first and hands it the target path; architect Writes, commits, pushes its own file(s) |
 | `agents/developer.md` | Executes plans. Implements, ticks plan checkboxes, commits and pushes directly using the `caveman-commit` skill (can't call `@git` itself — same subagent restriction) |
-| `agents/reviewer.md` | Reviews diffs against plan, finds bugs, outputs manual validation matrix on LGTM |
-| `agents/docs.md` | Two modes: **write mode** (takes content relayed from `@fire_keeper`/`@tarnished` on brainstorm/architect's behalf, writes + commits it verbatim) and **update mode** (post-LGTM: updates project docs, marks spec task done, captures lessons in CLAUDE.md/AGENTS.md, commits to branch) |
-| `agents/git.md` | Owns branch creation (milestone/quick/task, called by `@fire_keeper`/`@tarnished`/`@commander`), PR creation + plan archiving, post-merge cleanup |
+| `agents/reviewer.md` | Captain Levi — reviews diffs against plan. Mandatory pre-LGTM checks: lint/format, new compiler warnings, CVEs on touched manifests, DRY, 75% business-logic coverage (boilerplate excluded via the language's own tag). LGTM output branches on the plan's `**Test scope:**`: `unit` = nothing more, `http` = requires a `.http` file, `e2e` = writes/extends the single spec-level regression matrix directly |
+| `agents/docs.md` | **Write mode** (dormant — general-purpose content+path writer, no current caller since brainstorm/architect write their own files now) and **update mode**, split into two commander-triggered calls: post-LGTM (docs update, mark task done, lessons learned — no archiving) and recheck-mode at Step 5.5 (drift check + archive plan + archive spec/matrix if milestone complete, all in one commit) |
+| `agents/git.md` | Owns branch creation (milestone/quick/task, called by `@fire_keeper`/`@tarnished`/`@commander`), PR creation, post-merge cleanup. Never commits to `main` without explicit confirmation; checks for lingering uncommitted work before every checkout. Plan archiving is now `@docs`'s job (Step 5.5) — git's own archive step is a defensive fallback only |
 | `agents/tarnished.md` | **Tarnished (builder)** — triage: small → implement, complex → escalate to plan, scope creep → backlog |
 | `agents/carter.md` | **Carter (security)** — read-only, finds exploitable gaps + vulnerable/outdated deps, writes a severity-ranked report with a `## Tasks` checklist, hands off to `@tarnished`/`@architect` for remediation |
 | `skills/project-scaffolding` | Gate-by-gate logic for `@well` — scope/architecture/data-model/glossary/functional-spec, folder scaffold, handoff to `@fire_keeper` |
@@ -59,21 +59,21 @@ Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`) ke
 
 ## Agent responsibilities
 
-| Agent | Creates branches | Writes spec/plan files | Commits | Pushes | Creates PR | Cleanup |
-|-------|-----------------|------------------------|---------|--------|------------|---------|
-| well (init) | No | No (via docs, through project-scaffolding skill) | No | No | No | No |
-| fire_keeper (planner) | **Mediates** (calls `@git`) | **Mediates** (calls `@docs`, relaying brainstorm/architect content) | No | No | No | No |
-| tarnished (builder) | **Mediates** (calls `@git`, standalone quick-plan only) | **Mediates** (calls `@docs`, relaying architect content) | No | No | No | No |
-| brainstorm | No — returns content to caller | No — returns content to caller | No | No | No | No |
-| architect | No — returns content to caller | No — returns content to caller | No | No | No | No |
-| commander (orchestrator) | No | No | No | No | No | No |
-| git | **Yes** (milestone/quick/task, called by fire_keeper/tarnished/commander) | No | No | Yes | Yes | Yes (incl. plan archiving) |
-| developer | No | No | **Yes** (direct, via `caveman-commit` skill) | Yes | No | No |
-| reviewer | No | No (matrix file is the one exception — not in scope of this round's cleanup) | No | No | No | No |
-| docs | No | **Yes** (write mode: content relayed to it by fire_keeper/tarnished) | Yes (both modes) | Yes (write mode) | No | No |
-| carter (security) | No | Its own report only (writes + commits directly, like well) | Yes (report only) | Yes | No | No |
+| Agent | Creates branches | Writes spec/plan files | Commits | Pushes | Creates PR | Archives | Cleanup |
+|-------|-----------------|------------------------|---------|--------|------------|----------|---------|
+| well (init) | No | No (via docs, through project-scaffolding skill) | No | No | No | No | No |
+| fire_keeper (planner) | **Mediates** (calls `@git`) | No — brainstorm/architect write their own | No | No | No | No | No |
+| tarnished (builder) | **Mediates** (calls `@git`, standalone quick-plan only) | No — architect writes its own | No | No | No | No | No |
+| brainstorm | No | **Yes** (direct, via Write + `caveman-commit`) | Yes | Yes | No | No | No |
+| architect | No | **Yes** (direct, via Write + `caveman-commit`) | Yes | Yes | No | No | No |
+| commander (orchestrator) | No | No | No | No | No | No | No |
+| git | **Yes** (milestone/quick/task, called by fire_keeper/tarnished/commander) | No | No | Yes | Yes | Defensive fallback only | Yes |
+| developer | No | No | **Yes** (direct, via `caveman-commit` skill) | Yes | No | No | No |
+| reviewer | No | No (matrix file is the one exception — writes directly on `e2e`-scoped LGTM) | Yes (matrix only) | Yes (matrix only) | No | No | No |
+| docs | No | **Yes** (write mode — dormant, no current caller) | Yes (both modes) | Yes | No | **Yes** (recheck mode, Step 5.5 — sole primary owner) | No |
+| carter (security) | No | Its own report only (writes + commits directly, like well) | Yes (report only) | Yes | No | No | No |
 
-> Git agent owns all branch operations. Docs agent owns all spec/plan file writes. Neither `brainstorm` nor `architect` nor `developer` can call another agent directly — opencode subagents can't call other subagents. `fire_keeper`/`tarnished` (primary agents) mediate on brainstorm/architect's behalf; developer falls back to committing directly via a skill instead of an agent call. Main is read-only — only PRs merge to main.
+> Git agent owns all branch operations. `@docs` owns archiving (plan + spec, both at Step 5.5 — git's own archive step is a defensive fallback for the rare case docs got skipped). Neither `brainstorm` nor `architect` nor `developer` can call another agent directly — opencode subagents can't call other subagents — but Write/commit/push on their own file is a plain tool/skill use, not an agent call, so brainstorm and architect now write their own spec/plan files instead of relaying content through `@docs`. `fire_keeper`/`tarnished` (primary agents) still mediate branch creation, since that's a real platform restriction; developer falls back to committing directly via a skill instead of an agent call, same pattern. Main is read-only — only PRs merge to main, and no agent commits directly to `main` without explicit user confirmation.
 
 ---
 
@@ -100,14 +100,14 @@ I want to add ingredient search — users type a name and get matching
 inventory items filtered by dietary restriction.
 ```
 
-Fire Keeper calls `@brainstorm` internally. Brainstorm explores the approaches, asks you whenever a design decision has more than one reasonable path (it no longer silently picks — that was a real bug), then returns the finished spec content in chat. Fire Keeper (a primary agent — brainstorm itself can't call other agents) creates the milestone branch via `@git` and writes the spec via `@docs`. Fire Keeper stops and asks:
+Fire Keeper derives a slug from your brief and creates the milestone branch via `@git` first, then calls `@brainstorm` with the target spec path. Brainstorm explores the approaches, asks you whenever a design decision has more than one reasonable path (it no longer silently picks — that was a real bug), then writes the finished spec file itself, commits, and pushes — no relay through `@docs`, which used to be where specs quietly got thinner than they should. Fire Keeper stops and asks:
 
 ```
 Spec written: docs/specs/YYYY-MM-DD-<slug>-design.md
 Read it. "approved" to proceed, or give feedback to revise.
 ```
 
-You review. Reply `approved` or give feedback. Fire Keeper then calls `@architect`, which drafts plan content and returns it; Fire Keeper writes it via `@docs` (no new branch — the milestone branch already exists). When plans are committed, Fire Keeper stops again:
+You review. Reply `approved` or give feedback. Fire Keeper then calls `@architect` with the spec path; architect drafts, writes, commits, and pushes one plan file per task itself (no new branch — the milestone branch already exists). Each plan is flagged `**Test scope:** unit | http | e2e` — decides later whether the task needs unit tests only, a `.http` file, or an entry in the E2E regression matrix. When plans are committed, Fire Keeper stops again:
 
 ```
 Plans written:
@@ -134,7 +134,8 @@ Commander runs autonomously until the E2E gate:
 
 ```
 @git        → Task D: creates task/<slug> off latest feat/<milestone>,
-              or resumes it if already exists on remote
+              or resumes it if already exists on remote (lingering
+              uncommitted work on the current branch? stops and asks first)
 @developer  → confirms it's on the right branch (stops if not),
               checks plan checkboxes, resumes from first unchecked step,
               implements, ticks each plan checkbox in the same commit as
@@ -144,22 +145,39 @@ Commander runs autonomously until the E2E gate:
               → about to get cut for context? pushes a wip: checkpoint
               commit — commander detects wip: prefix and re-invokes
               developer to resume automatically
-@reviewer   → receives branch name + full commit list for context,
-              reviews against plan (max 3 cycles), runs stack-specific
-              verification skills depending on what the diff touches
-              (dotnet-verification / clean-architecture-boundary-check /
-              nuxt-verification), outputs manual validation matrix on LGTM
+@reviewer   → Captain Levi. Receives branch name + full commit list for
+              context. No cycle cap — runs until LGTM. Mandatory every
+              cycle: lint/format, new compiler warnings (vs parent branch
+              baseline), CVE scan on any touched dependency manifest, DRY,
+              75% coverage on business logic (boilerplate excluded via
+              the language's own tag — never tested just to hit the
+              number). Plus stack-specific skills depending on what the
+              diff touches (dotnet-verification / clean-architecture-
+              boundary-check / nuxt-verification / etc). LGTM's next step
+              depends on the plan's Test scope: unit = nothing more,
+              http = requires a .http file, e2e = writes/extends the
+              single spec-level regression matrix directly
   ↺ if findings: @developer fixes → @reviewer re-reviews
+      commander watches for STUCK (same finding survives a fix cycle, or
+      the fix diff is a no-op vs its own previous attempt → stop, report
+      both cycles) and DEAD (a call to @developer/@reviewer errors or
+      returns nothing usable → stop, snapshot git status/log, report —
+      "dead" means commander stops calling it, there's no separate
+      process to kill). Every 10th cycle with no repeat/no dead-agent:
+      a soft checkpoint asks you "still finding new things, keep going?"
+      instead of silently running forever or hard-stopping
 @docs       → updates project docs (per project's own AGENTS.md/CLAUDE.md
               convention), marks spec task checkbox done (- [ ] → - [x]),
               scans git history for lessons not yet in CLAUDE.md/AGENTS.md
               (wip: commits, multi-cycle review findings, WORKAROUND
               comments) and appends them — all in one docs: commit.
-              Plan file stays in place, not archived yet.
+              Plan file stays in place, nothing archived yet.
 
 ← [YOU: E2E GATE — smoke test or manual validation]
   → "ready" → @docs rechecks (git log since its last commit — catches
-              anything the E2E/tarnished loop below changed) → PR created
+              anything the E2E/tarnished loop below changed), archives
+              the plan (always) and the spec + matrix (if the milestone's
+              last task just closed) in one commit → PR created
   → describe findings → commander can't dispatch @tarnished itself
               (primary agents can't call other primary agents — only a
               human switching sessions can), so it hands you the exact
@@ -172,12 +190,13 @@ Commander runs autonomously until the E2E gate:
 
 @git        → creates PR: task/<slug> → feat/<milestone>
               body includes Plan: + Spec: refs + bullet list from git log
-              archives the plan file to docs/archive/plans/ (never deleted —
-              permanent record, same treatment as docs/archive/specs/)
+              (plan/spec archiving already done by @docs at Step 5.5 —
+              this is a defensive re-check only, for the rare case it
+              got skipped)
 → outputs PR URL, stops
 ```
 
-You only get interrupted if 3 review cycles exhaust without LGTM, an agent hits a hard error, or the E2E gate fires.
+You get interrupted if the review loop gets stuck or an agent dies mid-cycle, every 10th cycle if it's still finding genuinely new things, an agent hits a hard error, or the E2E gate fires.
 
 **Something broke badly mid-task?** `@git` → "drop this branch" → branch deleted (local + remote), plan file untouched. Rerun the same `/commander` call later — git agent rebuilds the branch fresh off the feat branch's current tip.
 
@@ -201,27 +220,35 @@ You only get interrupted if 3 review cycles exhaust without LGTM, an agent hits 
 
 ```
 /fire_keeper
-  → @brainstorm thinks (asks when ambiguous), returns spec content
-  → fire_keeper: @git creates feat/<slug> → @docs writes spec
+  → fire_keeper: @git creates feat/<slug> off main
+  → @brainstorm thinks (asks when ambiguous), writes+commits+pushes spec itself
   ← [YOU: approve spec]
-  → @architect drafts plans, returns content → fire_keeper: @docs writes plan files
+  → @architect writes+commits+pushes plan files itself, each flagged Test scope
   ← [YOU: approve plans]
 
 for each task:
   /commander
-    → @git sets up task/<slug> (create or resume off latest feat branch)
+    → @git sets up task/<slug> (create or resume off latest feat branch;
+                  lingering uncommitted work → stops and asks first)
     → @developer confirms branch, implements, ticks plan checkboxes live,
                   commits + pushes directly via caveman-commit skill,
                   wip-checkpoints on context cutoff (auto-resumed)
-    ↺ @reviewer until LGTM (max 3) — gets commit list, runs stack checks
-    → @docs: update docs + mark spec task done + lessons learned
+    ↺ @reviewer (Captain Levi) until LGTM — no cycle cap. Every cycle:
+                  lint/format, new compiler warnings, CVEs, DRY, 75%
+                  business-logic coverage, plus stack checks. Commander
+                  watches for STUCK (repeated finding / no-progress diff)
+                  and DEAD (agent call errors/empty) → stops + reports;
+                  soft checkpoint every 10 cycles if still finding new things
+    → @docs: update docs + mark spec task done + lessons learned (no archive yet)
   ← [YOU: E2E gate — smoke test, give findings or say "ready"]
       any finding → switch to @tarnished yourself (commander can't
                     dispatch it — no primary-to-primary calls), it fixes
                     SMALL directly, escalates COMPLEX to a new plan, parks
                     SCOPE CREEP in backlog.md → you resume the gate
-    → @docs rechecks for drift since last commit
-    → @git creates PR (Plan: + Spec: refs in body) + archives plan file
+    → @docs rechecks for drift + archives plan (always) + spec/matrix
+                  (if milestone complete) — single commit, single place
+    → @git creates PR (Plan: + Spec: refs in body); archive step here is
+                  a defensive no-op, docs already did it
   ← [YOU: merge PR on GitHub]
   → @git "PR merged" → cleanup
   ⚠ broke badly? @git "drop this branch" → rerun /commander, fresh start
@@ -266,7 +293,7 @@ When git asks "all tasks complete, ready to merge milestone to main?" — say `n
 | What you found | Who |
 |----------------|-----|
 | Trivial (typo, 1-2 lines) | `/tarnished` — commits directly to milestone branch |
-| Multi-step bug or enhancement | `/tarnished` (mediates `@architect` quick plan — you're already on `feat/<milestone>` so no new branch, tarnished just relays the plan to `@docs`) → `/commander` |
+| Multi-step bug or enhancement | `/tarnished` (mediates `@architect` quick plan — you're already on `feat/<milestone>` so no new branch, architect writes its own plan file directly) → `/commander` |
 | Several things at once | `/fire_keeper` — groups them into tasks, runs commander per task |
 
 When satisfied, ship the milestone:
@@ -310,11 +337,11 @@ docs/
 ├── DECISIONS.md          — ADRs inline: D-1, D-2, D-3... one per architectural decision
 ├── backlog.md            — uncommitted ideas, scope-creep items surfaced during dev
 ├── specs/                — active milestone specs (moved to archive/ when all tasks done)
-├── plans/                — task plans (architect drafts content, fire_keeper/tarnished relay it, docs writes, git archives at PR creation — never deleted)
-├── manual-validation/    — per-spec E2E matrices (per-plan files consolidated here, then moved to archive/ with spec)
+├── plans/                — task plans (architect writes+commits+pushes directly; docs archives at Step 5.5, every task — never deleted)
+├── manual-validation/    — spec-level E2E matrices (reviewer writes/extends directly on any `e2e`-scoped task's LGTM; no per-plan files, nothing to consolidate)
 └── archive/
     ├── specs/            — completed specs + their final test matrices (permanent record)
-    └── plans/             — every plan that shipped, archived (not deleted) once its PR is created
+    └── plans/             — every plan that shipped, archived (not deleted) at Step 5.5, right before PR
 ```
 
 **Starting a new project?** Run `/well` first — it invokes the `project-scaffolding` skill, working through scope, architecture, data model, glossary, and functional-spec one gate at a time. Each doc is drafted inline, revised until approved, then committed. When `/well` finishes, `functional-spec.md` is your roadmap and `/fire_keeper` takes over for individual features, with a concrete Phase 1 `/fire_keeper` invocation handed to you directly (no re-typing what you just defined). `/fire_keeper` will hard-stop and redirect to `/well` if `functional-spec.md` is missing.
@@ -406,9 +433,11 @@ Add files to `agents/`, `skills/`, or `commands/` and commit. Available on every
 
 ## A hard platform constraint worth remembering
 
-**opencode subagents cannot call other subagents — only primary agents (`well`, `fire_keeper`, `commander`, `tarnished`, `carter`) can dispatch to `@name` agents.** This shaped the design above more than anything else:
+**opencode subagents cannot call other subagents — only primary agents (`well`, `fire_keeper`, `commander`, `tarnished`, `carter`) can dispatch to `@name` agents.** This shaped the design above more than anything else. It's a restriction on *agent-to-agent calls* specifically — not on a subagent's own tool use. Write/Edit and skill invocations (like `caveman-commit`) are plain tool use, not an agent dispatch, so a subagent can write and commit its own file without that counting as delegation:
 
-- `brainstorm` and `architect` (both `mode: subagent`) can only *think* and return content in their chat response. They can never call `@git` or `@docs` themselves, no matter how convenient that would be. `fire_keeper` (milestone mode) or `tarnished` (standalone quick mode) has to mediate every branch-creation and file-write on their behalf.
-- `developer` (also `mode: subagent`) can't call `@git` either — it commits and pushes directly, using the `caveman-commit` skill to keep messages conventional. A skill invocation is fine for a subagent (it's prompt injection, not an agent dispatch); an `@mention` call is not.
-- Any future agent added to this system needs the same check before assuming it can delegate: if it's `mode: subagent`, it can use skills freely but can only report back to whatever called it — never dispatch onward itself.
+- `brainstorm` and `architect` (both `mode: subagent`) can never call `@git` or `@docs` themselves, no matter how convenient that would be — `fire_keeper` (milestone mode) or `tarnished` (standalone quick mode) mediates branch creation. But once the branch exists and they've been handed a target path, they Write, commit (`caveman-commit`), and push their own spec/plan file directly — no relay through `@docs`. This changed from an earlier design where they returned content in chat for `@fire_keeper` to relay: that relay step was a real source of thinner, more compressed specs — being told "you're producing a draft for someone else to write" measurably encouraged the model to compress. Being told "you're writing the final file" doesn't.
+- `developer` (also `mode: subagent`) can't call `@git` either — it commits and pushes directly, using the `caveman-commit` skill to keep messages conventional. Same shape brainstorm/architect now follow.
+- `reviewer` (also `mode: subagent`) follows the same shape for exactly one file: it writes/extends the spec-level E2E matrix directly on an `e2e`-scoped task's LGTM, and commits/pushes it — everything else about its job stays read-only.
+- Any future agent added to this system needs the same check before assuming it can delegate: if it's `mode: subagent`, it can use skills and Write/Edit its own designated file freely, but can never dispatch an `@mention` call onward — only report back to whatever called it.
 - **The same restriction applies between two primary agents.** `commander` cannot dispatch `@tarnished` mid-turn either, even though both are `mode: primary` — opencode has no primary-to-primary call, only a human manually switching which agent their session is talking to. Every cross-primary handoff in this system (`commander` → `tarnished`, `carter` → `tarnished`/`architect`) follows the same shape: print the exact next command, stop completely, let the human run it. `commander`'s own "Resume gate for `<plan-file-path>`" re-entry logic exists specifically so coming back after one of these manual switches is a clean loop, not a special case.
+- **opencode itself has no native timeout/recovery on a hung subagent call** (open upstream gap, confirmed via `anomalyco/opencode` issue tracker as of Aug 2026) — `commander`'s dead-agent detection can only react to a call that *returns* something (error or empty), not a true silent hang. The community plugin `Mte90/opencode-auto-resume` targets exactly this gap ("stops working if a model goes in timeout or there are errors") — worth evaluating as a session-level safety net underneath commander's own logic, not installed here yet (same "read third-party session-access code before trusting" bar the `opencode-fallback` note above already applies).

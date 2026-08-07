@@ -82,18 +82,17 @@ Use this brief as the input to @brainstorm — not the original raw message.
 
 ## Step 2 — Brainstorm
 
-Call `@brainstorm` with the brief (expanded or original). Brainstorm thinks — it will either ask you a clarifying question mid-way (relay it to the user, wait, pass the answer back) or return finished spec content in its response, including a proposed `**Branch:** \`feat/<slug>\`` line.
+Derive a short kebab-case slug from the brief yourself (e.g. "ingredient search filtered by diet" → `ingredient-search`). Call `@git`: `Create milestone branch feat/<slug> off main.` Wait for confirmation.
 
-Once brainstorm returns content:
-1. Call `@git`: `Create milestone branch feat/<slug> off main.` Wait for confirmation.
-2. Call `@docs` (write mode): `Write this spec to docs/specs/YYYY-MM-DD-<slug>-design.md and commit "docs: add spec for <slug>":` followed by brainstorm's full spec content, verbatim — you do not edit or improve it.
-3. Wait for docs to confirm the commit.
+Call `@brainstorm` with the brief (expanded or original) and the target path: `Write the spec to docs/specs/YYYY-MM-DD-<slug>-design.md when done.` Brainstorm thinks — it will either ask you a clarifying question mid-way (relay it to the user, wait, pass the answer back) or write the spec file itself, commit, push, and report the committed path back to you. You are not relaying content — brainstorm writes and commits its own file.
+
+Wait for brainstorm to report the committed path.
 
 ---
 
 ## GATE 1 — Spec review
 
-Once docs confirms the commit, report to user:
+Once brainstorm confirms the commit, report to user:
 ```
 Spec written: docs/specs/<filename>
 Read it. "approved" to proceed, or give feedback to revise.
@@ -102,7 +101,7 @@ Read it. "approved" to proceed, or give feedback to revise.
 **STOP. Wait for user.**
 
 - User says "approved" / "looks good" / "all good" → go to Step 3
-- User gives feedback → call `@brainstorm`: "Revise the spec based on this feedback: <feedback>". When it returns revised content, call `@docs` (write mode) again to overwrite the same path, commit `docs: revise spec for <slug>`. Return to GATE 1.
+- User gives feedback → call `@brainstorm`: "Revise the spec at docs/specs/<filename> based on this feedback: <feedback>. Overwrite the file yourself, commit `docs: revise spec for <slug>`, push, report back." Wait for confirmation. Return to GATE 1.
 
 ---
 
@@ -111,10 +110,10 @@ Read it. "approved" to proceed, or give feedback to revise.
 Call `@architect`:
 ```
 Spec is at docs/specs/<spec-filename>.
-Turn this into implementation plans. One plan file per task.
+Turn this into implementation plans. One plan file per task, written to docs/plans/.
 ```
 
-Architect drafts plan content for every task and returns it as a list of `<target path> → <content>` pairs. Milestone branch already exists (Step 2) — no new branch needed. Call `@docs` (write mode) once with the full batch: `Write these task plans to docs/plans/ and commit "docs: add task plans for <milestone-slug>":` followed by every path + content pair. Wait for docs to confirm.
+Architect drafts, writes, commits, and pushes every plan file itself — milestone branch already exists (Step 2), so no new branch needed. Wait for architect to report the committed paths.
 
 ---
 
@@ -138,7 +137,7 @@ Read them. "approved" to start work, or give feedback to revise.
 **STOP. Wait for user.**
 
 - User says "approved" / "looks good" → go to Step 4
-- User gives feedback → call `@architect`: "Revise the plans: <feedback>". When it returns revised content, call `@docs` (write mode) again to write it, commit `docs: revise plans for <milestone-slug>`. Return to GATE 2.
+- User gives feedback → call `@architect`: "Revise the plans at docs/plans/ for <milestone-slug>: <feedback>. Overwrite the affected file(s) yourself, commit `docs: revise plans for <milestone-slug>`, push, report back." Return to GATE 2.
 
 ---
 

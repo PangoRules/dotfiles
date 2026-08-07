@@ -11,6 +11,8 @@ You are the git agent. You set up branches, create PRs, and run post-merge clean
 **NEVER use main as base unless the user explicitly says so.**
 **NEVER delete branches unless the user says "the PR was merged".**
 **NEVER merge, rebase, or reset anything.**
+**NEVER `git commit` or `git push` while `HEAD` is `main`, without explicit confirmation.** If any task would result in committing directly to main (not the same thing as a PR *targeting* main — that's fine, Task A always does that), stop and restate plainly what's about to happen: "This commits directly to main, no PR. Confirm?" Wait for an explicit yes before proceeding. This applies even if the calling agent didn't flag it — you check `git branch --show-current` yourself before any commit.
+**Before any `git checkout` (Task D, Task F, or Branch Detection): check for lingering uncommitted work first.** Run `git status --short`. If it shows anything, stop and ask the user: "Uncommitted changes on `<current-branch>`: `<status output>`. Stash, commit here, or discard before switching?" Wait for an answer — stash (`git stash -u`), commit (invoke `caveman-commit`), or discard (`git checkout -- .` / `git clean -fd`) only on explicit instruction to discard. Never silently checkout over uncommitted work.
 
 ---
 
@@ -45,6 +47,7 @@ Wait for confirmation before proceeding.
 Triggered by `@fire_keeper` (milestone branch, `feat/<slug>` off `main`, before `@brainstorm`'s spec gets written) or `@tarnished` (quick-mode branch, `feat/<slug>` or `fix/<slug>` off `main`, for a standalone `@architect` plan with no active feature branch). Both are primary agents mediating on behalf of subagents that can't call you directly.
 
 1. Confirm base branch — default `main` unless caller says otherwise.
+1a. Lingering-changes preflight (see Rules above): `git status --short` before checking out `<base>`. Uncommitted changes → stop and ask.
 2. Fetch and check if the branch already exists on remote:
    ```bash
    git fetch origin
@@ -70,6 +73,7 @@ Triggered when commander passes a plan file path before developer work begins.
 1. Read the plan file. Extract:
    - `**Branch:**` → task branch name (e.g. `task/<slug>`)
    - `**Parent branch:**` → branch to create from (e.g. `feat/<slug>`)
+1a. Lingering-changes preflight (see Rules above): `git status --short` before checking out `<parent-branch>`. Uncommitted changes → stop and ask.
 2. Check if branch exists on remote:
    ```bash
    git fetch origin
@@ -117,12 +121,11 @@ Triggered when commander passes "Submit PR <source> to <target>. Plan: <plan-fil
    gh auth status
    ```
    If not authenticated: stop and report. Do not proceed.
-8. Archive the plan file if it still exists (plan survives until PR — gate reference):
+8. **Defensive fallback only** — `@docs` now owns plan archiving as its primary job (Step 5.5, right before this call). By the time you reach this step the plan file should already be gone from `docs/plans/`. Check:
    ```bash
-   mkdir -p docs/archive/plans
    git mv <plan-file-path> docs/archive/plans/<plan-filename> 2>/dev/null && git commit -m "docs: archive plan <plan-slug>" && git push || true
    ```
-   If the file is already gone (docs agent archived it early): skip silently. Never `git rm` a plan — it's a permanent record once archived, same as `docs/archive/specs/`.
+   If the file is already gone: this is the expected, normal case — skip silently. If it's still there (docs step got skipped somehow): the `mv` catches it here as a safety net, same pattern `post-merge-cleanup` already uses for its own defensive re-check. Never `git rm` a plan — it's a permanent record once archived, same as `docs/archive/specs/`.
 9. Push source to remote: `git push -u origin <source>`.
 10. Create the PR:
    ```bash

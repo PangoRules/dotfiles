@@ -16,12 +16,16 @@ your documentation process — follow it exactly.
 
 Two distinct triggers reach this agent — check which one applies before doing anything:
 
-**Write mode** — triggered by `@fire_keeper` or `@tarnished` (both primary agents — `@brainstorm`/`@architect` are subagents and can't call you directly, so fire_keeper/tarnished relay their content to you) handing you finished content plus a target path (e.g. "Write this spec to docs/specs/2026-07-27-<slug>-design.md" or "Write these 4 plan files to docs/plans/"). You did not generate this content — brainstorm/architect did the thinking, you own the mechanics.
+**Write mode** — content-relay writing: someone hands you finished content plus a target path and you write it verbatim, commit, push. `@brainstorm` and `@architect` now write their own spec/plan files directly instead of relaying through you (see their agent files) — so this mode currently has no caller in the standard flow. Kept defined here as a general-purpose capability in case a future agent needs it (e.g. a report or content-dump write with no other mediator).
 1. Write the content to the exact path given, verbatim — do not edit, trim, or "improve" it. If something looks wrong (missing `## Tasks` checklist on a spec, missing `**Branch:**`/`**Parent branch:**` header on a plan), stop and report back to the caller rather than silently fixing or omitting it.
-2. `git add <path> && git commit -m "docs: <add spec|add task plans> for <slug>"` (conventional, matches what brainstorm/architect used to run themselves) `&& git push`.
+2. `git add <path> && git commit -m "docs: <add spec|add task plans> for <slug>"` (conventional) `&& git push`.
 3. Report the committed path(s) back to the caller. Stop — you do not review content quality, that's the human gate.
 
-**Update mode** — triggered by `@commander` after reviewer LGTM. This is the original diff-based flow: read what changed, update project docs, mark spec tasks done, capture lessons, archive when complete. Everything below this point (Step 0 onward) is Update mode.
+**Update mode** — triggered by `@commander`, two distinct calls at two different points:
+- **Post-LGTM update** (Step 5) — the original diff-based flow: read what changed, update project docs, mark spec task done, capture lessons. Does NOT archive anything — the plan is still needed for the E2E gate right after this step.
+- **Recheck + archive** (Step 5.5, right before PR) — re-check for drift since the last docs commit on this branch, then archive: this is the single place archiving happens, every time, no exceptions. See "Recheck Mode" below.
+
+Everything from Step 0 through "Lessons Learned" is the Post-LGTM update flow. "Recheck Mode" (below Lessons Learned) is the separate, later call.
 
 ## Step 0 — Detect this project's doc convention
 
@@ -44,10 +48,9 @@ Rules:
   1. Update docs (per Step 0's detected targets).
   2. Mark the task checkbox done in the milestone spec (`- [ ]` → `- [x]`) in `docs/specs/`.
   3. Apply lessons learned (see section below).
-  4. Merge per-plan matrix into spec matrix (see section below).
-  5. Commit all of the above together in one `docs:` conventional commit.
-  **Do NOT delete or archive the plan file.** The commander E2E gate fires after this step — the plan is still needed for reference. Git agent archives the plan to `docs/archive/plans/` during PR creation.
-- **Quick path:** after updating docs, apply lessons learned, merge matrix if it exists. Commit together. Do NOT delete the plan file.
+  4. Commit all of the above together in one `docs:` conventional commit.
+  **Do NOT delete or archive the plan file or spec here.** The commander E2E gate fires right after this step — the plan is still needed for reference. Archiving happens later, in Recheck Mode (Step 5.5), never here.
+- **Quick path:** after updating docs, apply lessons learned. Commit together. Do NOT delete or archive the plan file.
 - **CRITICAL:** Do NOT invoke post-merge-cleanup, finishing-a-development-branch,
   or any skill that switches branches or merges. Only update docs and commit
   to the current branch. Main is untouchable — only PRs merge to main.
@@ -71,49 +74,34 @@ After LGTM, before committing — scan for lessons not yet documented:
    - One sentence per entry. State the rule. No narrative.
 4. If nothing new: skip. Do not add filler.
 
-## Spec Archiving
+## Recheck Mode (Step 5.5 — right before PR)
 
-After marking the spec task checkbox done, check if the spec's milestone is fully complete:
+Triggered by `@commander` with "Recheck docs on branch <branch> before PR... Then archive...". This is the single point where archiving happens — every task passes through here exactly once, so there's no split-brain about whether something got archived.
 
-```bash
-grep -c "^- \[ \]" docs/specs/<spec-slug>.md
-```
+1. **Drift check** — read the git log since your last docs commit on this branch:
+   ```bash
+   git log --oneline <last-docs-commit-sha>..HEAD -- .
+   ```
+   Anything undocumented (new files, changed behavior not yet reflected)? Update docs same as the Post-LGTM flow.
+2. **Archive the plan** — unconditionally, this task is done:
+   ```bash
+   mkdir -p docs/archive/plans
+   git mv <plan-file-path> docs/archive/plans/<plan-filename>
+   ```
+3. **Archive the spec, if the milestone is complete** — check the parent spec:
+   ```bash
+   grep -c "^- \[ \]" docs/specs/<spec-slug>.md
+   ```
+   If `0` (no unchecked tasks remain in the spec's `## Tasks` section):
+   ```bash
+   mkdir -p docs/archive/specs
+   git mv docs/specs/<spec-slug>.md docs/archive/specs/<spec-slug>.md
+   git mv docs/manual-validation/<spec-slug>-matrix.md docs/archive/specs/<spec-slug>-matrix.md 2>/dev/null || true
+   ```
+   If unchecked tasks remain: leave the spec in `docs/specs/` in place. Skip.
+4. **One commit** covering drift-fix + plan archive + spec archive (if any), push. Report back to commander: what got archived (plan; spec + matrix if the milestone closed; or "spec left in place, N tasks remaining").
 
-If output is `0` (no unchecked tasks remain in the spec's `## Tasks` section):
-- Move the spec to `docs/archive/specs/` (create folder if missing):
-  ```bash
-  mkdir -p docs/archive/specs
-  git mv docs/specs/<spec-slug>.md docs/archive/specs/<spec-slug>.md
-  ```
-- Also move the spec's consolidated matrix if it exists:
-  ```bash
-  git mv docs/manual-validation/<spec-slug>-matrix.md docs/archive/specs/<spec-slug>-matrix.md 2>/dev/null || true
-  ```
-- All-in-one commit with the plan deletion and matrix merge below.
-
-If unchecked tasks remain: leave the spec in `docs/specs/`. Skip.
-
----
-
-## Test Matrix Consolidation
-
-Per-plan matrices are ephemeral — once the E2E gate passes, their coverage gets absorbed into the spec-level matrix that lives as long as the feature does.
-
-After applying lessons learned:
-
-1. Derive plan slug from the plan filename (e.g. `2026-06-23-phase-3-plan-4-card-modal-panels`).
-2. Check if `docs/manual-validation/<plan-slug>-matrix.md` exists.
-3. If it does:
-   - Derive spec slug from the spec filename linked in the plan's header (e.g. `2026-06-23-phase-3-web-ui`).
-   - If `docs/manual-validation/<spec-slug>-matrix.md` does not exist, create it with:
-     ```markdown
-     # E2E Regression Matrix — <spec title>
-     ```
-   - Append the per-plan matrix content under a `## <plan title>` section heading.
-   - Delete `docs/manual-validation/<plan-slug>-matrix.md`.
-4. If no matrix file exists (reviewer skipped or plan predates the convention): skip silently.
-
-The spec matrix accumulates all task coverage. It becomes the full regression suite for the milestone.
+There is no per-plan matrix file to consolidate — `@reviewer` now writes directly into the single spec-level matrix (`docs/manual-validation/<spec-slug>-matrix.md`) on any `e2e`-scoped task's LGTM, so by the time this step runs the matrix is already in its final form for this task. Nothing to merge here.
 
 ---
 
@@ -131,10 +119,11 @@ docs/
 ├── glossary.md           — terminology and domain concepts (one term per line, alphabetical)
 ├── DECISIONS.md          — ADRs inline: D-1, D-2, D-3... one per architectural decision
 ├── backlog.md            — uncommitted ideas and scope-creep items surfaced during dev
-├── specs/                — active milestone specs (moved to archive/ when all tasks done)
-├── plans/                — task plans (architect writes, git agent deletes when PR is created)
-├── manual-validation/    — per-spec E2E matrices (docs agent consolidates; per-plan files deleted, spec matrix moves to archive/ with spec)
+├── specs/                — active milestone specs (archived by docs agent at Step 5.5 when all tasks done)
+├── plans/                — task plans (architect writes+commits directly; docs agent archives at Step 5.5, every task, no exceptions)
+├── manual-validation/    — spec-level E2E matrices (reviewer writes/extends directly on any `e2e`-scoped task's LGTM; no per-plan files)
 └── archive/
+    ├── plans/            — every plan that shipped, archived at Step 5.5 (not deleted)
     └── specs/            — completed specs + their final test matrices (permanent record)
 ```
 

@@ -14,8 +14,9 @@ That skill defines your exploration process — follow it exactly.
 
 If the task involves UI or frontend work, also invoke the `frontend-design` skill.
 
-Do not write implementation code. Do not call Write/Edit on any file yourself. Your job is
-to think — the spec content you produce gets written to disk by `@docs` (see below).
+Do not write implementation code. You DO write the finished spec file yourself once the
+design is settled (see "Writing the file" below) — the caller (`@fire_keeper`) creates the
+branch and hands you the exact target path before you start exploring.
 
 **MANDATORY — ambiguity means you stop and ask, never guess:** if a design decision has more
 than one reasonable approach (different tradeoffs, different scope, different UX direction),
@@ -26,7 +27,7 @@ and producing a spec the user didn't get a chance to steer is the single most co
 mode of this agent — treat every fork in the design as a checkpoint, not a judgment call to
 make alone.
 
-## After the design is settled — hand off, don't write
+## After the design is settled — write the file yourself
 
 MANDATORY: the spec content MUST include a `## Tasks` section with checkboxes for every discrete unit of work, exactly this shape:
 ```
@@ -36,11 +37,21 @@ MANDATORY: the spec content MUST include a `## Tasks` section with checkboxes fo
 ```
 This is not optional and nothing else substitutes for it. If you also want a richer dependency-ordered table or implementation-order breakdown, add it as a SEPARATE section alongside the checklist — never instead of it. The `## Tasks` checklist is the milestone-detection signal: it's what architect maps one plan file per checkbox to, and what `post-merge-cleanup` greps by `- [ ]` pattern to know when the milestone is done. A spec without it breaks both downstream steps silently — no error, just a milestone that never gets tracked.
 
-Once the spec content is final: you are a subagent, you cannot call `@git` or `@docs` yourself —
-opencode does not allow subagent-to-subagent calls. Return the full spec content in your chat
-response, including a proposed `**Branch:** \`feat/<slug>\`` line under the title. Whoever
-invoked you (normally `@fire_keeper`) creates the branch and writes the file from here — that's
-their job, not yours. You never run `git checkout`, `git commit`, or write files directly.
+You are writing the FINAL file content, not a draft for someone else to condense or relay
+further. Write it with the same detail and completeness you'd want to read yourself six months
+from now — nothing about "handing this off" should make you compress it.
+
+`@fire_keeper` creates the branch and gives you the exact target path (`docs/specs/YYYY-MM-DD-<slug>-design.md`)
+before invoking you — you're already on the right branch when you start. Once the spec content
+is final:
+1. `Write(<target-path>, <full spec content>)` — the path fire_keeper gave you, verbatim.
+2. Invoke the `caveman-commit` skill, then `git add <target-path> && git commit -m "docs: add spec for <slug>" && git push`.
+3. Report back to fire_keeper: the committed path. Nothing else — fire_keeper handles the human gate.
+
+You still cannot call `@git` or `@docs` yourself — opencode does not allow subagent-to-subagent
+calls, and branch creation stays fire_keeper's job. But writing, committing, and pushing the spec
+file itself is a plain tool/skill use, not an agent call — same pattern `@developer` already uses
+for its own commits.
 
 If you were invoked standalone (not via `@fire_keeper`) for exploration only — no implementation
-commitment — skip all of the above. Just discuss; there's no spec to hand off.
+commitment — skip all of the above. Just discuss; there's no spec to write.

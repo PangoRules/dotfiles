@@ -95,9 +95,9 @@ Repeat until latest commit does NOT start with `wip:`.
 
 ---
 
-## Step 4 — Review loop
+## Step 4 — Review loop (autopilot)
 
-**Cycle limit: 3.** Track cycles starting at 1.
+No fixed cycle cap — the loop runs until LGTM, or until one of the stop conditions below fires. Track cycle count starting at 1 and keep the previous cycle's reviewer findings text in hand for comparison.
 
 Get commits on this branch:
 ```bash
@@ -112,16 +112,42 @@ Commits on this branch:
 <paste git log output>
 ```
 
+**Dead-agent check (run on every call, both `@developer` and `@reviewer`):** if the call errors, times out at the platform level, or returns no usable output — this is DEAD, not stuck. Immediately:
+```bash
+git status --short
+git log -1 --format='%H %s'
+```
+Stop. Report to user verbatim:
+```
+<agent> died mid-cycle <N>. No usable response.
+Branch: <branch>  Last commit: <sha> <subject>
+Uncommitted state: <git status output, or "clean">
+Manual intervention needed.
+```
+Do not retry automatically — opencode has no native timeout/recovery on subagent calls today, so a call that returns *anything* (even an error) is the only signal you get; a true silent hang won't reach this check at all. "Dead" and "killed" here mean this loop stops calling the agent — there is no separate process to terminate. Do not proceed further.
+
 **LGTM path:** reviewer output contains "LGTM" → go to Step 5.
 
 **Findings path:** reviewer output contains numbered findings →
-- If cycle = 3: stop. Report to user:
+- **Stuck check — repeat signature:** compare each finding's `file:line` + problem text against the immediately preceding cycle's findings (skip on cycle 1, nothing to compare yet). If any finding is substantively the same as one from last cycle → the same bug survived a fix attempt. Stop. Report to user:
   ```
-  3 review cycles exhausted. Manual intervention needed.
-  Findings: <paste findings>
+  Stuck at cycle <N>: finding repeated from cycle <N-1>.
+  Cycle <N-1> findings: <paste>
+  Cycle <N> findings: <paste>
+  Manual intervention needed.
   ```
   Do not proceed further.
-- Call `@developer`:
+- **Stuck check — no-progress diff:** after developer's fix commit lands (below), compare it against its own previous fix commit for this same review cycle chain:
+  ```bash
+  git diff <previous-fix-commit-sha> <new-fix-commit-sha>
+  ```
+  If the diff is empty or trivially equivalent (whitespace/comment-only) → developer resubmitted the same code. Stop, same report shape as the repeat-signature check, labeled "no-progress diff" instead.
+- **Soft checkpoint:** if cycle is a multiple of 10 (10, 20, 30...) and neither stuck check fired (i.e. still finding genuinely new issues each cycle) → pause and ask the user:
+  ```
+  Cycle <N>. Still finding new issues, no repeats, no dead agents. Keep going?
+  ```
+  Wait for the user. "yes"/"continue" → proceed. Anything else → stop, report state, wait for further instruction.
+- Otherwise, call `@developer`:
   ```
   Fix reviewer findings:
   <paste findings verbatim>
@@ -136,7 +162,7 @@ Commits on this branch:
 
 Call `@docs`:
 ```
-Reviewer gave LGTM on branch <branch> (parent: <parent-branch>). Plan: <plan-file-path>. Update docs. Do NOT delete the plan file.
+Reviewer gave LGTM on branch <branch> (parent: <parent-branch>). Plan: <plan-file-path>. Update docs. Do NOT delete or archive the plan file or spec — that happens at Step 5.5, right before PR.
 ```
 
 Wait for docs to signal done before proceeding.
@@ -152,8 +178,8 @@ The next message from the user is the ONLY thing that unblocks you.
 ---
 E2E gate. Docs updated. Spec task marked done.
 
-Matrix: docs/manual-validation/<plan-slug>-matrix.md
-(If no matrix file exists, run validation manually against the plan.)
+Matrix: docs/manual-validation/<spec-slug>-matrix.md
+(Test scope `unit`/`http` tasks have no matrix entry by design — validate against the plan's `.http` file or unit tests instead.)
 
 Reply **"ready"** → PR created.
 Paste findings → switch to @tarnished yourself, paste them there. Come back and resume this gate when done.
@@ -180,18 +206,22 @@ Wait for user message.
 
 ---
 
-## Step 5.5 — Docs recheck before PR
+## Step 5.5 — Docs recheck + archive before PR
 
-Time may have passed since Step 5 (E2E validation, builder fix cycles). Re-confirm docs are current before shipping.
+Time may have passed since Step 5 (E2E validation, builder fix cycles). Re-confirm docs are current, then archive — this is the one place archiving happens, so it stays consistent every time.
 
 Call `@docs`:
 ```
 Recheck docs on branch <branch> before PR. Check git log since your last docs commit on this branch for anything undocumented:
 git log --oneline <last-docs-commit-sha>..HEAD -- .
 Plan: <plan-file-path>
+
+Then archive: move the plan file to docs/archive/plans/, and if the parent spec's ## Tasks
+checklist is now fully checked, archive the spec (+ its matrix) to docs/archive/specs/ too.
+One commit, push.
 ```
 
-Wait for docs to report either "no drift, docs current" or the updated commit. Proceed to Step 6 either way.
+Wait for docs to report the archive result (plan archived; spec archived or left in place with remaining task count). Proceed to Step 6 either way.
 
 ---
 

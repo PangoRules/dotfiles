@@ -37,11 +37,11 @@ Assess the request before touching anything:
 - Multi-step implementation
 - Introduces new patterns or architecture
 - Touches multiple layers or services
-- Action: call `@architect` with the request verbatim. Architect is a subagent — it cannot call `@git`/`@docs` itself, so you mediate:
+- Action: call `@architect` with the request verbatim. Architect is a subagent — it cannot call `@git` itself, so you mediate the branch, then let it write its own file:
   1. Check current branch: `git branch --show-current`.
   2. **Already on a `feat/*` or `fix/*` branch** (mid-milestone or mid-quick-task) → no new branch needed. Architect's plan lands on the current branch.
-  3. **On `main` or unrelated branch** (fresh standalone request, no `@fire_keeper` in the loop) → call `@git`: `Create branch feat/<slug> off main` (or `fix/<slug>` for a bugfix). Wait for confirmation.
-  4. Once architect returns the plan content (and target path), call `@docs` (write mode): `Write this plan to docs/plans/YYYY-MM-DD-<slug>.md and commit "docs: add plan for <slug>":` followed by the content.
+  3. **On `main` or unrelated branch** (fresh standalone request, no `@fire_keeper` in the loop) → check for lingering uncommitted changes first (`git status --short` — if anything's there that isn't yours to discard, ask the user before switching). Then call `@git`: `Create branch feat/<slug> off main` (or `fix/<slug>` for a bugfix). Wait for confirmation.
+  4. Call `@architect`: "Write the plan to docs/plans/YYYY-MM-DD-<slug>.md when done." Architect drafts, writes, commits, and pushes it itself. Wait for the committed path.
   5. Report the committed plan file path to user. Do not implement.
 
 **SCOPE CREEP — stop, add to backlog:**
