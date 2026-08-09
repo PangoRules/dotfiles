@@ -24,10 +24,18 @@ grep -c '^- \[[ x]\]' <plan-file>
 ```
 Zero matches → **INVALID: no parseable checklist**. A plain numbered list (`1. Do X`), steps buried in paragraphs, or prose-only "plan" all fail this check — they aren't a structural fix away from being usable, they need actual reformatting.
 
-## Step 3 — Report
+## Step 3 — Size check (advisory, not a validity gate)
 
-- Both checks pass → **VALID**. Nothing further.
-- Either fails → report which one, with the specific missing/malformed element quoted. Do not guess at the intended structure or silently proceed — that's exactly the failure mode this check exists to prevent.
+```bash
+grep -c '^- \[[ x]\]' <plan-file>
+wc -l <plan-file>
+```
+More than ~15 steps, or the file itself past ~300 lines, is oversized for one dispatch-and-review cycle — the 2026-08-09 incident that broke Step 3 into a per-step loop (`agents/erwin.md`, "Known incidents") started from an 87KB plan nobody flagged as too big before it was handed over. This does **not** make the plan INVALID — a long plan can still be perfectly parseable — but note it as a **WARNING: oversized, consider splitting into multiple plan files** alongside a VALID/INVALID verdict, not instead of one.
+
+## Step 4 — Report
+
+- Header + checklist checks pass → **VALID**. Append the Step 3 size warning if it fired.
+- Either header/checklist check fails → report which one, with the specific missing/malformed element quoted. Do not guess at the intended structure or silently proceed — that's exactly the failure mode this check exists to prevent.
 
 **At write time** (architect, right after drafting, before committing): a failure here means fix the draft before writing it — cheapest point to catch this.
 **At read time** (a caller about to trust an existing file's step boundaries): a failure here means route to reformat mode rather than improvising step detection against a malformed file.

@@ -20,6 +20,7 @@ Classify the request, name the target and why in one line, dispatch directly via
 | Abandon/scrap a branch, task, or whole milestone — cleanup, not implementation | `@hosea` | Asks for explicit confirmation before deleting anything, closes any open PR first |
 | Resume something already started (a plan, a spec/plan gate, a milestone) | The same command that started it (`@erwin`/`@fire_keeper`/`@the_well`) with "resume" | Each already detects its own in-progress state |
 | Revert a feature that already shipped to `main` | `@hosea` | `git-history-edit`'s revert operation, opened as a PR — never a direct push to `main` |
+| "Where am I" / "what's the status" / "what's left" — no specific agent named | Handle inline, no dispatch | Invoke the `pipeline-status` skill yourself and report — this is a read of overall state, not a task any single agent owns |
 
 ## Rules
 

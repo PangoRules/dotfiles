@@ -13,13 +13,15 @@ Missing or unhealthy Docker services produce errors that look like code bugs: co
 docker compose ps
 ```
 
-All services should show `running` or `healthy`. If any show `exited` or `starting`:
+**Record the baseline before starting anything** — note which services are already `running`/`healthy` right now. Anything already up was started by someone else (the user, another process) and is not yours to touch later; anything you bring up yourself in this step is the only thing Step 6 is allowed to tear down.
+
+All services should show `running` or `healthy`. For any that show `exited` or missing entirely, start only those by name — never a blanket `docker compose up -d` when some services are already running, since that risks recreating/restarting containers you didn't bring up yourself and don't own:
 
 ```bash
-docker compose up -d
+docker compose up -d <service-name> [<service-name> ...]
 ```
 
-Wait a few seconds, then re-check `docker compose ps`.
+Wait a few seconds, then re-check `docker compose ps`. Keep the list of service names you started in Step 1 — that exact list, nothing inferred later, is what Step 6 stops.
 
 ## Step 2 — Database reachable
 
@@ -74,6 +76,18 @@ grep -i "connection\|port\|host\|endpoint" .env
 
 Confirm the ports and credentials in `.env` match what's in `docker-compose.yml`. Stale `.env` from a different branch is a common source of connection failures after a branch switch.
 
+## Step 6 — Teardown (after the test run this preflight was for finishes, pass or fail)
+
+Stop only the services you recorded as self-started in Step 1:
+
+```bash
+docker compose stop <service-name> [<service-name> ...]
+```
+
+Never `docker compose down` and never stop a service that was already `running`/`healthy` before Step 1 — it may be serving something else (another session, a local app, a long-running dev server) and stopping it out from under whoever started it is a correctness bug in this skill, not a cleanup. If you started nothing in Step 1 (everything was already up), Step 6 is a no-op — say so, don't stop anything.
+
+If you can't tell anymore which services you started (context lost, resumed mid-task) — do not guess and do not stop anything. Leave everything running and say so; an extra running container costs nothing, a wrongly-stopped one breaks whoever it belonged to.
+
 ## When to run
 
 - Start of any task touching database, migrations, or file/object storage
@@ -84,7 +98,7 @@ Confirm the ports and credentials in `.env` match what's in `docker-compose.yml`
 
 ## This is not a code bug if
 
-- `docker compose ps` shows a service is down → `docker compose up -d`, not a code fix
+- `docker compose ps` shows a service is down → `docker compose up -d <service-name>` (that service only), not a code fix
 - pgvector extension missing → wrong Docker image tag, not a migration bug
 - `.env` has wrong port or credential → configuration drift, not a code bug
 - Service shows `starting` → wait for health check, not a code bug

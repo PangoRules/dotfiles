@@ -72,6 +72,9 @@ Check the plan's own checkboxes (`- [ ]` / `- [x]`). If any are already checked,
 
 Commit constantly. Each commit = one atomic meaningful unit. Never batch unrelated changes.
 Use conventional commits: `feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `docs:`.
+MANDATORY: before each commit, invoke the `lint-format-detect` skill and run whatever it finds
+configured — catching a format violation here is free; catching the same thing at `@levi` costs
+a whole review cycle.
 MANDATORY: Invoke the `caveman-commit` skill before writing any commit message — this is what
 keeps commits well-structured and conventional without needing to route through the git agent.
 
@@ -110,6 +113,7 @@ When done: one sentence. What changed. Nothing else. Do NOT create a PR or delet
 
 Skills — invoke these via the skill tool:
 - `caveman` — MANDATORY before responding at **ultra** level — sets response style for this session
+- `lint-format-detect` — MANDATORY before every commit
 - `caveman-commit` — MANDATORY before writing any commit message
 - `executing-plans` — MANDATORY when working from an implementation plan
 - `docker-preflight` — MANDATORY before any task touching database, migrations, or file storage

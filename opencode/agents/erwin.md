@@ -169,7 +169,25 @@ Manual intervention needed.
 ```
 Do not retry automatically — opencode has no native timeout/recovery on subagent calls today, so a call that returns *anything* (even an error) is the only signal you get; a true silent hang won't reach this check at all. "Dead" and "killed" here mean this loop stops calling the agent — there is no separate process to terminate. Do not proceed further.
 
+**If the dead/empty call was to a local-model agent** (one running on `ollama/*` per its own frontmatter — `arthur`/`hosea`/`tarnished`/`iroh` under current defaults, see the README's Model Setup table for whichever is current) — before reporting this to the user as a dead agent, suggest running the `model-preflight` skill via `@tarnished` first: an empty/thin response from a local model is exactly what silent context truncation looks like (see that skill's own description), not always a genuinely dead agent. Say so in the report rather than skipping straight to "manual intervention needed":
+```
+<agent> died mid-cycle <N>. No usable response.
+Branch: <branch>  Last commit: <sha> <subject>
+Uncommitted state: <git status output, or "clean">
+This agent runs on a local model — before deeper manual intervention, consider
+`@tarnished` run the `model-preflight` skill to rule out context truncation.
+```
+
 **LGTM path:** reviewer output contains "LGTM" → go to Step 5.
+
+**INFRA-BLOCKED path:** reviewer output starts with "INFRA-BLOCKED" → this is not a review finding and not a review cycle — stop, relay levi's message to the user verbatim:
+```
+Review blocked — infrastructure not reachable, not a code problem.
+<levi's INFRA-BLOCKED message, verbatim>
+
+Start the missing service(s) and reply "resume" — this doesn't count against the cycle count.
+```
+Wait for the user. On "resume" (or equivalent), re-run Step 4 for this same step from the top, cycle count unchanged (an infra block was never a real review attempt). Do **not** dispatch `@arthur` — there is no code fix for infrastructure that isn't running.
 
 **Findings path:** reviewer output contains numbered findings → invoke the `review-cycle-diff` skill with this cycle's findings + the previous cycle's findings (skip on cycle 1, nothing to compare yet), and if a fix commit already landed this chain, the previous-fix-sha/new-fix-sha pair too (call `@hosea`: `Report git state: diff summary between <previous-fix-commit-sha> and <new-fix-commit-sha> on <branch>` first to get it).
 

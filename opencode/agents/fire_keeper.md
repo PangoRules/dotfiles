@@ -44,6 +44,10 @@ On resume, check what's already on disk before doing anything:
 
 ---
 
+## Step 0a — Local-model preflight (once per session)
+
+Before Step 0, invoke the `model-preflight` skill once per session (not per call) if any agent this milestone will dispatch to runs on `ollama/*` per its own frontmatter — cheap, catches a silently-truncated context window before it wastes a whole milestone's worth of dispatches. Skip if already run earlier this session.
+
 ## Step 0 — Guard: project must be initialized
 
 Before anything else, check if foundational docs exist:
