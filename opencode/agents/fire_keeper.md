@@ -1,6 +1,6 @@
 ---
 description: Fire Keeper (planner) — tends brainstorm → spec approval gate → architect → plan approval gate. Output: approved task plans ready for /commander.
-model: minimax-coding-plan/MiniMax-M2.5
+model: ollama/glm-4.7-flash:latest
 mode: primary
 temperature: 0.3
 ---

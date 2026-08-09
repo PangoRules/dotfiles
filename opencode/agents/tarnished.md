@@ -1,6 +1,6 @@
 ---
 description: Tarnished (builder) — general-purpose agent for quick tasks. No restrictions.
-model: minimax-coding-plan/MiniMax-M2.7
+model: ollama/glm-4.7-flash:latest
 mode: primary
 temperature: 0.5
 ---

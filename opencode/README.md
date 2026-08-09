@@ -4,17 +4,38 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 
 ## Agent names
 
-Primary agents (the ones you can switch to / invoke directly, shown in chat) are themed — dark fantasy pulled from Lovecraft, Murakami, Attack on Titan, Dark Souls, and Elden Ring, one codename per universe. Every reference includes the old functional name in parentheses as a hint, e.g. **The Well (init)**, since the codename alone doesn't tell you what it does. Mention/slash-command form is always lowercase, no spaces, underscores for multi-word names: `@well`, `@fire_keeper`, `@commander`, `@tarnished`, `@carter`.
+Primary agents (the ones you can switch to / invoke directly, shown in chat) are themed — dark fantasy and adventure fiction pulled from Lovecraft, Murakami, Attack on Titan, Dark Souls, Elden Ring, S.T.A.L.K.E.R., Red Dead Redemption 2, and now LOTR, one codename per universe (a couple of universes cover two roles each — AoT gives us Commander, the debugger, and now brainstorm; RDR2 gives us git and developer). Every reference includes the old functional name in parentheses as a hint, e.g. **The Well (init)**, since the codename alone doesn't tell you what it does. Mention/slash-command form is always lowercase, no spaces, underscores for multi-word names: `@well`, `@fire_keeper`, `@commander`, `@tarnished`, `@carter`, `@explore`, `@debugger`, `@gandalf`.
 
-Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`) keep their plain functional names — they aren't user-switchable and don't show up in the chat picker, so a codename would only add indirection with no payoff.
+**The four you live in day to day:** `@well` (new project), `@fire_keeper` (plan the next feature), `@commander` (build an approved plan), `@tarnished` (quick task, no ceremony). `@carter`, `@explore`, `@debugger` are on-demand specialists you reach for by name when the situation calls for them. `@gandalf` is the fifth touchpoint for when you don't know which of the above you need — see "Not sure where to start?" below.
 
-| Codename | Formerly | Universe | Why |
+Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`) keep their plain functional names — they aren't user-switchable and don't show up in the chat picker, so a codename would only add indirection with no payoff. Every subagent now carries a `## Voice` section too (same pattern as the primaries) — it colors prose only, never the file formats, commit messages, or checklist conventions those agents produce.
+
+**Correction (2026-08-08):** an earlier pass here had `brainstorm` reusing The Well's voice. Wrong — The Well is `init` only, the one-time project-from-zero agent. Brainstorm now has its own character (Armin Arlert) below.
+
+| Codename | Formerly / role | Universe | Why |
 |---|---|---|---|
-| **The Well** | `init` | Murakami | descent into stillness to define the world before anything's built |
-| **Fire Keeper** | `planner` | Dark Souls | tends the flame between two checkpoints, turns raw intent into the structured thing others follow |
-| **Commander** | `orchestrator` | Attack on Titan | sends the squad into the loop, holds every hard gate, doesn't flinch when the review loop runs long — knows the difference between stuck and just thorough |
-| **Tarnished** | `builder` | Elden Ring | no fixed path, wanders in and does whatever the moment needs |
+| **The Well** | `init` | Murakami | descent into stillness to define the world before anything's built — project creation only, not reused elsewhere |
+| **Fire Keeper** | `planner` | Dark Souls | tends the flame between two checkpoints, turns raw intent into the structured thing others follow — calls brainstorm then architect when starting a new phase |
+| **Commander (Erwin)** | `orchestrator` | Attack on Titan | sends the squad into the loop, holds every hard gate, doesn't flinch when the review loop runs long — knows the difference between stuck and just thorough |
+| **Tarnished** | `builder` | Elden Ring | no fixed path, wanders in and does whatever the moment needs — the driver for quick tasks and implementations |
 | **Carter** | `security` | Lovecraft (Randolph Carter) | investigator who goes looking for what's hidden and shouldn't be |
+| **Gandalf** | `router` (new) | LOTR | knows every member of the roster by their strengths, sends you to the one built for what you actually need |
+| **Sokka** | `architect` (subagent) | Avatar: The Last Airbender | the plan guy — three steps ahead, writes it down before anyone swings |
+| **Arthur Morgan** | `developer` (subagent) | Red Dead Redemption 2 | rides out and does the job while the planning happens elsewhere |
+| **Captain Levi** | `reviewer` (subagent) | Attack on Titan | zero tolerance for sloppy work, respects competence when he sees it |
+| **Uncle Iroh** | `docs` (subagent) | Avatar: The Last Airbender | patient teacher, cares more that the next person understands than being impressive |
+| **Hosea Matthews** | `git` (subagent) | Red Dead Redemption 2 | scouts the road, checks the saddles, minds what nobody else remembers to |
+| **Armin Arlert** | `brainstorm` (subagent) | Attack on Titan | sees the whole board — the plan survives because he questioned it from every side first |
+| **Strelok** | `explore` | S.T.A.L.K.E.R. | maps hostile terrain, leaves markers, reports without changing anything |
+| **Mikasa Ackerman** | `debugger` | Attack on Titan | closes distance on a bug one eliminated possibility at a time, doesn't stop until it's dead |
+
+### Not sure where to start?
+
+```
+/gandalf
+<describe what you're trying to do, however roughly>
+```
+Gandalf knows the whole roster, asks one clarifying question if genuinely unclear, and hands back the exact next command — it doesn't do the work itself, same primary-can't-dispatch-primary restriction as everyone else.
 
 ---
 
@@ -34,6 +55,9 @@ Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`) ke
 | `agents/git.md` | Owns branch creation (milestone/quick/task, called by `@fire_keeper`/`@tarnished`/`@commander`), PR creation, post-merge cleanup. Never commits to `main` without explicit confirmation; checks for lingering uncommitted work before every checkout. Plan archiving is now `@docs`'s job (Step 5.5) — git's own archive step is a defensive fallback only |
 | `agents/tarnished.md` | **Tarnished (builder)** — triage: small → implement, complex → escalate to plan, scope creep → backlog |
 | `agents/carter.md` | **Carter (security)** — read-only, finds exploitable gaps + vulnerable/outdated deps, writes a severity-ranked report with a `## Tasks` checklist, hands off to `@tarnished`/`@architect` for remediation |
+| `agents/explore.md` | **Strelok (explorer)** — read-only codebase mapping, on demand or as a manual hand-off target from `@commander`/`@fire_keeper`. Never edits, never writes a report unless explicitly asked |
+| `agents/debugger.md` | **Mikasa Ackerman (debugger)** — systematic bug hunter, on demand or as a manual hand-off target when a `@commander` review cycle goes STUCK. Reproduces, isolates root cause, fixes it, commits — narrow scope, no adjacent refactors |
+| `agents/gandalf.md` | **Gandalf (router)** — entry point for "not sure what I need." Classifies the request against the full roster, asks one clarifying question if unclear, hands back the exact next command. Never does the work itself |
 | `skills/project-scaffolding` | Gate-by-gate logic for `@well` — scope/architecture/data-model/glossary/functional-spec, folder scaffold, handoff to `@fire_keeper` |
 | `skills/dependency-vulnerability-scan` | SCA — detects whichever package ecosystems are present (npm/pnpm/yarn, NuGet, pip, Go, Cargo, Bundler) and runs the right CVE audit for each. Stack-agnostic |
 | `skills/security-code-review` | OWASP-style manual review: injection, XSS, broken authz/IDOR, secrets exposure, SSRF, insecure deserialization, weak crypto, missing rate-limiting/DoS resilience, CSRF, unsafe file upload. Stack-agnostic |
@@ -72,6 +96,9 @@ Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`) ke
 | reviewer | No | No (matrix file is the one exception — writes directly on `e2e`-scoped LGTM) | Yes (matrix only) | Yes (matrix only) | No | No | No |
 | docs | No | **Yes** (write mode — dormant, no current caller) | Yes (both modes) | Yes | No | **Yes** (recheck mode, Step 5.5 — sole primary owner) | No |
 | carter (security) | No | Its own report only (writes + commits directly, like well) | Yes (report only) | Yes | No | No | No |
+| explore | No | No | No | No | No | No | No |
+| debugger | No | No | Yes (fix only) | Yes | No | No | No |
+| gandalf (router) | No | No | No | No | No | No | No |
 
 > Git agent owns all branch operations. `@docs` owns archiving (plan + spec, both at Step 5.5 — git's own archive step is a defensive fallback for the rare case docs got skipped). Neither `brainstorm` nor `architect` nor `developer` can call another agent directly — opencode subagents can't call other subagents — but Write/commit/push on their own file is a plain tool/skill use, not an agent call, so brainstorm and architect now write their own spec/plan files instead of relaying content through `@docs`. `fire_keeper`/`tarnished` (primary agents) still mediate branch creation, since that's a real platform restriction; developer falls back to committing directly via a skill instead of an agent call, same pattern. Main is read-only — only PRs merge to main, and no agent commits directly to `main` without explicit user confirmation.
 
@@ -82,6 +109,7 @@ Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`) ke
 ### Your only touchpoints
 
 ```
+?. /gandalf        → not sure which of the below fits? ask here first
 0. /well          → new project only: scope → arch → data model → glossary → roadmap
 1. /fire_keeper    → read spec → "approved" → read plans → "approved"
 2. /commander      → one call per task, runs autonomously until E2E gate
@@ -160,12 +188,15 @@ Commander runs autonomously until the E2E gate:
   ↺ if findings: @developer fixes → @reviewer re-reviews
       commander watches for STUCK (same finding survives a fix cycle, or
       the fix diff is a no-op vs its own previous attempt → stop, report
-      both cycles) and DEAD (a call to @developer/@reviewer errors or
-      returns nothing usable → stop, snapshot git status/log, report —
-      "dead" means commander stops calling it, there's no separate
-      process to kill). Every 10th cycle with no repeat/no dead-agent:
-      a soft checkpoint asks you "still finding new things, keep going?"
-      instead of silently running forever or hard-stopping
+      both cycles and suggest switching to @debugger — Mikasa — with the
+      branch and finding pasted in, since a repeat like this usually means
+      the symptom's being patched, not the root cause) and DEAD (a call to
+      @developer/@reviewer errors or returns nothing usable → stop,
+      snapshot git status/log, report — "dead" means commander stops
+      calling it, there's no separate process to kill). Every 10th cycle
+      with no repeat/no dead-agent: a soft checkpoint asks you "still
+      finding new things, keep going?" instead of silently running
+      forever or hard-stopping
 @docs       → updates project docs (per project's own AGENTS.md/CLAUDE.md
               convention), marks spec task checkbox done (- [ ] → - [x]),
               scans git history for lessons not yet in CLAUDE.md/AGENTS.md
@@ -280,6 +311,9 @@ Tarnished triages it as SMALL and implements directly.
 **Reviewer feedback is wrong:**
 Commander passes findings to developer which uses `receiving-code-review` — evaluates critically, pushes back on incorrect findings rather than blindly implementing.
 
+**A small related idea pops up while `@developer` is mid-plan:**
+Developer can append it as a new checkbox on the *same* plan file, same branch, if it's tightly scoped — same file(s) already being touched, no new external surface or architectural decision, finishable in-session (see "Small related idea discovered mid-implementation" in `agents/developer.md`). Anything bigger or unrelated still goes to `docs/backlog.md`, same as `@tarnished`'s SCOPE CREEP path. This exists specifically so a real related improvement doesn't force a whole new plan+branch cycle for something that would've been one extra checkbox.
+
 **Standalone brainstorm (exploration only, not committing to implementation):**
 ```
 /brainstorm
@@ -304,6 +338,52 @@ Submit PR feat/<milestone> to main
 
 ---
 
+## Known gaps & hardening (2026-08-08 pass)
+
+Real issues found in practice — a manual Claude second-pass after reviewer LGTM kept catching things reviewer should have caught itself. Fixed in `agents/reviewer.md`, documented here so the "why" doesn't get lost:
+
+1. **Type errors slipping past LGTM.** The old "new compiler/typecheck warnings" check only diffed *warnings* between parent and current branch tip — it never ran an absolute build/typecheck on its own. A type hole that didn't happen to trigger a *new* warning (e.g. extending an already-loose generic, or a stack with no dedicated verification skill) sailed through. Fixed: reviewer now runs a full build/typecheck on the current branch tip and treats **any error as always a finding**, never "pre-existing debt" — only warnings get the pre-existing exemption.
+2. **Missing business-logic unit tests, silently.** The 75% coverage rule existed, but it only had a path to an actual number through `dotnet-verification`/`nuxt-verification`/`python-verification`. A plain Node/TS backend, a Go service, anything outside those three stacks had **no skill that reports coverage at all** — the rule was unenforceable by construction for those stacks. Fixed: reviewer now runs the language's native tool directly (`tsc --noEmit` + `vitest`/`jest --coverage`, `go test -cover`, `cargo tarpaulin`, etc.) when no stack skill triggers. "No coverage check ran" is no longer a silently acceptable outcome — it's either a real number or an explicit "not measurable" finding.
+3. **E2E matrix entries for untestable infrastructure.** Reviewer wrote matrix entries for whatever `**Test scope:** e2e` said, without checking whether the task was actually reachable by a real user/client. A migration or background-job task mislabeled `e2e` by architect got a matrix entry nobody could actually walk through by hand. Fixed: reviewer now sanity-checks reachability before writing anything — genuinely infra-only work gets flagged back as a scope mismatch instead of a bogus matrix entry.
+
+**Also real, not yet hardened — worth watching:** `dotnet-verification` only triggers on Domain-entity/`DbContext`/`IEntityTypeConfiguration` changes, so a .NET diff that's pure service/business logic with no EF touch point currently gets no stack-specific typecheck pass at all — it now falls through to the new generic build/typecheck step above, but hasn't been battle-tested the way the EF-triggered path has.
+
+---
+
+## Local model ops (ollama)
+
+RTX 4090 (24GB VRAM) + 32GB system RAM rig. Ollama had zero tuning before 2026-08-08 — default `OLLAMA_NUM_PARALLEL`/`OLLAMA_MAX_LOADED_MODELS` reserve more memory than a single-user sequential agent loop needs, and KV cache runs full fp16 unless told otherwise. None of this was applied automatically — editing `/etc/systemd/system/ollama.service.d/override.conf` needs `sudo` and got blocked by the permission classifier as a system-service change. Run this yourself:
+
+```bash
+sudo tee /etc/systemd/system/ollama.service.d/override.conf > /dev/null <<'EOF'
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0:11434"
+Environment="OLLAMA_FLASH_ATTENTION=1"
+Environment="OLLAMA_KV_CACHE_TYPE=q8_0"
+Environment="OLLAMA_MAX_LOADED_MODELS=1"
+Environment="OLLAMA_NUM_PARALLEL=1"
+Environment="OLLAMA_KEEP_ALIVE=15m"
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart ollama
+```
+
+What each does and why, for this specific rig/workflow:
+
+| Setting | Value | Why |
+|---|---|---|
+| `OLLAMA_FLASH_ATTENTION` | `1` | Cuts attention-computation memory overhead — frees VRAM for context instead of scratch space. RTX 4090 supports it natively, no downside here. |
+| `OLLAMA_KV_CACHE_TYPE` | `q8_0` | Quantizes the KV cache to 8-bit instead of fp16 — roughly halves per-token context memory for ~no measurable quality loss (q4_0 exists and is smaller, but the quality tradeoff is sharper — not worth it on a card with room to spare). Requires flash attention on, which is set above. |
+| `OLLAMA_MAX_LOADED_MODELS` | `1` | Only one local model is ever actually in use at a time in the opencode flow — `git`/`developer`/`fire_keeper`/`tarnished` never run concurrently, commander calls them sequentially. Capping at 1 guarantees no two models fight over the same 24GB and forces clean eviction instead of an OOM crash. |
+| `OLLAMA_NUM_PARALLEL` | `1` | Default reserves multiple parallel request slots (extra KV cache reservations) even for a single-user sequential workload — wasted VRAM for capacity nothing here uses. |
+| `OLLAMA_KEEP_ALIVE` | `15m` | Default is 5m. A commander review loop can call `@developer` back-to-back across several fix cycles within minutes — 15m avoids reload thrash mid-loop while still releasing VRAM back to the browser/services during idle stretches between tasks. |
+
+**Practical effect:** switching agents (e.g. `@git` → `@developer`) triggers a model swap with a few seconds' load delay — expected, not a bug, given only one model stays resident. `opencode.json`'s per-model `limit.context` values were set conservatively (32K for devstral/glm/gpt-oss, 65K for qwen3-coder) rather than pushed to each model's theoretical max (256K for devstral, 200K for glm) — those ceilings assume the tuning above is active; if you push `num_ctx` higher per-call and hit VRAM pressure or OOM, dial the context limit back down before blaming the model.
+
+**If you want more VRAM headroom on `git`/`fire_keeper`/`tarnished`:** the `glm-4.7-flash:latest` tag pulled at 19GB — heavier than the smallest available quant. `ollama pull glm-4.7-flash:q4_K_M` gets a ~5GB version if you want more room to run other GPU work alongside it; re-tag the `model:` line in the three agent files + `opencode.json` if you switch.
+
+---
+
 ## Security audit
 
 On-demand, not part of the per-task pipeline — run it whenever, against any project:
@@ -320,6 +400,26 @@ Hand-off depends on scope, printed at the end of the audit:
 - **4+ findings / multi-domain** → the report itself is spec-shaped. `@git` creates `feat/security-hardening-<date>`, then `@architect` in Milestone mode reads the report directly (same as any spec with a `## Tasks` checklist) and splits it into one plan per finding. Run `/commander` per plan from there.
 
 `reviewer` also runs the two generalized skills below (`error-handling-consistency-check`, `hardcoded-endpoint-check`) conditionally on every normal task diff, not just during a dedicated audit — they catch narrower classes of the same bug families as they're introduced, rather than waiting for the next full audit to find them.
+
+---
+
+## Codebase exploration and debugging
+
+Both on-demand, same shape as `@carter` — read-only or narrowly-scoped, not part of the per-task pipeline unless you route them there manually.
+
+**Explore** — map unfamiliar terrain before touching it:
+```
+/explore
+Where does the invite-link flow validate expiry?
+```
+Strictly read-only, chat output by default. Useful before `/fire_keeper` on an unfamiliar codebase, or any time you need "where is X" answered without committing to a task yet.
+
+**Debugger** — hunt one bug to its root cause and fix it:
+```
+/debugger
+Login silently fails for users with an apostrophe in their email. Find it.
+```
+Narrow scope — fixes the root cause only, no adjacent refactors. This is also where a STUCK `@commander` review loop can go: if the same reviewer finding survives a fix cycle, switch to `@debugger` with the branch and finding pasted in (manual switch — primary agents can't dispatch each other mid-turn, same restriction that sends E2E-gate findings to `@tarnished`). Come back and resume `/commander` once it reports the fix.
 
 ---
 
@@ -348,39 +448,54 @@ docs/
 
 ---
 
-## Cloud model setup
+## Model setup — local + cloud
 
-All agents use cloud providers. No local runtime required. Strategy: MinMax subscription is spent ONLY where model quality changes real outcomes (developer implementation, reviewer quality gate) — every deterministic/gate-keeping/file-writing role runs on cheap OpenRouter pay-per-token models instead, so it never competes with developer/reviewer for the same subscription's rate limit.
+Mixed local/cloud since 2026-08-08. Strategy: MiniMax subscription is spent ONLY where model quality changes real outcomes (reviewer quality gate). Deterministic/gate-keeping roles (`git`, `fire_keeper`, `tarnished`) and implementation (`developer`) moved to local ollama on the RTX 4090 rig — they were burning MiniMax subscription quota for work that doesn't need a frontier-tier model, and the shared pool (5 agents deep before this change) was the real driver of hitting caps. `docs`/`architect`/`brainstorm`/`well`/`carter`/`explore` stay on cheap OpenRouter — deterministic writes and rare on-demand reasoning respectively, neither contributes to the MiniMax cap problem, no reason to move them.
 
 | Agent | Model | Why |
 |-------|-------|-----|
 | architect | `openrouter/deepseek/deepseek-v4-pro` | plan reasoning needs full strength — errors cascade into every downstream task. Can't write files or touch git even if it wanted to (subagent restriction) — its tokens go entirely to thinking, fire_keeper/tarnished handle the mechanics |
-| brainstorm | `openrouter/z-ai/glm-5.2` | creative + 1M-context exploration, leads quality benchmarks among affordable options. Was silently on DeepSeek V4 Flash (cheap, wrong tier) — fixed; now that it no longer burns tokens writing files, the token budget goes to actually thinking well |
-| docs | `openrouter/deepseek/deepseek-v4-flash` | deterministic file writes (both content-dump write mode and diff-based update mode) — cheap, fast, low temp (0.3). Previously drifted onto a shared-subscription model at temp 0.5, which is the most likely cause of past "gets stuck / doesn't write files properly" symptoms — fixed |
-| developer | `minimax-coding-plan/MiniMax-M2.7` | general purpose, strong instruction-following on plans; subscription model keeps quota usage predictable. Only agent besides reviewer left on the subscription pool |
-| reviewer | `minimax-coding-plan/MiniMax-M3` | quality gate — best owned model catches more bugs per cycle |
-| tarnished (builder) | `minimax-coding-plan/MiniMax-M2.7` | general purpose, moderate complexity |
+| brainstorm | `openrouter/z-ai/glm-5.2` | creative + 1M-context exploration, leads quality benchmarks among affordable options |
+| docs | `openrouter/deepseek/deepseek-v4-flash` | deterministic file writes (both content-dump write mode and diff-based update mode) — cheap, fast, low temp (0.3) |
+| **developer** | `ollama/devstral-small-2:latest` | **local.** Purpose-built agentic coding model (68% SWE-bench Verified), 15GB VRAM, fits the 4090 with headroom for browser/services. Was the single biggest MiniMax consumer — every commander review cycle re-invokes it |
+| reviewer | `minimax-coding-plan/MiniMax-M3` | quality gate — best owned model catches more bugs per cycle. Stays cloud on purpose, this is exactly where README's own strategy says spend the subscription |
+| **tarnished** (builder) | `ollama/glm-4.7-flash:latest` | **local.** Triage/small-fix work — MoE, fast, plenty of headroom left on the card |
 | commander (orchestrator) | `openrouter/deepseek/deepseek-v4-flash` | holds hard E2E gate — needs reliable instruction following; M2.5 skipped the gate in practice |
-| fire_keeper (planner) | `minimax-coding-plan/MiniMax-M2.5` | gate-keeping only, simpler gates than commander |
-| git | `minimax-coding-plan/MiniMax-M2.5` | deterministic bash ops, no gates to hold. Now also creates milestone/quick-mode branches on fire_keeper/tarnished's behalf — still deterministic work, model choice unchanged |
+| **fire_keeper** (planner) | `ollama/glm-4.7-flash:latest` | **local.** Pure gate-keeping, no implementation reasoning needed |
+| **git** | `ollama/glm-4.7-flash:latest` | **local.** Deterministic bash/PR mechanics — was drawing MiniMax quota for work with zero real judgment calls |
 | well (init) | `openrouter/google/gemini-2.5-flash` | large-context Q&A synthesis across five gated docs |
 | carter (security) | `openrouter/deepseek/deepseek-v4-pro` | same reasoning tier as architect — triaging exploitability and severity needs real judgment, not just pattern-matching; run rarely (on-demand), so cost matters less than getting it right |
+| explore | `openrouter/google/gemini-2.5-flash` | same large-context/cheap tier as well — reading a lot of code and reporting back doesn't need frontier reasoning, it needs context room |
+| debugger | `minimax-coding-plan/MiniMax-M2.7` | same tier developer used to sit at — finding and fixing a root cause is real implementation work, not a gate-keeping pass. Kept cloud since it's on-demand only, not a per-cycle cost driver like developer was |
+| gandalf (router) | `openrouter/deepseek/deepseek-v4-flash` | same tier as commander — classification/dispatch needs reliable judgment, not raw power, and it's a light per-call cost |
 | opencode default | `openrouter/deepseek/deepseek-v4-pro` | general interactive sessions |
 
-> **Historical note:** `qwen3-coder:latest` (Ollama/local) was the original developer model — dropped for cloud-only setup, now back as `openrouter/qwen/qwen3-coder` (same model, OR-hosted) as a fallback option. `openai/gpt-5.5` was a previous reasoning-tier model no longer used. Reviewer sits on M3 (best owned coding model) while developer stays on M2.7 — a deliberate two-tier split within the same subscription. docs and git were both found drifted from their documented models/temps during a July 2026 audit — this table now reflects the corrected, verified state. Primary agents were renamed (init→well, planner→fire_keeper, orchestrator→commander, builder→tarnished) plus a new security→carter agent added in the same pass — see "Agent names" at the top.
+Registered but not wired to any agent by default — pulled locally for manual experimentation, mainly with `@gandalf`: `qwen3-coder:latest` (18GB, MoE), `gemma4:26b` (17GB), `gemma4:e4b` (9.6GB). Flip any agent's `model:` line to `ollama/<tag>` to try one.
+
+> **Historical note:** `qwen3-coder:latest` was the original local developer model, dropped for cloud-only, briefly readded as an OpenRouter-hosted fallback, then superseded entirely by the 2026-08-08 local-model pass above (`devstral-small-2`, `glm-4.7-flash`, `gpt-oss:20b` all pulled and benchmarked against it — see the model table). `openai/gpt-5.5` was a previous reasoning-tier model no longer used. docs and git were both found drifted from their documented models/temps during a July 2026 audit — the pre-2026-08-08 table reflected that corrected state, since superseded by the local-model move above. Primary agents were renamed (init→well, planner→fire_keeper, orchestrator→commander, builder→tarnished) plus security→carter, explore→Strelok, debugger→Mikasa, and router→Gandalf added across two later passes — see "Agent names" at the top.
 
 ### Fallback models (manual)
 
-opencode has no native model-fallback field (`AgentConfig.model` is a single string — confirmed against `https://opencode.ai/config.json` schema). If MiniMax subscription quota runs out or MiniMax infra is down, flip the affected agent's `model:` line by hand:
+opencode has no native model-fallback field (`AgentConfig.model` is a single string — confirmed against `https://opencode.ai/config.json` schema). Flip the affected agent's `model:` line by hand for either failure mode below. Fallbacks are picked cost-efficient-but-competent, not cheapest-possible — a fallback that quietly tanks review/implementation quality defeats the point of having one.
+
+**Local ollama unavailable** (fresh machine with no models pulled yet, or GPU busy with something else) — these are the exact cloud models `developer`/`git`/`fire_keeper`/`tarnished` ran on before the 2026-08-08 local move, proven-good, not a new guess:
+
+| Agent | Fallback | Notes |
+|-------|----------|-------|
+| developer | `minimax-coding-plan/MiniMax-M2.7` | its pre-local model — same tier reviewer expects findings to be fixed at |
+| git, fire_keeper | `minimax-coding-plan/MiniMax-M2.5` | deterministic/gate-keeping tier |
+| tarnished | `minimax-coding-plan/MiniMax-M2.7` | matches developer's tier since it does the same class of work standalone |
+
+**MiniMax subscription quota exhausted or MiniMax infra down** (affects `reviewer`, `debugger`, and any agent temporarily flipped back to MiniMax above):
 
 | Tier | Model | Covers |
 |------|-------|--------|
 | 1 | `openrouter/minimax/minimax-m3` or `openrouter/minimax/minimax-m2.7` | Subscription quota exhausted — same model, billed through OpenRouter instead. Zero prompt-tuning drift. |
 | 2 | `openrouter/deepseek/deepseek-v3` | MiniMax infra itself down — different provider, cheap, strong instruction-following. |
 
-Revert to `minimax-coding-plan/MiniMax-M*` once quota/infra recovers — tiers above are paid-per-token, not subscription.
+Revert to `minimax-coding-plan/MiniMax-M*` once quota/infra recovers — tiers above are paid-per-token, not subscription. Revert local agents to `ollama/*` once the GPU/models are available again — cloud fallback costs real money per call, local is free once pulled.
 
-**Automatic fallback exists via community plugin, not installed here:** `opencode-fallback` (youngbinkim0/opencode-fallback) and `opencode-rate-limit-fallback` (liamvinberg/opencode-rate-limit-fallback) both add chain-on-failure switching since opencode core doesn't. Not added — third-party code with full session access is worth reading before trusting. Worth revisiting now that developer/reviewer are the only agents left contending for MiniMax subscription quota — same exposure as before, just fewer agents sharing it.
+**Automatic fallback exists via community plugin, not installed here:** `opencode-fallback` (youngbinkim0/opencode-fallback) and `opencode-rate-limit-fallback` (liamvinberg/opencode-rate-limit-fallback) both add chain-on-failure switching since opencode core doesn't. Not added — third-party code with full session access is worth reading before trusting. Less urgent now that only `reviewer`/`debugger` still depend on MiniMax day-to-day.
 
 ---
 
