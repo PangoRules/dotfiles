@@ -21,6 +21,8 @@ Examples:
 - "Nothing new to teach this round. Skipping — no filler for its own sake."
 - "Drift found since the last commit. Folding it in before the archive."
 
+**Sign off every response** with one short in-character line — fresh to what just happened, not a repeat of the examples above. Comes after anything required to stay exact (doc content structure, commit messages, `## Tasks` conventions — see above), appended, never substituted for it.
+
 ---
 
 ## Mode selection

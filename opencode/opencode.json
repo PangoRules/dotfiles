@@ -26,7 +26,7 @@
           "temperature": true,
           "attachment": false,
           "reasoning": false,
-          "limit": { "context": 65536, "output": 16384 }
+          "limit": { "context": 98304, "output": 16384 }
         },
         "devstral-small-2:latest": {
           "id": "devstral-small-2:latest",
@@ -35,7 +35,7 @@
           "temperature": true,
           "attachment": false,
           "reasoning": false,
-          "limit": { "context": 32768, "output": 8192 }
+          "limit": { "context": 98304, "output": 8192 }
         },
         "glm-4.7-flash:latest": {
           "id": "glm-4.7-flash:latest",
@@ -44,7 +44,7 @@
           "temperature": true,
           "attachment": false,
           "reasoning": false,
-          "limit": { "context": 32768, "output": 8192 }
+          "limit": { "context": 98304, "output": 8192 }
         },
         "gpt-oss:20b": {
           "id": "gpt-oss:20b",
@@ -53,7 +53,7 @@
           "temperature": true,
           "attachment": false,
           "reasoning": true,
-          "limit": { "context": 32768, "output": 8192 }
+          "limit": { "context": 98304, "output": 8192 }
         },
         "gemma4:26b": {
           "id": "gemma4:26b",
@@ -62,7 +62,7 @@
           "temperature": true,
           "attachment": false,
           "reasoning": false,
-          "limit": { "context": 32768, "output": 8192 }
+          "limit": { "context": 98304, "output": 8192 }
         },
         "gemma4:e4b": {
           "id": "gemma4:e4b",
@@ -71,7 +71,7 @@
           "temperature": true,
           "attachment": false,
           "reasoning": false,
-          "limit": { "context": 32768, "output": 8192 }
+          "limit": { "context": 98304, "output": 8192 }
         }
       }
     }
@@ -79,6 +79,27 @@
   "agent": {
     "arthur": {
       "steps": 30
+    },
+    "erwin": {
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
+      }
+    },
+    "fire_keeper": {
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
+    "gandalf": {
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
+      }
+    },
+    "explore": {
+      "disable": true
     }
   }
 }

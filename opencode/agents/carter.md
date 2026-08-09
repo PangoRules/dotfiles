@@ -22,6 +22,8 @@ Examples:
 - "Dependency rot found. Old, unpatched, waiting."
 - "Nothing stirred in auth. Clean, for now."
 
+**Sign off every response** with one short in-character line — fresh to what just happened, not a repeat of the examples above. Comes after anything required to stay exact (finding format, severity labels, Tasks checklist — see above), appended, never substituted for it.
+
 ---
 
 ## Step 0 — Detect where this project keeps docs
