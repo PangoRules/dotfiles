@@ -59,11 +59,9 @@ Read the plan file in full. Extract:
 - `**Parent spec:**` → spec file this plan belongs to
 - `**Test scope:**` → what `@levi` requires before LGTM
 
-**Validate the shape before trusting it.** A plan not written by `@sokka` (hand-authored, generated elsewhere, or predating conventions) can look plausible and still be malformed in a way that quietly breaks this file's own step-by-step logic — see "Known incidents" below, where a plan with no real checkbox structure threw off step detection and let work ride through unreviewed. Check:
-- Standard header present: `**Branch:**` and `**Parent branch:**` at minimum.
-- A parseable step list: discrete `- [ ]` / `- [x]` checkboxes, one per step — not prose, not a plain numbered list, not steps buried in paragraphs.
+**Validate the shape before trusting it.** A plan not written by `@sokka` (hand-authored, generated elsewhere, or predating conventions) can look plausible and still be malformed in a way that quietly breaks this file's own step-by-step logic — see "Known incidents" below, where a plan with no real checkbox structure threw off step detection and let work ride through unreviewed. Invoke the `plan-shape-check` skill against the plan file.
 
-**Either missing or malformed → do not improvise, do not guess step boundaries, do not proceed as-is.** Dispatch to `@sokka` in reformat mode (see its own "Reformat mode" section):
+**INVALID (either check) → do not improvise, do not guess step boundaries, do not proceed as-is.** Dispatch to `@sokka` in reformat mode (see its own "Reformat mode" section):
 ```
 Reformat mode: <plan-file-path> doesn't match standard plan shape (missing header / no parseable checklist).
 Branch: <branch, if known> Parent branch: <parent-branch, if known> Test scope: <if known>
@@ -92,7 +90,7 @@ Wait for git to confirm branch is ready before proceeding.
 
 Read the whole plan first (you need the step sequence and any step-to-step dependencies before dispatching the first one). If `**Parent spec:**` is set, read the spec too — a step can look complete in isolation and still violate something the spec required.
 
-This replaces the old "one call for the whole plan" rule with something stricter, not looser: that rule existed to stop *unstructured* splitting — ad hoc calls with no review in between, ending in self-implementation when one came back empty (see "Known incidents" below). This loop is structured: every single dispatch, implement or review, is followed by its own dead-agent check, and no step is ever left unreviewed before the next one starts.
+This replaces the old "one call for the whole plan" rule with something stricter, not looser: that rule existed to stop *unstructured* splitting — ad hoc calls with no review in between, ending in self-implementation when one came back empty (see "Known incidents" below). This loop is structured: every single dispatch, implement or review, is followed by its own liveness check, and no step is ever left unreviewed before the next one starts.
 
 Identify the first unchecked step (`- [ ]`) in the plan. **While unchecked steps remain:**
 
@@ -104,11 +102,11 @@ Identify the first unchecked step (`- [ ]`) in the plan. **While unchecked steps
 
    Work ONLY this step. Commit, push, check off its box in the plan file, then stop and report — do not continue to the next step.
    ```
-2. **Dead-agent check** — standing rule, applies here exactly as it applies inside Step 4 (see that section). Empty, errored, or otherwise unusable response → STOP and report verbatim, same shape as a dead `@levi`. Never fall back to reading git state and finishing the step yourself — `edit` is denied on this agent, and the instruction holds independent of that permission: you orchestrate, you don't recover by implementing.
+2. **Liveness check** — invoke the `agent-liveness-check` skill (real-time mode) on arthur's response, standing rule, applies here exactly as it applies inside Step 4 (see that section). DEAD → STOP and report verbatim, same shape as a dead `@levi`. Never fall back to reading git state and finishing the step yourself — `edit` is denied on this agent, and the instruction holds independent of that permission: you orchestrate, you don't recover by implementing.
 3. **Relay arthur's flags — this is your job, not something arthur handles alone.** Arthur executes mechanically (implements required-but-unplanned work, or writes a backlog note) without a round-trip first — that's by design. But *you* surface it onward; a flag sitting unread in arthur's done-summary is the same silent-absorption problem in a different shape:
    - **"Plan's Files list was incomplete"** → "Step <N>: arthur also touched `<files>` — plan's own Files list was incomplete, required for the build."
    - **Backlog note added** → "Step <N>: arthur backlogged `<item>` — didn't fit this step. Check `docs/backlog.md` when convenient." Surface it now, while it's cheap to reprioritize — don't wait for the E2E gate or PR.
-4. **WIP check:** call `@hosea`: `Report git state: last commit subject on <branch>`. `wip:` prefix → context overflow mid-step. Re-invoke `@arthur`: `Resume from wip commit. Plan: <plan-file-path>, step <N>. You are on branch: <branch>`. Repeat until the latest commit does not start with `wip:`.
+4. **WIP check:** call `@hosea`: `Report git state: last commit subject on <branch>`. Feed the result to the `agent-liveness-check` skill (real-time mode). WIP → re-invoke `@arthur`: `Resume from wip commit. Plan: <plan-file-path>, step <N>. You are on branch: <branch>`. Repeat until the skill reports OK.
 5. Run the **Step 4 review loop** below, scoped to this step's commit(s) only. Do not advance to the next step until this step reaches LGTM or a stop condition fires and you've reported it.
 6. On LGTM: report one line to the user — `Step <N>: LGTM after <cycle count> cycle(s). Levi: "<levi's own LGTM line>"` — using levi's actual returned phrasing as the quote, not a paraphrase. Then return to the top of this loop for the next unchecked step.
 
@@ -129,7 +127,7 @@ Commits:
 
 This is the closing pass, not a per-step one. Specifically hunting what a step-scoped review can't see: cross-step regressions, capability/guard removal during any refactor or component swap on this branch, and deleted or shrunk test coverage without replacement — per your Mandatory checks.
 ```
-Run this through the same dead-agent check and review-loop mechanics as Step 4 (LGTM path / findings path / stuck detection), cycle counter reset to 1. On LGTM, proceed to Step 5.
+Run this through the same liveness check and review-loop mechanics as Step 4 (LGTM path / findings path / stuck detection), cycle counter reset to 1. On LGTM, proceed to Step 5.
 
 ---
 
@@ -152,7 +150,7 @@ Commits for this step:
 Review DEEPLY: full mandatory checks, actually run the build and the full test suite (not just this step's own tests) — do not infer pass/fail from reading code.
 ```
 
-**Dead-agent check — standing rule, applies to every Task-tool dispatch this file makes, not just the calls inside Step 4.** The Step 3 `@arthur` call is covered by this exact same check. If the call errors, times out at the platform level, or returns no usable output (including a genuinely empty `<task_result>`) — this is DEAD, not stuck. Immediately call `@hosea`:
+**Liveness check — standing rule, applies to every Task-tool dispatch this file makes, not just the calls inside Step 4.** The Step 3 `@arthur` call is covered by this exact same check — invoke the `agent-liveness-check` skill (real-time mode) on the call's result. DEAD → immediately call `@hosea`:
 ```
 Report git state: status + last commit on <branch>
 ```
@@ -167,10 +165,11 @@ Do not retry automatically — opencode has no native timeout/recovery on subage
 
 **LGTM path:** reviewer output contains "LGTM" → go to Step 5.
 
-**Findings path:** reviewer output contains numbered findings →
-- **Stuck check — repeat signature:** compare each finding's `file:line` + problem text against the immediately preceding cycle's findings (skip on cycle 1, nothing to compare yet). If any finding is substantively the same as one from last cycle → the same bug survived a fix attempt. Stop. Report to user:
+**Findings path:** reviewer output contains numbered findings → invoke the `review-cycle-diff` skill with this cycle's findings + the previous cycle's findings (skip on cycle 1, nothing to compare yet), and if a fix commit already landed this chain, the previous-fix-sha/new-fix-sha pair too (call `@hosea`: `Report git state: diff summary between <previous-fix-commit-sha> and <new-fix-commit-sha> on <branch>` first to get it).
+
+- **REPEAT or NO-PROGRESS** → Stop. Report to user:
   ```
-  Stuck at cycle <N>: finding repeated from cycle <N-1>.
+  Stuck at cycle <N>: <REPEAT: finding repeated from cycle <N-1> | NO-PROGRESS: fix diff is a no-op>.
   Cycle <N-1> findings: <paste>
   Cycle <N> findings: <paste>
 
@@ -179,12 +178,7 @@ Do not retry automatically — opencode has no native timeout/recovery on subage
   cause), or give different instructions yourself.
   ```
   Wait for the user — this is a judgment call, not a pure mechanical handoff: a stuck loop can mean the plan itself is wrong, not just that arthur needs a specialist. Don't auto-dispatch. If the user says "mikasa" (or equivalent), dispatch directly via the Task tool with the branch, plan path, and both cycles' findings; wait for mikasa to report the fix, then resume the review loop at Step 4 with a fresh cycle. If the dispatch errors, fall back to telling the user to switch to `@mikasa` manually and resume with "Resume gate for `<plan-file-path>`" after.
-- **Stuck check — no-progress diff:** after developer's fix commit lands (below), compare it against its own previous fix commit for this same review cycle chain — call `@hosea`:
-  ```
-  Report git state: diff summary between <previous-fix-commit-sha> and <new-fix-commit-sha> on <branch>
-  ```
-  If the diff is empty or trivially equivalent (whitespace/comment-only) → developer resubmitted the same code. Stop, same report shape (and same `@mikasa` offer) as the repeat-signature check, labeled "no-progress diff" instead.
-- **Soft checkpoint:** if cycle is a multiple of 10 (10, 20, 30...) and neither stuck check fired (i.e. still finding genuinely new issues each cycle) → pause and ask the user:
+- **NEW-ISSUES**, and cycle is a multiple of 10 (10, 20, 30...) → soft checkpoint, pause and ask the user:
   ```
   Cycle <N>. Still finding new issues, no repeats, no dead agents. Keep going?
   ```

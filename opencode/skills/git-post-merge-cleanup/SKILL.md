@@ -47,12 +47,11 @@ fi
 Already archived (file not found) → skip silently, expected case. Never `rm` a plan file — it's a permanent record once archived, same as `docs/archive/specs/`.
 
 **0d. Check if all tasks are done:**
-```bash
-grep "\- \[ \]" docs/specs/<parent-spec-file>.md
-```
-- If output is empty → all tasks complete. Print: `"All tasks done. Creating milestone PR."`
+
+Invoke the `milestone-completion-check` skill against `docs/specs/<parent-spec-file>.md`.
+- Complete → print: `"All tasks done. Creating milestone PR."`
   Then invoke the `git-pr-create` skill: source `feat/<milestone-slug>`, target `main`. Never a local `git merge` — a PR is the only path to `main`.
-- If output has remaining `[ ]` items → more tasks remain. Stop here.
+- Tasks remain → stop here, report which ones (the skill names them).
 
 ---
 

@@ -42,15 +42,7 @@ Everything from Step 0 through "Lessons Learned" is the Post-LGTM update flow. "
 
 ## Step 0 — Detect this project's doc convention
 
-Do not assume the "Standard docs layout" below applies. Check first:
-- Read `AGENTS.md` / `CLAUDE.md` if present — many projects declare their real doc layout there (e.g. a project might use `docs/scope.md`, `docs/functional-spec.md`, `docs/architecture.md` instead of the numbered scheme).
-- Run `ls docs/` and look at what already exists.
-
-If the project has its own established layout, follow it — find the file that already serves each intent below by content, not by guessing a filename:
-- **"mark task done"** → whichever file tracks milestone/phase checklists (could be a roadmap file, or a "live" checklist section inside a functional-spec-type file).
-- **"document new files"** → whichever file documents repo structure/architecture (could be a dedicated file, or folded into an architecture doc).
-
-Only fall back to the "Standard docs layout" section below when the project has no established convention of its own (e.g. a fresh project with no `docs/` folder yet).
+Do not assume the "Standard docs layout" below applies. Invoke the `docs-convention-detect` skill — it checks `AGENTS.md`/`CLAUDE.md` and `ls docs/`, matches "mark task done" and "document new files" intents to whatever the project already has, and only falls back to the "Standard docs layout" section below when nothing established exists.
 
 Rules:
 - Read files and diffs to understand what changed.
@@ -77,7 +69,7 @@ After LGTM, before committing — scan for lessons not yet documented:
    git log origin/<parent-branch>..<current-branch> --oneline
    ```
 2. Identify signals:
-   - `wip:` commits → context overflow happened mid-task
+   - Invoke the `agent-liveness-check` skill (history-scan mode) on that commit range — any `wip:` commits found mean context overflow happened mid-task at some point, worth noting if it's a pattern
    - Steps that required multiple reviewer fix cycles → tricky pattern worth noting
    - Any `# WORKAROUND` or `# HACK` comments introduced in source files
    - Framework/library behavior that surprised the developer (visible in commit messages or reviewer findings)
@@ -101,17 +93,14 @@ Triggered by `@erwin` with "Recheck docs on branch <branch> before PR... Then ar
    mkdir -p docs/archive/plans
    git mv <plan-file-path> docs/archive/plans/<plan-filename>
    ```
-3. **Archive the spec, if the milestone is complete** — check the parent spec:
-   ```bash
-   grep -c "^- \[ \]" docs/specs/<spec-slug>.md
-   ```
-   If `0` (no unchecked tasks remain in the spec's `## Tasks` section):
+3. **Archive the spec, if the milestone is complete** — invoke the `milestone-completion-check` skill against the parent spec.
+   Complete:
    ```bash
    mkdir -p docs/archive/specs
    git mv docs/specs/<spec-slug>.md docs/archive/specs/<spec-slug>.md
    git mv docs/manual-validation/<spec-slug>-matrix.md docs/archive/specs/<spec-slug>-matrix.md 2>/dev/null || true
    ```
-   If unchecked tasks remain: leave the spec in `docs/specs/` in place. Skip.
+   Tasks remain: leave the spec in `docs/specs/` in place. Skip.
 4. **One commit** covering drift-fix + plan archive + spec archive (if any), push. Report back to commander: what got archived (plan; spec + matrix if the milestone closed; or "spec left in place, N tasks remaining").
 
 There is no per-plan matrix file to consolidate — `@levi` now writes directly into the single spec-level matrix (`docs/manual-validation/<spec-slug>-matrix.md`) on any `e2e`-scoped task's LGTM, so by the time this step runs the matrix is already in its final form for this task. Nothing to merge here.

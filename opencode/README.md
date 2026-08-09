@@ -73,6 +73,12 @@ Gandalf knows the whole roster, asks one clarifying question if genuinely unclea
 | `skills/git-post-merge-cleanup` | After PR merges: mark spec checkbox, archive plan file, delete branch, `git fetch --prune`, detect milestone completion |
 | `skills/git-stash` | Stash/pop/list/drop uncommitted changes. Idempotent against an empty stash |
 | `skills/git-history-edit` | Tag, revert, cherry-pick, amend — amend only on unpushed commits, revert/cherry-pick never target `main` directly, no force-push without the literal request |
+| `skills/plan-shape-check` | Validates a plan file's header + `- [ ]`/`- [x]` checklist shape. Used by `@sokka` right after drafting (catch at source) and `@erwin` before trusting a plan it didn't write |
+| `skills/agent-liveness-check` | Classifies a subagent dispatch result DEAD/WIP/OK (real-time mode, `@erwin`'s dead-agent/resume checks), or scans a commit range for `wip:` commits (history-scan mode, `@iroh`'s Lessons Learned) — one definition of the `wip:` convention instead of two |
+| `skills/review-cycle-diff` | Classifies a review cycle REPEAT/NO-PROGRESS/NEW-ISSUES against the previous cycle's findings/fix-commit — `@erwin`'s stuck-loop detection |
+| `skills/coverage-check` | Generic native-tool coverage fallback (tsc+vitest/jest, go test -cover, cargo tarpaulin) for stacks with no dedicated verification skill — `@levi` never gets a silent "no coverage check ran" |
+| `skills/milestone-completion-check` | Single definition of "is this spec's `## Tasks` checklist fully checked" — used by both `git-post-merge-cleanup` and `@iroh`'s Recheck Mode, previously two independent grep patterns that could disagree |
+| `skills/docs-convention-detect` | Detects a project's own doc layout (AGENTS.md/CLAUDE.md, `ls docs/`) before `@iroh` writes anything, falls back to the standard layout only if nothing established exists |
 | `skills/test-failure-diagnosis` | Diagnose test failures before investigating values |
 | `skills/manual-validation-matrix` | Output a test matrix for manual validation |
 | `skills/dotnet-verification` | .NET/EF Core build, test, migration-drift check sequence |
