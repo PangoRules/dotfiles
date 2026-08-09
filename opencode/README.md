@@ -545,6 +545,22 @@ Loaded automatically on startup. Verify with `cat ~/.local/share/opencode/log/<l
 
 **Why `opencode-dynamic-context-pruning` was dropped (2026-08-09):** two confirmed open bugs on the upstream repo. [#560](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning/issues/560) — default `range`-mode compaction can replay a stale approval phrase as if it were the current answer, letting a plan-mode agent bypass its own execution restriction. This directly threatens the confirmation-gate pattern this whole config leans on (main-branch commit confirmation, milestone-abandon cascade confirmation, etc.) — and it fires under our *default* config, no experimental flag needed. [#595](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning/issues/595) — resuming a subagent via `task_id` silently rewrites earlier rounds' results with the latest reply; only triggers with `experimental.allowSubAgents: true`, which we never enabled, so we were accidentally unaffected — but it also meant DCP was only ever pruning the top-level primary session, never any of the 11 subagents. `context-mode`'s structured decision-tracking (discrete DB records, not raw-text summarization) avoids #560's failure class by construction, and gets full session coverage on OpenCode out of the box.
 
+**`opencode-vibeguard` was found to be a total no-op (2026-08-09):** it requires a `vibeguard.config.json` (project root, `.opencode/`, or `~/.config/opencode/`) listing the specific strings to mask, and becomes a silent no-op without one — no such file exists anywhere on this machine. Even configured, it's the wrong tool for secret *files*: it masks configured strings from the cloud provider only, then explicitly restores real values before any local tool (`bash`/`write`/`edit`) executes. It was never protecting anything here, and wouldn't have stopped an agent from reading or writing a real secret file even if it had been configured. Kept installed (it's still useful for its actual purpose — masking specific known tokens from providers — if someone populates the config later) but is not what enforces the policy below.
+
+---
+
+## Secrets protection (2026-08-09)
+
+No agent may read or write real secret files, full stop — enforced by opencode's native permission system (`opencode.json` top-level `permission` block), not by prompting any agent to behave. This applies to every agent uniformly, including ones not yet built, since it's checked below the prompt layer.
+
+**Denied outright** (read, edit, and grep all refuse — the agent doesn't even get partial content back): `.env` and any `.env.*` variant, `appsettings.json` and any `appsettings.*.json` variant, private key files (`*.pem`, `*.key`, `*.pfx`, `*.p12`, `id_rsa`, `id_ed25519`), and common secret-manifest files (`secrets.yml`/`.yaml`/`.json`, `credentials.json`, `.npmrc`, `.netrc`, `.aws/credentials`).
+
+**Explicitly allowed** — these never contain real secrets by convention, denying them would just break legitimate work: `.env.example`, `.env.sample`, `*.env.example`, `appsettings.Development.json`, `appsettings.Example.json`, `appsettings.Sample.json`.
+
+Real secret changes are a manual, human-only action from here — an agent that needs a new env var or connection string names it in its report and stops; it does not write the value itself. This is a hard block, not masking — no plugin here can safely do "show keys, redact values" (that needs a custom content-transform layer, which none of the installed plugins provide once you actually account for what they do — see the vibeguard note above); denying the whole file is stronger anyway, since there's no partial-content path to leak from.
+
+**Known limitation, stated honestly:** the `bash` tool's deny rules match against the command *string* (`*cat*.env*` etc.), not a file path — this stops the obvious cases (`cat .env`, `head .env.production`) but a deliberately obfuscated command (`python3 -c "print(open('.env').read())"`, piping through `base64`, etc.) could route around it. The `read`/`edit`/`grep` denials are the real guarantee, since those tools take structured file-path arguments matched by glob, not free-text commands. If an agent ever needs to *touch* one of these files for a legitimate reason (rotating a key, scaffolding a new `.env` from `.env.example`), that has to go through you directly, not through any agent in this roster.
+
 ---
 
 ## Per-machine setup
