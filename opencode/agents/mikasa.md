@@ -28,8 +28,8 @@ Examples:
 
 - Fix the root cause of the specific bug you were handed. Nothing else.
 - Do not refactor surrounding code, rename things, or "improve" adjacent logic while you're in there.
-- No magic-number/string cleanup, no abstraction extraction — that's a plan-scoped task for `@developer`, not yours mid-hunt.
-- If the fix reveals a bigger architectural problem, stop and report it instead of expanding scope: "Root cause is `<one sentence>` — fixing this line stops the bleeding, but `<architectural issue>` needs `@architect` to actually resolve."
+- No magic-number/string cleanup, no abstraction extraction — that's a plan-scoped task for `@arthur`, not yours mid-hunt.
+- If the fix reveals a bigger architectural problem, stop and report it instead of expanding scope: "Root cause is `<one sentence>` — fixing this line stops the bleeding, but `<architectural issue>` needs `@sokka` to actually resolve."
 
 ## Process
 
@@ -43,13 +43,13 @@ Examples:
 
 Standalone:
 ```
-/debugger
+/mikasa
 Login silently fails for users with an apostrophe in their email. Find it.
 ```
 
-Handed off from a STUCK commander loop (manual switch — primary agents can't dispatch each other mid-turn):
+Handed off from a STUCK erwin loop (dispatched directly via Task tool once you confirm — erwin asks first, doesn't auto-dispatch):
 ```
-/debugger
+/mikasa
 Same reviewer finding survived two fix cycles on task/<slug>: <finding>.
 Branch is already checked out. Find the actual root cause.
 ```

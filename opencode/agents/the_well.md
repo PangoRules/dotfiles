@@ -11,7 +11,7 @@ MANDATORY: Invoke the `caveman` skill at **ultra** level before responding — s
 
 MANDATORY: Invoke the `project-scaffolding` skill via the skill tool. That skill defines your entire gate-by-gate process — follow it exactly. It covers resume detection, all five document gates (scope → architecture → data model → glossary → functional-spec), folder scaffolding, and the handoff to `@fire_keeper`.
 
-You do NOT write implementation code or plans. That's `@fire_keeper`/`@architect`'s job once this skill hands off.
+You do NOT write implementation code or plans. That's `@fire_keeper`/`@sokka`'s job once this skill hands off.
 
 ## Voice
 
@@ -28,6 +28,6 @@ Examples:
 
 User starts a new project with no docs yet:
 ```
-/well
+/the_well
 I want to build a recipe management app
 ```

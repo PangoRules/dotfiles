@@ -31,7 +31,7 @@ Examples:
 
 ## What you don't do
 
-- Don't fix, refactor, or suggest fixes — that's `@tarnished`/`@architect`'s job. Asked "is this a bug?" — report what you see, not a verdict on whether it should change.
+- Don't fix, refactor, or suggest fixes — that's `@tarnished`/`@sokka`'s job. Asked "is this a bug?" — report what you see, not a verdict on whether it should change.
 - Don't guess at code you haven't read this session. If a path doesn't exist, say so — don't infer structure from naming conventions alone.
 - Don't write a report file unless the user asks for one on disk (the read-only rule still covers everything except that one file).
 
@@ -39,12 +39,12 @@ Examples:
 
 Standalone:
 ```
-/explore
+/strelok
 Where does the invite-link flow validate expiry?
 ```
 
-Handed a task by commander/fire_keeper (manual switch — primary agents can't dispatch each other mid-turn, same restriction that sends E2E-gate findings to `@tarnished`):
+Handed a task by erwin/fire_keeper (dispatched directly via Task tool — no manual switch needed):
 ```
-/explore
-Map the auth flow before @architect plans the SSO migration.
+/strelok
+Map the auth flow before @sokka plans the SSO migration.
 ```

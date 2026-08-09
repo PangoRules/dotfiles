@@ -67,7 +67,7 @@ Three questions for the architecture:
 
 Synthesize into `architecture.md`:
 - System overview (what it is, what it isn't — one paragraph)
-- Layer structure — name the actual layers and the dependency direction between them (e.g. `Domain ← Application ← Infrastructure ← Server/Client`). If it's Clean Architecture, say so explicitly and name what belongs in each layer — this table gets read by `@architect` on every future plan, ambiguity here compounds
+- Layer structure — name the actual layers and the dependency direction between them (e.g. `Domain ← Application ← Infrastructure ← Server/Client`). If it's Clean Architecture, say so explicitly and name what belongs in each layer — this table gets read by `@sokka` on every future plan, ambiguity here compounds
 - Key patterns (CQRS, event-driven, REST vs GraphQL, real-time transport, etc.)
 - Component map — major pieces and how they connect
 - Cross-cutting concerns worth settling now: error handling shape (exceptions vs Result types), auth model, real-time strategy — these are expensive to change once code exists, cheap to decide now
@@ -154,7 +154,7 @@ Last gate: the roadmap.
 ```
 **STOP. Wait for answers.**
 
-This is the document every other agent in the system reads most — `@architect` splits phases into plans, `@docs` ticks checkboxes here every task, `@fire_keeper` gates on it existing at all. Use the FR-numbered shape, not a bare bullet list — it scales to a large project without losing traceability, and every requirement gets a stable ID other docs/commits can reference (`D-14 supersedes FR-88`, `plan fixes FR-102`).
+This is the document every other agent in the system reads most — `@sokka` splits phases into plans, `@iroh` ticks checkboxes here every task, `@fire_keeper` gates on it existing at all. Use the FR-numbered shape, not a bare bullet list — it scales to a large project without losing traceability, and every requirement gets a stable ID other docs/commits can reference (`D-14 supersedes FR-88`, `plan fixes FR-102`).
 
 ```markdown
 # <Project Name> — Functional Specification
@@ -188,7 +188,7 @@ This is the document every other agent in the system reads most — `@architect`
 
 ### Phase 1: <name> 🏗️
 > Goal: <one sentence>
-- [ ] <milestone or feature — this becomes one @brainstorm spec later>
+- [ ] <milestone or feature — this becomes one @armin spec later>
 - [ ] <milestone or feature>
 
 ### Phase 2: <name>
@@ -199,7 +199,7 @@ Group FRs by domain area (auth, real-time, a given feature module), not by phase
 
 If a phase has a decision that must be made before implementation starts (e.g. "pick a file storage backend before Phase 2"), add a `> ⚠️ **Pre-phase decision needed:** ...` blockquote directly under that phase's heading with a recommendation — don't bury infra decisions in prose the architect has to hunt for.
 
-The checkboxes are LIVE — `@docs` ticks them as work completes. Never delete checked items.
+The checkboxes are LIVE — `@iroh` ticks them as work completes. Never delete checked items.
 
 Show the draft inline.
 
@@ -238,7 +238,7 @@ Write `docs/backlog.md` stub:
 git add docs/ && git commit -m "docs: scaffold remaining documentation structure"
 ```
 
-A project may grow docs beyond this baseline set as it goes (e.g. a standalone vision/pipeline doc for a specific subsystem) — that's fine, `@brainstorm` or the user can add those ad hoc later. This skill only owns the five gated foundational docs plus the folder scaffold.
+A project may grow docs beyond this baseline set as it goes (e.g. a standalone vision/pipeline doc for a specific subsystem) — that's fine, `@armin` or the user can add those ad hoc later. This skill only owns the five gated foundational docs plus the folder scaffold.
 
 ---
 
