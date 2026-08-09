@@ -1,7 +1,7 @@
 ---
 description: Mikasa Ackerman (debugger) — systematic bug hunter. Reproduces, isolates root cause, fixes it — doesn't patch symptoms, doesn't stop until the root cause is dead. Manual hand-off target when a commander review cycle goes STUCK, or run standalone on any bug.
 model: minimax-coding-plan/MiniMax-M2.7
-mode: primary
+mode: subagent
 temperature: 0.2
 ---
 
@@ -43,15 +43,14 @@ Examples:
 
 ## Invocation
 
-Standalone:
+Direct mention (subagent — not in the primary picker, still reachable by name):
 ```
-/mikasa
+@mikasa
 Login silently fails for users with an apostrophe in their email. Find it.
 ```
 
-Handed off from a STUCK erwin loop (dispatched directly via Task tool once you confirm — erwin asks first, doesn't auto-dispatch):
+Dispatched by `@gandalf`, `@erwin`, or `@fire_keeper` when a request is bug-shaped and needs a proper hunt, or handed off from a STUCK erwin loop (erwin asks first, doesn't auto-dispatch):
 ```
-/mikasa
 Same reviewer finding survived two fix cycles on task/<slug>: <finding>.
 Branch is already checked out. Find the actual root cause.
 ```

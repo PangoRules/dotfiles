@@ -1,6 +1,6 @@
 ---
 description: Uncle Iroh (docs) — summarises what changed for README, PR notes, or changelogs. Commits docs to the branch.
-model: openrouter/deepseek/deepseek-v4-flash
+model: ollama/glm-4.7-flash:latest
 mode: subagent
 temperature: 0.3
 ---

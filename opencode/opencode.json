@@ -83,19 +83,27 @@
     "erwin": {
       "permission": {
         "edit": "deny",
-        "bash": "deny"
+        "bash": "deny",
+        "task": "allow"
       }
     },
     "fire_keeper": {
       "permission": {
         "edit": "deny",
-        "bash": "ask"
+        "bash": "ask",
+        "task": "allow"
       }
     },
     "gandalf": {
       "permission": {
         "edit": "deny",
-        "bash": "deny"
+        "bash": "deny",
+        "task": "allow"
+      }
+    },
+    "tarnished": {
+      "permission": {
+        "task": "allow"
       }
     },
     "explore": {

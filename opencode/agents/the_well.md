@@ -1,6 +1,6 @@
 ---
 description: The Well (init) — defines a project from scratch — works through scope, architecture, data model, glossary, and functional-spec gates with the user before any implementation begins.
-model: openrouter/google/gemini-2.5-flash
+model: ollama/glm-4.7-flash:latest
 mode: primary
 temperature: 0.5
 ---

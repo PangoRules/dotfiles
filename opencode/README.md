@@ -4,11 +4,11 @@ Global opencode configuration, agents, skills, and commands — tracked in dotfi
 
 ## Agent names
 
-Primary agents (the ones you can switch to / invoke directly, shown in chat) are themed — dark fantasy and adventure fiction pulled from Lovecraft, Murakami, Attack on Titan, Dark Souls, Elden Ring, S.T.A.L.K.E.R., Red Dead Redemption 2, and now LOTR, one codename per universe (a couple of universes cover two roles each — AoT gives us Commander, the debugger, and now brainstorm; RDR2 gives us git and developer). Every reference includes the old functional name in parentheses as a hint, e.g. **The Well (init)**, since the codename alone doesn't tell you what it does. Mention/slash-command form is always lowercase, no spaces, underscores for multi-word names: `@the_well`, `@fire_keeper`, `@erwin`, `@tarnished`, `@carter`, `@strelok`, `@mikasa`, `@gandalf`.
+Primary agents (the ones you can switch to / invoke directly, shown in chat) are themed — dark fantasy and adventure fiction pulled from Murakami, Attack on Titan, Dark Souls, and now LOTR, one codename per universe. Every reference includes the old functional name in parentheses as a hint, e.g. **The Well (init)**, since the codename alone doesn't tell you what it does. Slash-command form is always lowercase, no spaces, underscores for multi-word names: `/the_well`, `/fire_keeper`, `/erwin`, `/gandalf`.
 
-**The four you live in day to day:** `@the_well` (new project), `@fire_keeper` (plan the next feature), `@erwin` (build an approved plan), `@tarnished` (quick task, no ceremony). `@carter`, `@strelok`, `@mikasa` are on-demand specialists you reach for by name when the situation calls for them. `@gandalf` is the fifth touchpoint for when you don't know which of the above you need — see "Not sure where to start?" below.
+**All four primaries, day to day:** `/the_well` (new project), `/fire_keeper` (plan the next feature), `/erwin` (build an approved plan), `/gandalf` (not sure which of the above, or anything off-script — a bug report, a security concern, a cleanup request). That's the whole picker now — everything else is a subagent, reached by `@mention` rather than a slash command.
 
-Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`) keep their plain functional names — they aren't user-switchable and don't show up in the chat picker, so a codename would only add indirection with no payoff. Every subagent now carries a `## Voice` section too (same pattern as the primaries) — it colors prose only, never the file formats, commit messages, or checklist conventions those agents produce.
+Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`, `builder`, `security`, `explore`, `debugger`) keep their plain functional names — they aren't user-switchable and don't show up in the chat picker, so a codename would only add indirection with no payoff. `@tarnished`/`@carter`/`@strelok`/`@mikasa` moved here from the primary picker on 2026-08-09 — they were always dispatched-to more than switched-to in practice (erwin/fire_keeper already called them directly via the Task tool), so the picker entry was pure clutter. Still fully reachable — type `@tarnished`, `@carter`, `@strelok`, or `@mikasa` directly, same as `@hosea` always has been. Every subagent carries a `## Voice` section too (same pattern as the primaries) — it colors prose only, never the file formats, commit messages, or checklist conventions those agents produce.
 
 **Correction (2026-08-08):** an earlier pass here had `brainstorm` reusing The Well's voice. Wrong — The Well is `init` only, the one-time project-from-zero agent. Brainstorm now has its own character (Armin Arlert) below.
 
@@ -17,8 +17,6 @@ Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`) ke
 | **The Well** | `init` | Murakami | descent into stillness to define the world before anything's built — project creation only, not reused elsewhere |
 | **Fire Keeper** | `planner` | Dark Souls | tends the flame between two checkpoints, turns raw intent into the structured thing others follow — calls brainstorm then architect when starting a new phase |
 | **Commander (Erwin)** | `orchestrator` | Attack on Titan | sends the squad into the loop, holds every hard gate, doesn't flinch when the review loop runs long — knows the difference between stuck and just thorough |
-| **Tarnished** | `builder` | Elden Ring | no fixed path, wanders in and does whatever the moment needs — the driver for quick tasks and implementations |
-| **Carter** | `security` | Lovecraft (Randolph Carter) | investigator who goes looking for what's hidden and shouldn't be |
 | **Gandalf** | `router` (new) | LOTR | knows every member of the roster by their strengths, sends you to the one built for what you actually need |
 | **Sokka** | `architect` (subagent) | Avatar: The Last Airbender | the plan guy — three steps ahead, writes it down before anyone swings |
 | **Arthur Morgan** | `developer` (subagent) | Red Dead Redemption 2 | rides out and does the job while the planning happens elsewhere |
@@ -26,8 +24,10 @@ Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`) ke
 | **Uncle Iroh** | `docs` (subagent) | Avatar: The Last Airbender | patient teacher, cares more that the next person understands than being impressive |
 | **Hosea Matthews** | `git` (subagent) | Red Dead Redemption 2 | scouts the road, checks the saddles, minds what nobody else remembers to |
 | **Armin Arlert** | `brainstorm` (subagent) | Attack on Titan | sees the whole board — the plan survives because he questioned it from every side first |
-| **Strelok** | `explore` | S.T.A.L.K.E.R. | maps hostile terrain, leaves markers, reports without changing anything |
-| **Mikasa Ackerman** | `debugger` | Attack on Titan | closes distance on a bug one eliminated possibility at a time, doesn't stop until it's dead |
+| **Tarnished** | `builder` (subagent as of 2026-08-09) | Elden Ring | no fixed path, wanders in and does whatever the moment needs — dispatched-to by gandalf/erwin/fire_keeper, still mediates hosea/sokka calls for other subagents |
+| **Carter** | `security` (subagent as of 2026-08-09) | Lovecraft (Randolph Carter) | investigator who goes looking for what's hidden and shouldn't be |
+| **Strelok** | `explore` (subagent as of 2026-08-09) | S.T.A.L.K.E.R. | maps hostile terrain, leaves markers, reports without changing anything |
+| **Mikasa Ackerman** | `debugger` (subagent as of 2026-08-09) | Attack on Titan | closes distance on a bug one eliminated possibility at a time, doesn't stop until it's dead |
 
 ### Not sure where to start?
 
@@ -35,7 +35,7 @@ Subagents (`brainstorm`, `architect`, `developer`, `reviewer`, `docs`, `git`) ke
 /gandalf
 <describe what you're trying to do, however roughly>
 ```
-Gandalf knows the whole roster, asks one clarifying question if genuinely unclear, and hands back the exact next command — it doesn't do the work itself, same primary-can't-dispatch-primary restriction as everyone else.
+Gandalf knows the whole roster via the `roster-routing` skill (shared with erwin/fire_keeper — one definition of "what goes where," not three copies), asks one clarifying question if genuinely unclear, and dispatches directly. Primary-to-anything dispatch is confirmed to work on this platform (verified against opencode's actual Task tool source, 2026-08-09) — the only thing that gates it is each agent's own `permission` config explicitly allowing the `task` permission, which `gandalf`/`erwin`/`fire_keeper`/`tarnished` all now have.
 
 ---
 
@@ -45,19 +45,19 @@ Gandalf knows the whole roster, asks one clarifying question if genuinely unclea
 |------|---------|
 | `opencode.json` | Base config: default model (DeepSeek V4 Pro), plugins |
 | `agents/the_well.md` | **The Well (init)** — thin wrapper around the `project-scaffolding` skill: scope → architecture → data model → glossary → functional-spec, one gate each |
-| `agents/fire_keeper.md` | **Fire Keeper (planner)** — brief expansion → brainstorm → spec gate → architect → plan gate. Resume-aware (detects an in-progress spec/plan gate and re-opens it instead of restarting blind) |
-| `agents/erwin.md` | **Commander (orchestrator)** — branch setup → dev → review loop → docs → docs recheck → E2E gate → PR. Anything that isn't a plan-execution request (bug report, new idea, question) gets routed straight to `@gandalf` instead of improvised |
+| `agents/fire_keeper.md` | **Fire Keeper (planner)** — brief expansion → brainstorm → spec gate → architect → plan gate. Resume-aware (detects an in-progress spec/plan gate and re-opens it instead of restarting blind). Off-script input dispatches directly via `roster-routing`, same as erwin — the GATE2→`/erwin` hand-off itself stays a manually-printed command by design |
+| `agents/erwin.md` | **Commander (orchestrator)** — branch setup → dev → review loop → docs → docs recheck → E2E gate → PR. Anything that isn't a plan-execution request (bug report, new idea, question) is classified via the `roster-routing` skill and dispatched directly — no bounce through `@gandalf` for a call it can make itself |
 | `agents/armin.md` | Explores approaches, writes the finished design spec itself (callable standalone). `@fire_keeper` creates the branch and hands it the target path first — brainstorm Writes, commits (`caveman-commit`), and pushes its own file; still can't call `@hosea`/`@iroh` itself (subagents can't call other subagents in opencode). Reports a short goal recap alongside the committed path, not just the filename |
 | `agents/sokka.md` | Reads spec, writes step-by-step task plan file(s) itself, one per task, flagged `**Test scope:** unit\|http\|e2e` (callable standalone). `@fire_keeper` (milestone mode) or `@tarnished` (standalone quick mode) creates the branch first and hands it the target path; architect Writes, commits, pushes its own file(s). Milestone mode asks upfront whether to checkpoint after each plan or batch the whole set for one review; either way, reports a goal recap alongside each path |
 | `agents/arthur.md` | Executes plans. Implements, ticks plan checkboxes, commits and pushes directly using the `caveman-commit` skill (can't call `@hosea` itself — same subagent restriction) |
 | `agents/levi.md` | Captain Levi — reviews diffs against plan. Mandatory pre-LGTM checks: lint/format, new compiler warnings, CVEs on touched manifests, DRY, 75% business-logic coverage (boilerplate excluded via the language's own tag). LGTM output branches on the plan's `**Test scope:**`: `unit` = nothing more, `http` = requires a `.http` file, `e2e` = writes/extends the single spec-level regression matrix directly |
 | `agents/iroh.md` | **Write mode** (dormant — general-purpose content+path writer, no current caller since brainstorm/sokka write their own files now) and **update mode**, split into two commander-triggered calls: post-LGTM (docs update, mark task done, lessons learned — no archiving) and recheck-mode at Step 5.5 (drift check + archive plan + archive spec/matrix if milestone complete, all in one commit) |
 | `agents/hosea.md` | Thin dispatcher over the `git-*` skills below — branch creation (milestone/quick/task, called by `@fire_keeper`/`@tarnished`/`@erwin`), commit, stash, tag/revert/cherry-pick/amend, PR creation, post-merge cleanup, read-only state query for `@erwin`. Keeps only the judgment calls and hard rules itself (voice, confirmation gates, never merge/rebase/reset, never push `main` without confirmation, lingering-uncommitted-work preflight). Plan archiving is `@iroh`'s job (Step 5.5) — the PR-create skill's own archive step is a defensive fallback only |
-| `agents/tarnished.md` | **Tarnished (builder)** — triage: small → implement, complex → escalate to plan (reconciling into the milestone's spec first via `spec-task-append` if it's a mid-milestone addition), scope creep → backlog |
-| `agents/carter.md` | **Carter (security)** — read-only, finds exploitable gaps + vulnerable/outdated deps, writes a severity-ranked report with a `## Tasks` checklist, hands off to `@tarnished`/`@sokka` for remediation |
-| `agents/strelok.md` | **Strelok (explorer)** — read-only codebase mapping, on demand or as a manual hand-off target from `@erwin`/`@fire_keeper`. Never edits, never writes a report unless explicitly asked |
-| `agents/mikasa.md` | **Mikasa Ackerman (debugger)** — systematic bug hunter, on demand or as a manual hand-off target when a `@erwin` review cycle goes STUCK. Reproduces, isolates root cause, fixes it, commits — narrow scope, no adjacent refactors |
-| `agents/gandalf.md` | **Gandalf (router)** — entry point for "not sure what I need." Classifies the request against the full roster (including mid-milestone additions, abandon/cleanup, resume, and reverting a shipped feature), asks one clarifying question if unclear, hands back the exact next command. Never does the work itself |
+| `agents/tarnished.md` | **Tarnished (builder, subagent as of 2026-08-09)** — triage: small → implement, complex → escalate to plan (reconciling into the milestone's spec first via `spec-task-append` if it's a mid-milestone addition), scope creep → backlog. Dispatched-to by `@gandalf`/`@erwin`/`@fire_keeper` rather than switched-to directly; still mediates `@hosea`/`@sokka` calls for other subagents, needs its own explicit `task` permission grant in `opencode.json` to do so once it's itself a dispatch target |
+| `agents/carter.md` | **Carter (security, subagent as of 2026-08-09)** — read-only, finds exploitable gaps + vulnerable/outdated deps, writes a severity-ranked report with a `## Tasks` checklist, hands off to `@tarnished`/`@sokka` for remediation |
+| `agents/strelok.md` | **Strelok (explorer, subagent as of 2026-08-09)** — read-only codebase mapping, on demand or as a manual hand-off target from `@erwin`/`@fire_keeper`. Never edits, never writes a report unless explicitly asked |
+| `agents/mikasa.md` | **Mikasa Ackerman (debugger, subagent as of 2026-08-09)** — systematic bug hunter, on demand or as a manual hand-off target when a `@erwin` review cycle goes STUCK. Reproduces, isolates root cause, fixes it, commits — narrow scope, no adjacent refactors |
+| `agents/gandalf.md` | **Gandalf (router)** — entry point for "not sure what I need," and the only primary left whose main job IS routing. Thin wrapper around the `roster-routing` skill (shared with erwin/fire_keeper) — asks one clarifying question if unclear, dispatches directly. Never does the work itself |
 | `skills/project-scaffolding` | Gate-by-gate logic for `@the_well` — scope/architecture/data-model/glossary/functional-spec, folder scaffold, handoff to `@fire_keeper` |
 | `skills/dependency-vulnerability-scan` | SCA — detects whichever package ecosystems are present (npm/pnpm/yarn, NuGet, pip, Go, Cargo, Bundler) and runs the right CVE audit for each. Stack-agnostic |
 | `skills/security-code-review` | OWASP-style manual review: injection, XSS, broken authz/IDOR, secrets exposure, SSRF, insecure deserialization, weak crypto, missing rate-limiting/DoS resilience, CSRF, unsafe file upload. Stack-agnostic |
@@ -80,6 +80,7 @@ Gandalf knows the whole roster, asks one clarifying question if genuinely unclea
 | `skills/coverage-check` | Generic native-tool coverage fallback (tsc+vitest/jest, go test -cover, cargo tarpaulin) for stacks with no dedicated verification skill — `@levi` never gets a silent "no coverage check ran" |
 | `skills/milestone-completion-check` | Single definition of "is this spec's `## Tasks` checklist fully checked" — used by both `git-post-merge-cleanup` and `@iroh`'s Recheck Mode, previously two independent grep patterns that could disagree |
 | `skills/docs-convention-detect` | Detects a project's own doc layout (AGENTS.md/CLAUDE.md, `ls docs/`) before `@iroh` writes anything, falls back to the standard layout only if nothing established exists |
+| `skills/roster-routing` | Single source of truth for "what goes where" — the classification table `@gandalf`, `@erwin`, and `@fire_keeper` all consult for off-script input, each dispatching directly instead of relaying through gandalf's own turn |
 | `skills/test-failure-diagnosis` | Diagnose test failures before investigating values |
 | `skills/manual-validation-matrix` | Output a test matrix for manual validation |
 | `skills/dotnet-verification` | .NET/EF Core build, test, migration-drift check sequence |
@@ -308,14 +309,14 @@ when all tasks done:
 
 **Small bugfix — skip Fire Keeper entirely:**
 ```
-/tarnished
+@tarnished
 The login form crashes when email is empty. Write a fix plan.
 ```
-Goes through `@tarnished`, not raw `/sokka` — architect is a subagent and can't create the branch or write the plan itself once it's done thinking. Tarnished (primary) calls `@sokka` for the plan content, creates the branch via `@hosea` if you're not already on one, then writes it via `@iroh`. Then run `/erwin` with the plan path.
+Goes through `@tarnished`, not raw `@sokka` — architect is a subagent and can't create the branch or write the plan itself once it's done thinking. Tarnished calls `@sokka` for the plan content, creates the branch via `@hosea` if you're not already on one. Then run `/erwin` with the plan path. (`@tarnished` moved off the primary picker on 2026-08-09 but is still reachable the same way `@hosea` always has been — see "Agent names" at the top. `@gandalf`/`@erwin`/`@fire_keeper` can also dispatch to it directly for you via the `roster-routing` skill.)
 
 **Trivial one-liner — skip both:**
 ```
-/tarnished
+@tarnished
 Fix the typo in the error message on line 42 of auth.ts
 ```
 Tarnished triages it as SMALL and implements directly.
@@ -328,7 +329,7 @@ Developer can append it as a new checkbox on the *same* plan file, same branch, 
 
 **Standalone brainstorm (exploration only, not committing to implementation):**
 ```
-/armin
+@armin
 I'm thinking about switching from REST to tRPC. What are the tradeoffs for this project?
 ```
 
@@ -338,8 +339,8 @@ When git asks "all tasks complete, ready to merge milestone to main?" — say `n
 
 | What you found | Who |
 |----------------|-----|
-| Trivial (typo, 1-2 lines) | `/tarnished` — commits directly to milestone branch |
-| Multi-step bug or enhancement | `/tarnished` (mediates `@sokka` quick plan — you're already on `feat/<milestone>` so no new branch, architect writes its own plan file directly) → `/erwin` |
+| Trivial (typo, 1-2 lines) | `@tarnished` — commits directly to milestone branch |
+| Multi-step bug or enhancement | `@tarnished` (mediates `@sokka` quick plan — you're already on `feat/<milestone>` so no new branch, architect writes its own plan file directly) → `/erwin` |
 | Several things at once | `/fire_keeper` — groups them into tasks, runs commander per task |
 
 When satisfied, ship the milestone:
@@ -417,7 +418,7 @@ msg="truncating input prompt" limit=32768 prompt=33856 keep=4 new=32768
 On-demand, not part of the per-task pipeline — run it whenever, against any project:
 
 ```
-/carter
+@carter
 Audit this app.
 ```
 
@@ -437,14 +438,14 @@ Both on-demand, same shape as `@carter` — read-only or narrowly-scoped, not pa
 
 **Explore** — map unfamiliar terrain before touching it:
 ```
-/strelok
+@strelok
 Where does the invite-link flow validate expiry?
 ```
 Strictly read-only, chat output by default. Useful before `/fire_keeper` on an unfamiliar codebase, or any time you need "where is X" answered without committing to a task yet.
 
 **Debugger** — hunt one bug to its root cause and fix it:
 ```
-/mikasa
+@mikasa
 Login silently fails for users with an apostrophe in their email. Find it.
 ```
 Narrow scope — fixes the root cause only, no adjacent refactors. This is also where a STUCK `@erwin` review loop can go: if the same reviewer finding survives a fix cycle, erwin offers to dispatch `@mikasa` directly with the branch and finding — say "mikasa" to confirm (deliberately not automatic; a stuck loop can mean the plan itself is wrong, not just that the bug needs a specialist). Erwin resumes the review loop once mikasa reports the fix.
@@ -478,20 +479,22 @@ docs/
 
 ## Model setup — local + cloud
 
-Mixed local/cloud since 2026-08-08. Strategy: MiniMax subscription is spent ONLY where model quality changes real outcomes (reviewer quality gate). Deterministic/gate-keeping roles (`git`, `fire_keeper`, `tarnished`) and implementation (`developer`) moved to local ollama on the RTX 4090 rig — they were burning MiniMax subscription quota for work that doesn't need a frontier-tier model, and the shared pool (5 agents deep before this change) was the real driver of hitting caps. `docs`/`architect`/`brainstorm`/`well`/`carter`/`explore` stay on cheap OpenRouter — deterministic writes and rare on-demand reasoning respectively, neither contributes to the MiniMax cap problem, no reason to move them.
+Mixed local/cloud since 2026-08-08. Strategy: MiniMax subscription is spent ONLY where model quality changes real outcomes (reviewer quality gate). Deterministic/gate-keeping roles (`git`, `fire_keeper`, `tarnished`) and implementation (`developer`) moved to local ollama on the RTX 4090 rig — they were burning MiniMax subscription quota for work that doesn't need a frontier-tier model, and the shared pool (5 agents deep before this change) was the real driver of hitting caps. `architect`/`carter`/`strelok` stay on cheap-to-mid OpenRouter — rare on-demand reasoning, neither contributes to the MiniMax cap problem, no reason to move them.
+
+**2026-08-09 update:** `docs` (iroh) and `well` (the_well) moved to local ollama as a test — same deterministic/low-judgment profile that already succeeded locally for fire_keeper/hosea/tarnished, worth trying now that the codebase has more local track record than it did on 2026-08-08. `brainstorm` (armin) moved the other direction, up to `deepseek-v4-pro` — bumped to match sokka/levi's tier since all three reasoning-heavy roles (brainstorm/architect/review) should sit equally strong, not two-of-three.
 
 | Agent | Model | Why |
 |-------|-------|-----|
 | sokka (architect) | `openrouter/deepseek/deepseek-v4-pro` | plan reasoning needs full strength — errors cascade into every downstream task. Can't write files or touch git even if it wanted to (subagent restriction) — its tokens go entirely to thinking, fire_keeper/tarnished handle the mechanics |
-| armin (brainstorm) | `openrouter/z-ai/glm-5.2` | creative + 1M-context exploration, leads quality benchmarks among affordable options |
-| iroh (docs) | `openrouter/deepseek/deepseek-v4-flash` | deterministic file writes (both content-dump write mode and diff-based update mode) — cheap, fast, low temp (0.3) |
+| armin (brainstorm) | `openrouter/deepseek/deepseek-v4-pro` | bumped 2026-08-09 from `glm-5.2` to match sokka/levi's tier — brainstorm/architect/review are the three reasoning-heavy roles, no reason to leave one of the three on a lower tier than the other two |
+| iroh (docs) | `ollama/glm-4.7-flash:latest` | **local, testing as of 2026-08-09** (was `openrouter/deepseek/deepseek-v4-flash`). Same deterministic/low-temp profile that already works for fire_keeper/hosea/tarnished on this tier — revert to the OpenRouter model above if local quality or reliability disappoints |
 | **developer** | `ollama/qwen3-coder:latest` | **local.** Devstral tried first (68% SWE-bench, purpose-built agentic model) but died mid-cycle repeatedly — root cause was the missing `OLLAMA_CONTEXT_LENGTH` incident below, not the model itself, but qwen3-coder has the longer local track record on this rig so it's the default while re-testing Devstral is optional. Was the single biggest MiniMax consumer before the local move — every commander review cycle re-invokes it |
 | levi (reviewer) | `minimax-coding-plan/MiniMax-M3` | quality gate — best owned model catches more bugs per cycle. Stays cloud on purpose, this is exactly where README's own strategy says spend the subscription |
 | **tarnished** (builder) | `ollama/glm-4.7-flash:latest` | **local.** Triage/small-fix work — MoE, fast, plenty of headroom left on the card |
 | erwin (orchestrator) | `openrouter/deepseek/deepseek-v4-flash` | holds hard E2E gate — needs reliable instruction following; M2.5 skipped the gate in practice |
 | **fire_keeper** (planner) | `ollama/glm-4.7-flash:latest` | **local.** Pure gate-keeping, no implementation reasoning needed |
 | **git** | `ollama/glm-4.7-flash:latest` | **local.** Deterministic bash/PR mechanics — was drawing MiniMax quota for work with zero real judgment calls |
-| well (init) | `openrouter/google/gemini-2.5-flash` | large-context Q&A synthesis across five gated docs |
+| well (init) | `ollama/glm-4.7-flash:latest` | **local, testing as of 2026-08-09** (was `openrouter/google/gemini-2.5-flash`). Risk worth naming: the_well's job is large-context Q&A synthesis across five gated docs, and local's context ceiling (`OLLAMA_CONTEXT_LENGTH=65536`, see below) is far smaller than gemini-2.5-flash's native window — fine for a fresh project with nothing written yet, untested for a well underway with a lot already on disk. Revert to the OpenRouter model above if that ceiling bites |
 | carter (security) | `openrouter/deepseek/deepseek-v4-pro` | same reasoning tier as architect — triaging exploitability and severity needs real judgment, not just pattern-matching; run rarely (on-demand), so cost matters less than getting it right |
 | strelok (explore) | `openrouter/google/gemini-2.5-flash` | same large-context/cheap tier as well — reading a lot of code and reporting back doesn't need frontier reasoning, it needs context room |
 | mikasa (debugger) | `minimax-coding-plan/MiniMax-M2.7` | same tier developer used to sit at — finding and fixing a root cause is real implementation work, not a gate-keeping pass. Kept cloud since it's on-demand only, not a per-cycle cost driver like developer was |

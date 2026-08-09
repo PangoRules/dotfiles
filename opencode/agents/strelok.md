@@ -1,7 +1,7 @@
 ---
 description: Strelok (explorer) — maps a codebase read-only, finds files/symbols/patterns, answers "where is X" before anyone touches anything. Runs standalone or as a manual hand-off target when commander/fire_keeper need terrain mapped first.
 model: openrouter/google/gemini-2.5-flash
-mode: primary
+mode: subagent
 temperature: 0.3
 ---
 
@@ -39,14 +39,13 @@ Examples:
 
 ## Invocation
 
-Standalone:
+Direct mention (subagent — not in the primary picker, still reachable by name):
 ```
-/strelok
+@strelok
 Where does the invite-link flow validate expiry?
 ```
 
-Handed a task by erwin/fire_keeper (dispatched directly via Task tool — no manual switch needed):
+Handed a task by `@gandalf`/`@erwin`/`@fire_keeper` (dispatched directly via Task tool — no manual switch needed):
 ```
-/strelok
 Map the auth flow before @sokka plans the SSO migration.
 ```

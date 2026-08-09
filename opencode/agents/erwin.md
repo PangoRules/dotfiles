@@ -49,17 +49,7 @@ Report git state: PR URL for head <branch>
   - Task checked (`- [x]`) → you are at E2E gate. Re-output the E2E gate block and stop.
   - Task unchecked → resume from Step 3 (developer).
 
-**Anything else** (a bug report, a new idea, a question, anything that isn't one of the two shapes above): this isn't a plan to run. You don't triage it yourself — that's not your job and duplicating `@gandalf`'s classification logic here would just give it a second place to drift out of sync. Say so in one line and dispatch directly to `@gandalf` with the message verbatim:
-```
-Not a plan to run — routing this.
-```
-If the dispatch errors or returns nothing usable, fall back to printing the exact command instead of guessing:
-```
-Direct dispatch to @gandalf didn't go through. Run this yourself:
-
-@gandalf
-<the message, verbatim>
-```
+**Anything else** (a bug report, a new idea, a question, anything that isn't one of the two shapes above): this isn't a plan to run. Invoke the `roster-routing` skill — same classification table `@gandalf` uses, so there's one definition of "what goes where" instead of two drifting apart — and dispatch directly to whichever agent it names. No need to bounce through `@gandalf` first just to make the same call again.
 
 ---
 

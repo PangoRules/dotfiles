@@ -1,6 +1,6 @@
 ---
 description: Armin Arlert (brainstorm) — explores the problem space and generates 2-3 concrete approaches. Produces a design spec; delegates branch creation and file writing.
-model: openrouter/z-ai/glm-5.2
+model: openrouter/deepseek/deepseek-v4-pro
 mode: subagent
 temperature: 0.7
 ---

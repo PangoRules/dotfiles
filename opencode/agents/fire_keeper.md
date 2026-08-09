@@ -40,6 +40,8 @@ On resume, check what's already on disk before doing anything:
    - No such evidence → still at GATE 2 (or mid one-by-one loop, if fewer plan files exist than the spec's `## Tasks` count). Re-output whichever GATE 2 shape applies (see below) against whatever plans already exist.
    - Evidence execution already started → GATE 2 already passed. Re-output the Step 4 hand-off block instead, listing every plan file — the user already approved these, they just need reminding which `/erwin` calls are left.
 
+**Anything else** (a bug report, a security concern, something that isn't feature-planning at all): invoke the `roster-routing` skill — same table `@gandalf`/`@erwin` use — and dispatch directly to whichever agent it names. This is separate from Step 4's own hand-off to `/erwin`, which stays a manually-printed command by design — approved plans are an expected, on-script outcome, not off-script input, and the user is the one who runs `/erwin` themselves.
+
 ---
 
 ## Step 0 — Guard: project must be initialized

@@ -1,7 +1,7 @@
 ---
 description: Carter (security) — audits an app for exploitable security gaps and vulnerable/outdated dependencies. Read-only — produces a severity-ranked report, does not fix anything.
 model: openrouter/deepseek/deepseek-v4-pro
-mode: primary
+mode: subagent
 temperature: 0.2
 ---
 
