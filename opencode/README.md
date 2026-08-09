@@ -538,10 +538,12 @@ Loaded automatically on startup. Verify with `cat ~/.local/share/opencode/log/<l
 |--------|---------|
 | `superpowers` | Skills framework — all agent skills load through this |
 | `opencode-vibeguard` | Masks secrets/tokens before sending to cloud providers |
-| `opencode-dynamic-context-pruning` | Compresses stale context, deduplicates tool calls — saves tokens on long sessions |
+| `context-mode` | Swapped in 2026-08-09, replacing `opencode-dynamic-context-pruning`. Sandboxes tool output so raw data never enters context (proactive, ~98% reduction with hooks) instead of compressing conversation history after the fact; session state lives in a searchable SQLite index. Full native-plugin support on OpenCode. Verify with `ctx doctor` inside any session |
 | `opencode-shell-strategy` | Teaches agents to use non-interactive flags (`-y`, `--no-edit`) — prevents hangs |
 | `type-inject` | Injects TypeScript type signatures when reading `.ts`/`.tsx` files |
 | `opencode-notifier` | Desktop notification + sound on completion, permission requests, errors |
+
+**Why `opencode-dynamic-context-pruning` was dropped (2026-08-09):** two confirmed open bugs on the upstream repo. [#560](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning/issues/560) — default `range`-mode compaction can replay a stale approval phrase as if it were the current answer, letting a plan-mode agent bypass its own execution restriction. This directly threatens the confirmation-gate pattern this whole config leans on (main-branch commit confirmation, milestone-abandon cascade confirmation, etc.) — and it fires under our *default* config, no experimental flag needed. [#595](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning/issues/595) — resuming a subagent via `task_id` silently rewrites earlier rounds' results with the latest reply; only triggers with `experimental.allowSubAgents: true`, which we never enabled, so we were accidentally unaffected — but it also meant DCP was only ever pruning the top-level primary session, never any of the 11 subagents. `context-mode`'s structured decision-tracking (discrete DB records, not raw-text summarization) avoids #560's failure class by construction, and gets full session coverage on OpenCode out of the box.
 
 ---
 

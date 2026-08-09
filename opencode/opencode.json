@@ -4,7 +4,7 @@
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
     "opencode-vibeguard@git+https://github.com/inkdust2021/opencode-vibeguard",
-    "opencode-dynamic-context-pruning@git+https://github.com/Opencode-DCP/opencode-dynamic-context-pruning",
+    "context-mode",
     "opencode-shell-strategy@git+https://github.com/JRedeker/opencode-shell-strategy",
     "type-inject@git+https://github.com/nick-vi/type-inject",
     "opencode-notifier@git+https://github.com/mohak34/opencode-notifier"
