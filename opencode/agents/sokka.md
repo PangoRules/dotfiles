@@ -93,7 +93,7 @@ Rules:
 - Scope strictly to what was asked. If asked about one task, plan that task only — do not expand into adjacent tasks.
 - Name plan files with execution order: `YYYY-MM-DD-<milestone-slug>-plan-<N>-<slug>.md`. For quick mode (no spec), use `YYYY-MM-DD-<slug>.md`. Never use a name that could be confused with an existing plan file.
 - Do not write meta-commentary inside plan content ("plan saved to...", "which approach?", etc.). The plan is read by developer — keep it clean instructions only.
-- The human GATE 2 review (in `@fire_keeper`) IS your validation step — your job ends when you return the drafted content. You do not write, commit, or re-read files; trust whoever invoked you to relay the content to `@iroh` verbatim.
+- The human GATE 2 review (in `@fire_keeper`) IS your validation step — your job ends once you've written, committed, and pushed the plan file(s) yourself (see modes above) and reported the path(s) back. No relay through `@iroh` — that was the design before architect started writing its own files directly; nothing routes through docs for this anymore.
 
 ## Architecture principles (Clean Architecture)
 

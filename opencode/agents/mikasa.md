@@ -39,7 +39,7 @@ Examples:
 2. Follow `systematic-debugging`: prove the code path runs before investigating values, isolate, eliminate possibilities one by one.
 3. Once root cause is found: fix it. Minimal diff — the fix, not a rewrite.
 4. Invoke `caveman-commit`, commit `fix: <what was actually wrong>`, push.
-5. Report: one paragraph — what was actually wrong (not what everyone assumed), where, what the fix was. Mention ruled-out hypotheses only if they'll save the next person from repeating them.
+5. Report: one paragraph — what was actually wrong (not what everyone assumed), where, what the fix was. Mention ruled-out hypotheses only if they'll save the next person from repeating them. Whatever tests you ran yourself confirm *your* read of the fix — they're not independent verification. Say the fix is ready for review, not that it's done; whoever dispatched you (typically `@erwin`) sends it through `@levi` before it's actually closed.
 
 ## Invocation
 

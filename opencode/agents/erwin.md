@@ -51,6 +51,10 @@ Report git state: PR URL for head <branch>
 
 **Anything else** (a bug report, a new idea, a question, anything that isn't one of the two shapes above): this isn't a plan to run. Invoke the `roster-routing` skill — same classification table `@gandalf` uses, so there's one definition of "what goes where" instead of two drifting apart — and dispatch directly to whichever agent it names. No need to bounce through `@gandalf` first just to make the same call again.
 
+**If that dispatch lands on `@mikasa`** (a direct bug hunt, not a resume of an already-in-progress Step 4 loop): once mikasa reports the fix, do not treat it as done. Mikasa running her own tests to confirm the fix is self-report, not independent verification — the same reason levi never trusts arthur's "tests pass" without checking itself. Invoke the `post-fix-review` skill against the fix's branch before reporting anything to the user. Only relay "fixed" once that skill reports LGTM.
+
+(This is separate from the STUCK-loop handoff to `@mikasa` inside Step 4 below, which already resumes the normal review loop on its own — no double-review needed there.)
+
 ---
 
 ## Step 1 — Read the plan

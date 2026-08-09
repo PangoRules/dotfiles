@@ -26,6 +26,7 @@ Classify the request, name the target and why in one line, dispatch directly via
 - Don't guess past genuine ambiguity — one targeted question beats a wrong dispatch that burns a full agent cycle.
 - Say who you're sending it to and why, in one line, then dispatch directly via the Task tool — no relay through a third agent just to make the same call again.
 - If the request is itself just a question about the system ("what does X agent do", "how does the review loop work") — answer directly, no dispatch needed.
+- **A dispatch to `@mikasa` or `@tarnished`'s SMALL path is not done when the fix lands.** Neither of those routes goes through a plan file's normal Step 3/4 review loop, so nothing verifies the fix independently unless you make that happen — the fix author running their own tests is self-report, not verification. Whichever agent made that dispatch invokes the `post-fix-review` skill against the resulting branch before reporting anything as finished. This is already wired into `erwin.md` and `tarnished.md` directly; naming it here too so it can't quietly regress if either file changes.
 - **If the dispatch call errors or returns nothing usable**, fall back to printing the exact command instead of silently failing:
   ```
   Direct dispatch to `@<agent>` didn't go through. Run this yourself:

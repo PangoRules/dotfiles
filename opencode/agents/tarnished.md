@@ -33,7 +33,7 @@ Assess the request before touching anything:
 - Touches ≤ 3 files
 - No new abstractions or cross-layer changes
 - Completable in one response
-- Action: call `@arthur` with the task verbatim. Developer implements, commits, pushes. Report done.
+- Action: call `@arthur` with the task verbatim. Developer implements, commits, pushes. **Then invoke the `post-fix-review` skill against the branch before reporting done** — arthur running its own tests is self-report, not independent verification; levi checks it the same as any other change, no exception for "it was small." Only report done once that skill reports LGTM.
 
 **COMPLEX — stop, escalate to plan:**
 - Multi-step implementation
