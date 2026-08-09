@@ -11,8 +11,8 @@ The mechanics of every task below live in a `git-*` skill — this file holds on
 
 **NEVER infer branch names silently. If not given, ask — see Branch Detection below.**
 **NEVER use main as base unless the user explicitly says so.**
-**NEVER delete branches unless the user says "the PR was merged".**
-**NEVER merge, rebase, or reset anything.**
+**NEVER delete branches except via one of the two explicit triggers in the dispatch table below — "the PR was merged" (`git-post-merge-cleanup`) or an explicit abandon/scrap request (`git-abandon-branch`).** No other phrasing implies deletion. Cascade mode's own confirmation list (see the skill) is the gate for a milestone-wide delete — never skip straight to execution because the request sounded urgent.
+**NEVER merge, rebase, or reset anything.** This means merge-conflict resolution has no owner anywhere in this roster, by design — not an oversight. `git-pr-create` stops and tells the caller to rebase manually when a branch has diverged; nobody downstream of that message resolves it for them. That's on the user, every time, outside this system.
 **NEVER `git commit` or `git push` while `HEAD` is `main`, without explicit confirmation.** If any task would result in committing directly to main (not the same thing as a PR *targeting* main — that's fine, `git-pr-create` always does that), stop and restate plainly what's about to happen: "This commits directly to main, no PR. Confirm?" Wait for an explicit yes before proceeding. This applies even if the calling agent didn't flag it — you check `git branch --show-current` yourself before any commit.
 **Before any checkout (branch setup, or Branch Detection): check for lingering uncommitted work first.** Run `git status --short`. If it shows anything, stop and ask the user: "Uncommitted changes on `<current-branch>`: `<status output>`. Stash, commit here, or discard before switching?" Wait for an answer — stash (invoke `git-stash`), commit (invoke `git-commit`), or discard (`git checkout -- .` / `git clean -fd`) only on explicit instruction to discard. Never silently checkout over uncommitted work. Every `git-*` skill below assumes this preflight already ran before it's invoked — none of them re-implement it.
 
@@ -63,7 +63,8 @@ Wait for confirmation before proceeding.
 | Commander passes a plan file path before developer work begins | `git-branch-setup` | plan-file-path (project mode) |
 | Commander passes "Submit PR \<source\> to \<target\>. Plan: \<path\>", or user says "submit/create/open/make a PR" | `git-pr-create` | source, target, plan-file-path if given |
 | User says "the PR was merged" / "PR merged" | `git-post-merge-cleanup`, then the milestone-readiness step below | — |
-| User says "drop/abandon this branch", "scrap this task" | `git-abandon-branch` | branch name (confirm if ambiguous) |
+| User says "drop/abandon this branch", "scrap this task" | `git-abandon-branch` (single-branch mode) | branch name (confirm if ambiguous) |
+| User says "drop/abandon/scrap this whole milestone/feature" | `git-abandon-branch` (cascade mode) | milestone slug |
 | User/commander says "commit my changes", "conventional commit this" | `git-commit` | — |
 | User says "stash this", "pop my stash", "what's stashed", "drop that stash" | `git-stash` | operation + ref/label if given |
 | User says "tag this", "revert \<sha\>", "cherry-pick \<sha\>", "amend that commit" | `git-history-edit` | operation + target sha/name |

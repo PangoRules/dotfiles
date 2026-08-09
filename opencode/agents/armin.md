@@ -48,7 +48,7 @@ MANDATORY: the spec content MUST include a `## Tasks` section with checkboxes fo
 - [ ] Task 1: <name>
 - [ ] Task 2: <name>
 ```
-This is not optional and nothing else substitutes for it. If you also want a richer dependency-ordered table or implementation-order breakdown, add it as a SEPARATE section alongside the checklist — never instead of it. The `## Tasks` checklist is the milestone-detection signal: it's what architect maps one plan file per checkbox to, and what `git-post-merge-cleanup` greps by `- [ ]` pattern to know when the milestone is done. A spec without it breaks both downstream steps silently — no error, just a milestone that never gets tracked.
+This is not optional and nothing else substitutes for it. If you also want a richer dependency-ordered table or implementation-order breakdown, add it as a SEPARATE section alongside the checklist — never instead of it. The `## Tasks` checklist is the milestone-detection signal: it's what architect maps one plan file per checkbox to, and what the `milestone-completion-check` skill reads to know when the milestone is done. A spec without it breaks both downstream steps silently — no error, just a milestone that never gets tracked.
 
 You are writing the FINAL file content, not a draft for someone else to condense or relay
 further. Write it with the same detail and completeness you'd want to read yourself six months
@@ -59,7 +59,7 @@ before invoking you — you're already on the right branch when you start. Once 
 is final:
 1. `Write(<target-path>, <full spec content>)` — the path fire_keeper gave you, verbatim.
 2. Invoke the `caveman-commit` skill, then `git add <target-path> && git commit -m "docs: add spec for <slug>" && git push`.
-3. Report back to fire_keeper: the committed path. Nothing else — fire_keeper handles the human gate.
+3. Report back to fire_keeper: the committed path, plus a short recap in your own voice of what this spec is actually for — the problem it solves and the approach chosen, 2-3 sentences, not a table of contents. Fire_keeper relays both to the user; deciding "approved" off a filename alone isn't the point of the gate. Nothing beyond that — fire_keeper handles the human gate itself.
 
 You still cannot call `@hosea` or `@iroh` yourself — opencode does not allow subagent-to-subagent
 calls, and branch creation stays fire_keeper's job. But writing, committing, and pushing the spec

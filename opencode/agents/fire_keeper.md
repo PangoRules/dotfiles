@@ -29,6 +29,17 @@ User describes what they want to build:
 I want to add ingredient search to cook-homie
 ```
 
+**Resume after context loss:**
+```
+Resume fire_keeper for <slug>
+```
+On resume, check what's already on disk before doing anything:
+1. `docs/specs/<slug>-design.md` doesn't exist → nothing to resume, this is actually fresh — fall through to Step 0.
+2. Exists, and `docs/plans/` has no files matching `<slug>` yet → you're sitting at GATE 1, unresolved. Re-read the spec, re-output the GATE 1 block (path + a recap in your own words of what it's for, pulled from the spec's own content) and stop.
+3. Plan files matching `<slug>` exist → call `@hosea`: `Report git state: commits ahead of origin/main on feat/<slug>` and check for any `task/*` branches under it (evidence `@erwin` already started execution on at least one plan).
+   - No such evidence → still at GATE 2 (or mid one-by-one loop, if fewer plan files exist than the spec's `## Tasks` count). Re-output whichever GATE 2 shape applies (see below) against whatever plans already exist.
+   - Evidence execution already started → GATE 2 already passed. Re-output the Step 4 hand-off block instead, listing every plan file — the user already approved these, they just need reminding which `/erwin` calls are left.
+
 ---
 
 ## Step 0 — Guard: project must be initialized
@@ -115,13 +126,13 @@ Spec is at docs/specs/<spec-filename>.
 Turn this into implementation plans. One plan file per task, written to docs/plans/.
 ```
 
-Architect drafts, writes, commits, and pushes every plan file itself — milestone branch already exists (Step 2), so no new branch needed. Wait for architect to report the committed paths.
+Architect drafts, writes, commits, and pushes every plan file itself — milestone branch already exists (Step 2), so no new branch needed. Before drafting, sokka asks you (relayed through you) whether it should checkpoint after each plan or draft the whole batch for one review — relay that question verbatim, wait for the answer, pass it back. Which answer determines which of the two GATE 2 shapes below plays out.
 
 ---
 
 ## GATE 2 — Plan review
 
-Once docs confirms the commit, list all new plan files:
+**Batch mode** (sokka drafted every plan up front): once architect confirms the commit, list all new plan files:
 ```bash
 ls docs/plans/
 ```
@@ -129,8 +140,8 @@ ls docs/plans/
 Report to user:
 ```
 Plans written:
-- docs/plans/<task-1-file>.md
-- docs/plans/<task-2-file>.md
+- docs/plans/<task-1-file>.md — <sokka's one-sentence recap>
+- docs/plans/<task-2-file>.md — <sokka's one-sentence recap>
 ...
 
 Read them. "approved" to start work, or give feedback to revise.
@@ -140,6 +151,20 @@ Read them. "approved" to start work, or give feedback to revise.
 
 - User says "approved" / "looks good" → go to Step 4
 - User gives feedback → call `@sokka`: "Revise the plans at docs/plans/ for <milestone-slug>: <feedback>. Overwrite the affected file(s) yourself, commit `docs: revise plans for <milestone-slug>`, push, report back." Return to GATE 2.
+
+**One-by-one mode** (sokka checkpoints per plan): after each plan sokka reports back — committed path plus its one-sentence recap — relay both to the user immediately:
+```
+Plan <N>/<total>: docs/plans/<task-N-file>.md — <sokka's recap>
+
+Read it. "approved" to move to the next plan, or give feedback to revise this one.
+```
+
+**STOP. Wait for user, every round.**
+
+- "approved" → relay that to sokka, which drafts the next plan (same ongoing call, not a fresh one — it already has the spec and prior plans in hand). Repeat this mini-gate per plan until sokka reports the batch is done.
+- Feedback → relay it to sokka verbatim: "Revise this plan: `<feedback>`." Sokka overwrites, recommits, re-reports. Re-run this same mini-gate on the revision before moving on.
+
+Once the last plan clears its own mini-gate, go to Step 4 — there's no separate batch-level GATE 2 in this mode, each plan already got its own approval.
 
 ---
 

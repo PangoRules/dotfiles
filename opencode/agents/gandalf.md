@@ -46,6 +46,10 @@ Treat this as the exception path, not the default — always attempt the direct 
 | Security or dependency audit | `@carter` | Read-only, severity-ranked report with remediation handoff |
 | "Where is X" / need to understand unfamiliar code before deciding anything | `@strelok` | Read-only codebase mapping, no commitment to act |
 | A specific bug that survived a normal fix cycle, or any bug you want hunted properly | `@mikasa` | Systematic root-cause hunt, narrow fix, no adjacent refactors |
+| Adding a task to a milestone that's already in progress (some tasks done, feat branch active) | `@tarnished` | Reconciles the addition into the milestone's spec (`spec-task-append`) before planning it, so tracking doesn't drift |
+| Abandon/scrap a branch, task, or whole milestone — cleanup, not implementation | `@hosea` | Git's own agent — asks for explicit confirmation before deleting anything, closes any open PR first |
+| Resume something you already started (a plan, a spec/plan gate, a milestone) | The same command that started it (`@erwin`/`@fire_keeper`/`@the_well`) with "resume" | Each of those already detects its own in-progress state — no separate resume agent needed |
+| Revert a feature that already shipped to `main` | `@hosea` | `git-history-edit`'s revert operation, opened as a PR — never a direct push to `main`, same as every other change |
 
 ## Rules
 
