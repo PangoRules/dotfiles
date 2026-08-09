@@ -64,7 +64,7 @@ Rules:
   4. Commit all of the above together in one `docs:` conventional commit.
   **Do NOT delete or archive the plan file or spec here.** The commander E2E gate fires right after this step — the plan is still needed for reference. Archiving happens later, in Recheck Mode (Step 5.5), never here.
 - **Quick path:** after updating docs, apply lessons learned. Commit together. Do NOT delete or archive the plan file.
-- **CRITICAL:** Do NOT invoke post-merge-cleanup, finishing-a-development-branch,
+- **CRITICAL:** Do NOT invoke git-post-merge-cleanup, finishing-a-development-branch,
   or any skill that switches branches or merges. Only update docs and commit
   to the current branch. Main is untouchable — only PRs merge to main.
 

@@ -1,6 +1,6 @@
 ---
-name: post-merge-cleanup
-description: Use after a PR is merged — handles plan/spec cleanup, branch deletion, and milestone completion detection. Covers both milestone task branches and quick feature branches.
+name: git-post-merge-cleanup
+description: Use after a PR is merged — handles plan/spec cleanup, branch deletion, remote-ref pruning, and milestone completion detection. Covers both milestone task branches and quick feature branches. Idempotent — already-deleted branches, already-archived plans, and already-marked checkboxes are skipped, not treated as failures.
 ---
 
 The PR has been merged. Clean up the workspace now.
@@ -26,7 +26,7 @@ This returns the milestone branch (e.g. `feat/milestone2-1-frontend-improvements
 **0b. Mark the task done in the spec:**
 
 Find the spec file in `docs/specs/`. It matches the milestone slug from the parent branch name.
-Find the checkbox line matching this task branch name. Change `- [ ]` to `- [x]`. Save.
+Find the checkbox line matching this task branch name. Change `- [ ]` to `- [x]`. Save. Already `- [x]` → skip, already done.
 ```bash
 git checkout <parent-branch>
 git pull origin <parent-branch>
@@ -35,7 +35,7 @@ git commit -m "docs: mark <task-slug> complete in spec"
 git push
 ```
 
-**0c. Archive the task plan file (defensive — git agent already does this at PR creation; only fires if that step somehow got skipped):**
+**0c. Archive the task plan file (defensive — normally already done at PR creation; only fires if that step somehow got skipped):**
 ```bash
 if [ -f docs/plans/<task-plan-file>.md ]; then
   mkdir -p docs/archive/plans
@@ -44,14 +44,14 @@ if [ -f docs/plans/<task-plan-file>.md ]; then
   git push
 fi
 ```
-Never `rm` a plan file — it's a permanent record once archived, same as `docs/archive/specs/`.
+Already archived (file not found) → skip silently, expected case. Never `rm` a plan file — it's a permanent record once archived, same as `docs/archive/specs/`.
 
 **0d. Check if all tasks are done:**
 ```bash
 grep "\- \[ \]" docs/specs/<parent-spec-file>.md
 ```
 - If output is empty → all tasks complete. Print: `"All tasks done. Creating milestone PR."`
-  Then invoke `finishing-a-development-branch` to create PR: `feat/<milestone-slug>` → `main`.
+  Then invoke the `git-pr-create` skill: source `feat/<milestone-slug>`, target `main`. Never a local `git merge` — a PR is the only path to `main`.
 - If output has remaining `[ ]` items → more tasks remain. Stop here.
 
 ---
@@ -65,7 +65,7 @@ Skip to Step 1 directly.
 
 ### Path C — Quick feature/fix branch (`feat/<slug>` or `fix/<slug>`)
 
-Find and archive the matching plan file if one exists (defensive — git agent already does this at PR creation):
+Find and archive the matching plan file if one exists (defensive — normally already done at PR creation):
 ```bash
 ls docs/plans/
 mkdir -p docs/archive/plans
@@ -73,7 +73,7 @@ git mv docs/plans/<matching-plan-file>.md docs/archive/plans/<matching-plan-file
 git commit -m "docs: archive completed plan for <slug>"
 git push
 ```
-If no plan file exists (task was chat-only, or git agent already archived it), skip.
+No plan file exists (task was chat-only, or already archived) → skip, expected case.
 
 ---
 
@@ -103,24 +103,25 @@ git pull origin main
 ```bash
 git branch -d <branch-name>
 ```
-Use `-D` only if the merge was a squash or rebase and you are certain it was merged.
+Already gone → skip, note it. Use `-D` only if the merge was a squash or rebase and you are certain it was merged.
 
 ## Step 4 — Delete the feature branch remotely
 
-Skip if GitHub already deleted it automatically.
 ```bash
 git ls-remote --heads origin <branch-name>   # if no output, already gone
 git push origin --delete <branch-name>
 ```
+Already gone (GitHub auto-deleted it, or a prior run already did this) → skip, note it.
 
-## Step 5 — Confirm clean state
+## Step 5 — Prune and confirm clean state
 
 ```bash
+git fetch --prune
 git status
 git log --oneline -3
 git branch
 ```
-Expected: on parent branch, feature branch gone, working tree clean.
+Expected: on parent branch, feature branch gone, working tree clean, no stale remote-tracking refs.
 
 ## Done
 

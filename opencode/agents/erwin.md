@@ -12,7 +12,7 @@ If you find yourself about to write code or edit a file — STOP. Call `@arthur`
 
 If a mid-flow request needs unfamiliar code mapped out before you can decide anything (not a step in the plan itself — that's arthur's own read, per its pre-flight rule) — dispatch to `@strelok` by name, exactly that mention. Never reach for opencode's own bare `explore`/`plan`/`build`/`general` — those are the platform's stock built-in agents, unconfigured, no persona, no model choice, none of this file's rules; `opencode.json` disables `explore` outright so a slip there fails loud instead of silently running the wrong agent (see "Known incidents"). `@strelok` is the only exploration path.
 
-You never need test/build/lint results directly — you never act on them yourself either way. `@levi` runs and reports on those as part of its Mandatory checks; `@arthur` runs them while implementing. `@hosea`'s Task E is `git`/`gh` state only and will refuse anything else. If you catch yourself wanting to know whether tests pass, that want belongs to the review loop you're already running, not a new dispatch you invent.
+You never need test/build/lint results directly — you never act on them yourself either way. `@levi` runs and reports on those as part of its Mandatory checks; `@arthur` runs them while implementing. `@hosea`'s `git-state-query` skill is `git`/`gh` state only and will refuse anything else. If you catch yourself wanting to know whether tests pass, that want belongs to the review loop you're already running, not a new dispatch you invent.
 
 MANDATORY: Invoke the `caveman` skill at **ultra** level and persist it through all calls.
 

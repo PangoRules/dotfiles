@@ -52,7 +52,7 @@ Gandalf knows the whole roster, asks one clarifying question if genuinely unclea
 | `agents/arthur.md` | Executes plans. Implements, ticks plan checkboxes, commits and pushes directly using the `caveman-commit` skill (can't call `@hosea` itself — same subagent restriction) |
 | `agents/levi.md` | Captain Levi — reviews diffs against plan. Mandatory pre-LGTM checks: lint/format, new compiler warnings, CVEs on touched manifests, DRY, 75% business-logic coverage (boilerplate excluded via the language's own tag). LGTM output branches on the plan's `**Test scope:**`: `unit` = nothing more, `http` = requires a `.http` file, `e2e` = writes/extends the single spec-level regression matrix directly |
 | `agents/iroh.md` | **Write mode** (dormant — general-purpose content+path writer, no current caller since brainstorm/sokka write their own files now) and **update mode**, split into two commander-triggered calls: post-LGTM (docs update, mark task done, lessons learned — no archiving) and recheck-mode at Step 5.5 (drift check + archive plan + archive spec/matrix if milestone complete, all in one commit) |
-| `agents/hosea.md` | Owns branch creation (milestone/quick/task, called by `@fire_keeper`/`@tarnished`/`@erwin`), PR creation, post-merge cleanup. Never commits to `main` without explicit confirmation; checks for lingering uncommitted work before every checkout. Plan archiving is now `@iroh`'s job (Step 5.5) — git's own archive step is a defensive fallback only |
+| `agents/hosea.md` | Thin dispatcher over the `git-*` skills below — branch creation (milestone/quick/task, called by `@fire_keeper`/`@tarnished`/`@erwin`), commit, stash, tag/revert/cherry-pick/amend, PR creation, post-merge cleanup, read-only state query for `@erwin`. Keeps only the judgment calls and hard rules itself (voice, confirmation gates, never merge/rebase/reset, never push `main` without confirmation, lingering-uncommitted-work preflight). Plan archiving is `@iroh`'s job (Step 5.5) — the PR-create skill's own archive step is a defensive fallback only |
 | `agents/tarnished.md` | **Tarnished (builder)** — triage: small → implement, complex → escalate to plan, scope creep → backlog |
 | `agents/carter.md` | **Carter (security)** — read-only, finds exploitable gaps + vulnerable/outdated deps, writes a severity-ranked report with a `## Tasks` checklist, hands off to `@tarnished`/`@sokka` for remediation |
 | `agents/strelok.md` | **Strelok (explorer)** — read-only codebase mapping, on demand or as a manual hand-off target from `@erwin`/`@fire_keeper`. Never edits, never writes a report unless explicitly asked |
@@ -65,7 +65,14 @@ Gandalf knows the whole roster, asks one clarifying question if genuinely unclea
 | `skills/playwright-e2e-verification` | Detects an existing Playwright config and runs it — no-ops if a project has no E2E infra, doesn't scaffold one |
 | `skills/error-handling-consistency-check` | Detects a project's own error-handling convention (Result/Either, exceptions, Go-style multi-return) and flags deviations + universally-bad patterns (swallowed errors, empty catches) |
 | `skills/hardcoded-endpoint-check` | Detects a centralized API-route-constants convention if one exists and flags inline URL literals bypassing it |
-| `skills/post-merge-cleanup` | After PR merges: delete branch, archive plan file |
+| `skills/git-branch-setup` | Create or resume a branch off a base — generic (bare names) or project mode (reads a plan file's Branch/Parent branch headers). Idempotent |
+| `skills/git-pr-create` | Open a PR, pull Plan:/Spec: refs + real commits into the body in project mode. Idempotent — returns the existing PR's URL instead of duplicating |
+| `skills/git-commit` | Draft a Conventional Commits message via `caveman-commit`, then actually stage and commit it — the draft skill never runs git itself |
+| `skills/git-abandon-branch` | Delete a branch local + remote for a scrapped task. Idempotent on already-gone branches |
+| `skills/git-state-query` | Read-only git/gh lookups for callers (like `@erwin`) with no bash of their own — output stays verbatim |
+| `skills/git-post-merge-cleanup` | After PR merges: mark spec checkbox, archive plan file, delete branch, `git fetch --prune`, detect milestone completion |
+| `skills/git-stash` | Stash/pop/list/drop uncommitted changes. Idempotent against an empty stash |
+| `skills/git-history-edit` | Tag, revert, cherry-pick, amend — amend only on unpushed commits, revert/cherry-pick never target `main` directly, no force-push without the literal request |
 | `skills/test-failure-diagnosis` | Diagnose test failures before investigating values |
 | `skills/manual-validation-matrix` | Output a test matrix for manual validation |
 | `skills/dotnet-verification` | .NET/EF Core build, test, migration-drift check sequence |
@@ -161,7 +168,7 @@ Work from docs/plans/YYYY-MM-DD-task-1-<slug>.md
 Commander runs autonomously until the E2E gate:
 
 ```
-@hosea        → Task D: creates task/<slug> off latest feat/<milestone>,
+@hosea        → git-branch-setup: creates task/<slug> off latest feat/<milestone>,
               or resumes it if already exists on remote (lingering
               uncommitted work on the current branch? stops and asks first)
 @arthur  → confirms it's on the right branch (stops if not),
@@ -238,7 +245,7 @@ You get interrupted if the review loop gets stuck or an agent dies mid-cycle, ev
    ```
    PR merged
    ```
-3. Git agent: deletes task branch (local + remote); plan file was already archived to `docs/archive/plans/` at PR creation (defensive re-check via `post-merge-cleanup` skill if that step somehow got skipped). Checks if any unchecked tasks remain in the milestone spec.
+3. Git agent: deletes task branch (local + remote); plan file was already archived to `docs/archive/plans/` at PR creation (defensive re-check via `git-post-merge-cleanup` skill if that step somehow got skipped). Checks if any unchecked tasks remain in the milestone spec.
 4. If all milestone tasks done, git asks:
    > "All tasks complete. Ready to merge feat/\<milestone\> to main?"
 5. You say yes → milestone PR created → you review + merge on GitHub → `PR merged` to `@hosea` → done.

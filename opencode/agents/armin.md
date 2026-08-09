@@ -48,7 +48,7 @@ MANDATORY: the spec content MUST include a `## Tasks` section with checkboxes fo
 - [ ] Task 1: <name>
 - [ ] Task 2: <name>
 ```
-This is not optional and nothing else substitutes for it. If you also want a richer dependency-ordered table or implementation-order breakdown, add it as a SEPARATE section alongside the checklist — never instead of it. The `## Tasks` checklist is the milestone-detection signal: it's what architect maps one plan file per checkbox to, and what `post-merge-cleanup` greps by `- [ ]` pattern to know when the milestone is done. A spec without it breaks both downstream steps silently — no error, just a milestone that never gets tracked.
+This is not optional and nothing else substitutes for it. If you also want a richer dependency-ordered table or implementation-order breakdown, add it as a SEPARATE section alongside the checklist — never instead of it. The `## Tasks` checklist is the milestone-detection signal: it's what architect maps one plan file per checkbox to, and what `git-post-merge-cleanup` greps by `- [ ]` pattern to know when the milestone is done. A spec without it breaks both downstream steps silently — no error, just a milestone that never gets tracked.
 
 You are writing the FINAL file content, not a draft for someone else to condense or relay
 further. Write it with the same detail and completeness you'd want to read yourself six months
