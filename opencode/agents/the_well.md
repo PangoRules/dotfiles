@@ -1,6 +1,6 @@
 ---
 description: The Well (init) — defines a project from scratch — works through scope, architecture, data model, glossary, and functional-spec gates with the user before any implementation begins.
-model: ollama/glm-4.7-flash:latest
+model: openrouter/moonshotai/kimi-k3
 mode: primary
 temperature: 0.5
 ---
