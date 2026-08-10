@@ -11,6 +11,7 @@
   ],
   "permission": {
     "read": {
+      "*": "allow",
       "**/.env.example": "allow",
       "**/.env.sample": "allow",
       "**/*.env.example": "allow",
@@ -33,10 +34,10 @@
       "**/credentials.json": "deny",
       "**/.npmrc": "deny",
       "**/.netrc": "deny",
-      "**/.aws/credentials": "deny",
-      "*": "allow"
+      "**/.aws/credentials": "deny"
     },
     "edit": {
+      "*": "allow",
       "**/.env.example": "allow",
       "**/.env.sample": "allow",
       "**/*.env.example": "allow",
@@ -59,10 +60,10 @@
       "**/credentials.json": "deny",
       "**/.npmrc": "deny",
       "**/.netrc": "deny",
-      "**/.aws/credentials": "deny",
-      "*": "allow"
+      "**/.aws/credentials": "deny"
     },
     "grep": {
+      "*": "allow",
       "**/.env.example": "allow",
       "**/appsettings.Development.json": "allow",
       "**/.env": "deny",
@@ -76,10 +77,10 @@
       "**/secrets.yml": "deny",
       "**/secrets.yaml": "deny",
       "**/secrets.json": "deny",
-      "**/credentials.json": "deny",
-      "*": "allow"
+      "**/credentials.json": "deny"
     },
     "bash": {
+      "*": "allow",
       "*cat*.env*": "deny",
       "*cat*appsettings*": "deny",
       "*cat*secrets*": "deny",
@@ -89,9 +90,18 @@
       "*head*.env*": "deny",
       "*tail*.env*": "deny",
       "*less*.env*": "deny",
-      "*more*.env*": "deny",
-      "*": "allow"
-    }
+      "*more*.env*": "deny"
+    },
+    "external_directory": {
+      "*": "ask",
+      "/tmp/*": "allow",
+      "~/Projects/*": "allow"
+    },
+    "glob": "allow",
+    "list": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "skill": "allow"
   },
   "provider": {
     "ollama": {
@@ -119,7 +129,7 @@
           "temperature": true,
           "attachment": false,
           "reasoning": false,
-          "limit": { "context": 98304, "output": 8192 }
+          "limit": { "context": 98304, "output": 16384 }
         },
         "glm-4.7-flash:latest": {
           "id": "glm-4.7-flash:latest",
@@ -162,7 +172,7 @@
   },
   "agent": {
     "arthur": {
-      "steps": 30
+      "steps": 60
     },
     "erwin": {
       "permission": {
@@ -183,6 +193,41 @@
         "edit": "deny",
         "bash": "deny",
         "task": "allow"
+      }
+    },
+    "levi": {
+      "permission": {
+        "edit": "deny"
+      }
+    },
+    "carter": {
+      "permission": {
+        "edit": {
+          "*": "deny",
+          "docs/security/*.md": "allow",
+          "security-audit/*.md": "allow"
+        }
+      }
+    },
+    "sokka": {
+      "permission": {
+        "edit": {
+          "*": "deny",
+          "docs/plans/*.md": "allow"
+        }
+      }
+    },
+    "strelok": {
+      "permission": {
+        "edit": "ask"
+      }
+    },
+    "iroh": {
+      "permission": {
+        "edit": {
+          "*": "deny",
+          "**/*.md": "allow"
+        }
       }
     },
     "tarnished": {

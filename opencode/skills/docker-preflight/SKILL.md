@@ -76,9 +76,9 @@ grep -i "connection\|port\|host\|endpoint" .env
 
 Confirm the ports and credentials in `.env` match what's in `docker-compose.yml`. Stale `.env` from a different branch is a common source of connection failures after a branch switch.
 
-## Step 6 — Teardown (after the test run this preflight was for finishes, pass or fail)
+## Step 6 — Teardown (timing is the caller's call, not this skill's)
 
-Stop only the services you recorded as self-started in Step 1:
+This skill only tracks what got started in Step 1 — when it's safe to tear that down depends on the caller's own workflow (a one-shot task vs. a multi-cycle review loop that reuses the same services across cycles), so the caller decides when to invoke this step, not "immediately after the test run." Stop only the services you recorded as self-started in Step 1 — or, if the caller is tracking that list itself across multiple calls to you (see `@levi`'s Mandatory checks for why that matters in a review loop), whatever list the caller hands you:
 
 ```bash
 docker compose stop <service-name> [<service-name> ...]

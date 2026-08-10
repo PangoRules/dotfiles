@@ -22,3 +22,5 @@ Run exactly the git/gh command the query implies. Common ones:
 ## Step 3 — Return verbatim
 
 Return the raw command output verbatim — the caller parses this, so the data itself stays exact. A short sentence of framing around it is fine; the output inside is never paraphrased or summarized away.
+
+**If routing this through a context-sandboxing tool (e.g. `ctx_batch_execute`): do not trust its own returned "search" excerpt as your answer.** That kind of tool auto-indexes and hands back a relevance-ranked slice by design — exactly the wrong shape when the whole point of this skill is that the caller needs every byte. Run the command in a way that surfaces its complete raw stdout (a plain single-command sandbox execution with the full output printed, not a batch call's summarized return), and never report a truncated result as if it satisfied "verbatim" — a caller parsing a cut-off diff will parse it wrong, silently.
